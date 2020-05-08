@@ -1,8 +1,8 @@
 ---
-project_name: %template%
+project_name: grafaman
 
 archives:
-- id: %template%
+- id: grafaman
   files:
   - LICENSE
   format: tar.gz
@@ -14,28 +14,28 @@ archives:
     linux:  Linux
 
 brews:
-- name: %template%
+- name: grafaman
   commit_author:
     name:  Kamil Samigullin
     email: kamil@samigullin.info
-  description: %template%
+  description: Metrics coverage reporter for Graphite and Grafana.
   folder: Formula
-  homepage: %template%
+  homepage: https://github.com/kamilsk/grafaman
   github:
-    owner: %template%
-    name:  %template%
+    owner: kamilsk
+    name:  grafaman
   install: |
-    bin.install "%template%"
-    output = Utils.popen_read("#{bin}/%template% completion bash")
-    (bash_completion/"%template%").write output
-    output = Utils.popen_read("#{bin}/%template% completion zsh")
-    (zsh_completion/"_%template%").write output
+    bin.install "grafaman"
+    output = Utils.popen_read("#{bin}/grafaman completion bash")
+    (bash_completion/"grafaman").write output
+    output = Utils.popen_read("#{bin}/grafaman completion zsh")
+    (zsh_completion/"_grafaman").write output
     prefix.install_metafiles
   test: |
-    system "#{bin}/%template% --version"
+    system "#{bin}/grafaman --version"
 
 builds:
-- binary: %template%
+- binary: grafaman
   env:
   - CGO_ENABLED=0
   goarch:
@@ -51,5 +51,5 @@ checksum: { name_template: checksums.txt }
 
 release:
   github:
-    owner: %template%
-    name:  %template%
+    owner: kamilsk
+    name:  grafaman

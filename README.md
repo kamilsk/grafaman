@@ -1,6 +1,6 @@
-> # 🧩 Tool
+> # 📈 grafaman
 >
-> Template for typical Go tool.
+> Metrics coverage reporter for Graphite and Grafana.
 
 [![Build][build.icon]][build.page]
 [![Template][template.icon]][template.page]
@@ -24,24 +24,24 @@ Full description of the idea is available [here][design.page].
 ### Homebrew
 
 ```bash
-$ brew install :owner/tap/:binary
+$ brew install kamilsk/tap/grafaman
 ```
 
 ### Binary
 
 ```bash
-$ curl -sSfL https://:install.sh | sh
+$ curl -sSfL https://raw.githubusercontent.com/kamilsk/grafaman/master/bin/install | sh
 # or
-$ wget -qO-  https://:install.sh | sh
+$ wget -qO-  https://raw.githubusercontent.com/kamilsk/grafaman/master/bin/install | sh
 ```
 
 ### Source
 
 ```bash
 # use standard go tools
-$ go get github.com/:owner/:repository@:version
+$ go get github.com/kamilsk/grafaman@latest
 # or use egg tool
-$ egg tools add github.com/:owner/:repository@:version
+$ egg tools add github.com/kamilsk/grafaman@latest
 ```
 
 > [egg][]<sup id="anchor-egg">[1](#egg)</sup> is an `extended go get`.
@@ -49,24 +49,18 @@ $ egg tools add github.com/:owner/:repository@:version
 ### Bash and Zsh completions
 
 ```bash
-$ :binary completion bash > /path/to/bash_completion.d/:binary.sh
-$ :binary completion zsh  > /path/to/zsh-completions/_:binary.zsh
+$ grafaman completion bash > /path/to/bash_completion.d/grafaman.sh
+$ grafaman completion zsh  > /path/to/zsh-completions/_grafaman.zsh
 ```
-
-## 🤲 Outcomes
-
-...
-
-<sup id="egg">1</sup> The project is still in prototyping.[↩](#anchor-egg)
 
 ---
 
 made with ❤️ for everyone
 
-[build.page]:       https://travis-ci.org/:owner/:repository
-[build.icon]:       https://travis-ci.org/:owner/:repository.svg?branch=master
+[build.page]:       https://travis-ci.org/kamilsk/grafaman
+[build.icon]:       https://travis-ci.org/kamilsk/grafaman.svg?branch=master
 [design.page]:      https://www.notion.so/33715348cc114ea79dd350a25d16e0b0?r=0b753cbf767346f5a6fd51194829a2f3
-[promo.page]:       https://github.com/:owner/:repository
+[promo.page]:       https://github.com/kamilsk/grafaman
 [template.page]:    https://github.com/octomation/go-tool
 [template.icon]:    https://img.shields.io/badge/template-go--tool-blue
 
