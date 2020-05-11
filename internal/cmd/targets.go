@@ -7,23 +7,26 @@ import (
 )
 
 // NewTargetsCommand returns command to fetch targets from a Grafana dashboard.
+// TODO
+//  - implement auth, if needed
+//  - validate subset by regexp
+//  - support raw option
+//  - support duplicates option
+//  - support sort option
 func NewTargetsCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		endpoint   string
 		dashboard  string
+		subset     string
 		raw        bool
 		duplicates bool
 		sort       bool
-		subset     string
 	)
 	command := cobra.Command{
 		Use:   "targets",
 		Short: "fetch targets from a Grafana dashboard",
 		Long:  "Fetch targets from a Grafana dashboard.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// TODO
-			//  - auth
-			//  - validate subset by regexp
 			return nil
 		},
 	}

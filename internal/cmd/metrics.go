@@ -7,6 +7,13 @@ import (
 )
 
 // NewMetricsCommand returns command to fetch metrics from Graphite.
+// TODO
+//  - implement auth, if needed
+//  - validate subset by regexp
+//  - try to fetch fast by ~, if possible
+//  - operates by nodes instead of strings
+//  - sort nodes by ids, cause async fetching
+//  - implement collapse mechanics
 func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		endpoint string
@@ -18,13 +25,6 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 		Short: "fetch metrics from Graphite",
 		Long:  "Fetch metrics from Graphite.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// TODO
-			//  - auth
-			//  - validate subset by regexp
-			//  - try to fetch fast
-			//  - operates by nodes instead of strings
-			//  - sort by id, cause async fetching
-			//  - implement collapse mechanism
 			return nil
 		},
 	}
