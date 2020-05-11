@@ -1,19 +1,23 @@
 package cmd
 
 import (
+	"fmt"
+	"sort"
+
 	"github.com/alexeyco/simpletable"
 	"github.com/spf13/cobra"
 	"go.octolab.org/fn"
+	"go.octolab.org/unsafe"
+
+	"github.com/kamilsk/grafaman/internal/provider/graphite"
 )
 
 // NewMetricsCommand returns command to fetch metrics from Graphite.
 // TODO
-//  - implement auth, if needed
 //  - validate subset by regexp
-//  - try to fetch fast by ~, if possible
-//  - operates by nodes instead of strings
-//  - sort nodes by ids, cause async fetching
-//  - implement collapse mechanics
+//  - support collapse option
+//  - replace recursion by worker pool
+//  - implement auth, if needed
 func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		endpoint string
@@ -25,6 +29,36 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 		Short: "fetch metrics from Graphite",
 		Long:  "Fetch metrics from Graphite.",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			provider, err := graphite.New(endpoint)
+			if err != nil {
+				return err
+			}
+			nodes, err := provider.Fetch(cmd.Context(), subset)
+			if err != nil {
+				return err
+			}
+			sort.Sort(nodes)
+
+			table := simpletable.New()
+			table.Header = &simpletable.Header{
+				Cells: []*simpletable.Cell{
+					{Text: "Metric name"},
+				},
+			}
+			for _, metric := range nodes {
+				r := []*simpletable.Cell{
+					{Text: metric.ID},
+				}
+				table.Body.Cells = append(table.Body.Cells, r)
+			}
+			table.Footer = &simpletable.Footer{
+				Cells: []*simpletable.Cell{
+					{Text: fmt.Sprintf("Total: %d", nodes.Len())},
+				},
+			}
+			table.SetStyle(style)
+
+			unsafe.DoSilent(fmt.Fprintln(cmd.OutOrStdout(), table.String()))
 			return nil
 		},
 	}
