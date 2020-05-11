@@ -57,8 +57,8 @@ $ grafaman completion zsh  > /path/to/zsh-completions/_grafaman.zsh
 
 made with ❤️ for everyone
 
-[build.page]:       https://travis-ci.org/kamilsk/grafaman
-[build.icon]:       https://travis-ci.org/kamilsk/grafaman.svg?branch=master
+[build.page]:       https://travis-ci.com/kamilsk/grafaman
+[build.icon]:       https://travis-ci.com/kamilsk/grafaman.svg?branch=master
 [design.page]:      https://www.notion.so/33715348cc114ea79dd350a25d16e0b0?r=0b753cbf767346f5a6fd51194829a2f3
 [promo.page]:       https://github.com/kamilsk/grafaman
 [template.page]:    https://github.com/octomation/go-tool
