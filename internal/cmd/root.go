@@ -54,7 +54,7 @@ func New() *cobra.Command {
 	command.AddCommand(
 		NewCoverageCommand(&style),
 		NewMetricsCommand(&style),
-		NewTargetsCommand(&style),
+		NewQueriesCommand(&style),
 	)
 	flags := command.PersistentFlags()
 	flags.StringVarP(&format, "format", "f", formatDefault, "Output format.")
