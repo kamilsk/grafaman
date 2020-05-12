@@ -14,7 +14,7 @@ type Dashboard struct {
 	Variables []Variable
 }
 
-func (dashboard Dashboard) Queries(cfg Transform) (Queries, error) {
+func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
 	transformed := make(Queries, 0, len(dashboard.RawData))
 
 	for _, raw := range dashboard.RawData {
@@ -29,7 +29,7 @@ func (dashboard Dashboard) Queries(cfg Transform) (Queries, error) {
 
 		exp, _, err := parser.ParseExpr(string(raw))
 		if err != nil {
-			return nil, errors.Wrap(err, "parse query")
+			return nil, errors.Wrapf(err, "parse expression %q", raw)
 		}
 		for _, query := range exp.Metrics() {
 			for _, prefix := range cfg.TrimPrefixes {
@@ -38,7 +38,11 @@ func (dashboard Dashboard) Queries(cfg Transform) (Queries, error) {
 					break
 				}
 			}
-			transformed = append(transformed, Query(query.Metric))
+			queries := []Query{Query(query.Metric)}
+			if cfg.Unpack {
+				queries = dashboard.unpack(query.Metric)
+			}
+			transformed = append(transformed, queries...)
 		}
 	}
 
@@ -62,10 +66,15 @@ func (dashboard Dashboard) Queries(cfg Transform) (Queries, error) {
 	return transformed, nil
 }
 
+func (dashboard *Dashboard) unpack(metric string) []Query {
+	return []Query{Query(metric)}
+}
+
 type Transform struct {
 	SkipRaw        bool
 	SkipDuplicates bool
 	NeedSorting    bool
+	Unpack         bool
 	TrimPrefixes   []string
 }
 

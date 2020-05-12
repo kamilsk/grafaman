@@ -30,17 +30,6 @@ func New(endpoint string) (*provider, error) {
 	}, nil
 }
 
-const (
-	fromKey  = "from"
-	queryKey = "query"
-)
-
-type dto struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Leaf int    `json:"leaf"`
-}
-
 type provider struct {
 	client   *http.Client
 	endpoint url.URL

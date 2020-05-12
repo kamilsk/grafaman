@@ -22,8 +22,8 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 		uid        string
 		subset     string
 		trim       []string
-		raw        bool
 		duplicates bool
+		raw        bool
 		sort       bool
 	)
 	command := cobra.Command{
@@ -78,9 +78,9 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 	flags.StringVarP(&endpoint, "endpoint", "e", "", "Grafana API endpoint.")
 	flags.StringVarP(&uid, "dashboard", "d", "", "A dashboard unique identifier.")
 	flags.StringVarP(&subset, "subset", "s", "", "The required subset of metrics. Must be a simple prefix.")
-	flags.StringArrayVarP(&trim, "trim", "t", nil, "Trim prefixes from queries.")
-	flags.BoolVar(&raw, "raw", false, "Leave the original values of queries.")
+	flags.StringArrayVar(&trim, "trim", nil, "Trim prefixes from queries.")
 	flags.BoolVar(&duplicates, "allow-duplicates", false, "Allow duplicates of queries.")
+	flags.BoolVar(&raw, "raw", false, "Leave the original values of queries.")
 	flags.BoolVar(&sort, "sort", false, "Need to sort queries.")
 	fn.Must(
 		func() error { return command.MarkFlagRequired("endpoint") },

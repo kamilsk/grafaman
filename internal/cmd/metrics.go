@@ -25,8 +25,8 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		endpoint string
 		subset   string
-		last     time.Duration
 		collapse int
+		last     time.Duration
 		fast     bool
 	)
 	command := cobra.Command{
@@ -47,7 +47,7 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 			table := simpletable.New()
 			table.Header = &simpletable.Header{
 				Cells: []*simpletable.Cell{
-					{Text: "Metric name"},
+					{Text: "Metric"},
 				},
 			}
 			for _, metric := range metrics {
@@ -70,8 +70,8 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 	flags := command.Flags()
 	flags.StringVarP(&endpoint, "endpoint", "e", "", "Graphite API endpoint.")
 	flags.StringVarP(&subset, "subset", "s", "", "The required subset of metrics. Must be a simple prefix.")
-	flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
 	flags.IntVarP(&collapse, "collapse", "c", 0, "How many levels from the right to collapse by wildcard.")
+	flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
 	flags.BoolVar(&fast, "fast", false, "Use tilde `~` to fetch all metrics by one query if supported.")
 	fn.Must(
 		func() error { return command.MarkFlagRequired("endpoint") },

@@ -4,6 +4,15 @@ github.com/alexeyco/simpletable
 github.com/davecgh/go-spew/spew
 # github.com/go-graphite/carbonapi v0.0.0-20200503122241-661001c7a79e
 github.com/go-graphite/carbonapi/pkg/parser
+# github.com/gobwas/glob v0.2.3
+github.com/gobwas/glob
+github.com/gobwas/glob/compiler
+github.com/gobwas/glob/match
+github.com/gobwas/glob/syntax
+github.com/gobwas/glob/syntax/ast
+github.com/gobwas/glob/syntax/lexer
+github.com/gobwas/glob/util/runes
+github.com/gobwas/glob/util/strings
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/mattn/go-runewidth v0.0.9
