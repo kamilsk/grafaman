@@ -7,6 +7,13 @@ import (
 )
 
 // New returns the new root command.
+// TODO:debt
+//  - add defaults for grafana and graphite endpoints
+//    - read from env
+//    - read from .env (app.toml, .env.paas)
+//    - by ldflags (+ add `egg` issue)
+//  - support tabular view (for `| column -t`) to output analyze
+//  - support json view to output analyze by jq
 func New() *cobra.Command {
 	const (
 		formatDefault     = "default"

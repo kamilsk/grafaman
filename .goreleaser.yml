@@ -23,7 +23,7 @@ brews:
   homepage: https://github.com/kamilsk/grafaman
   github:
     owner: kamilsk
-    name:  grafaman
+    name:  homebrew-tap
   install: |
     bin.install "grafaman"
     output = Utils.popen_read("#{bin}/grafaman completion bash")
