@@ -1,8 +1,10 @@
 package provider
 
 import (
+	"reflect"
 	"sort"
 	"strings"
+	"unsafe"
 
 	"github.com/go-graphite/carbonapi/pkg/parser"
 	"github.com/pkg/errors"
@@ -38,9 +40,9 @@ func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
 					break
 				}
 			}
-			queries := []Query{Query(query.Metric)}
-			if cfg.Unpack {
-				queries = dashboard.unpack(query.Metric)
+			queries := Queries{Query(query.Metric)}
+			if cfg.Unpack && strings.Contains(query.Metric, "$") {
+				queries.Convert(unpack(query.Metric, dashboard.Variables))
 			}
 			transformed = append(transformed, queries...)
 		}
@@ -66,8 +68,20 @@ func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
 	return transformed, nil
 }
 
-func (dashboard *Dashboard) unpack(metric string) []Query {
-	return []Query{Query(metric)}
+func unpack(metric string, variables []Variable) []string {
+	for i, variable := range variables {
+		env := "$" + variable.Name
+		if !strings.Contains(metric, env) {
+			continue
+		}
+		result := make([]string, 0, len(variable.Options))
+		for _, option := range variable.Options {
+			// TODO:research some variable has $__all option
+			result = append(result, unpack(strings.ReplaceAll(metric, env, option.Value), variables[i+1:])...)
+		}
+		return result
+	}
+	return []string{metric}
 }
 
 type Transform struct {
@@ -81,6 +95,11 @@ type Transform struct {
 type Query string
 
 type Queries []Query
+
+func (queries *Queries) Convert(src []string) {
+	header := (*reflect.SliceHeader)(unsafe.Pointer(&src))
+	*queries = *(*[]Query)(unsafe.Pointer(header))
+}
 
 func (queries Queries) Len() int           { return len(queries) }
 func (queries Queries) Less(i, j int) bool { return queries[i] < queries[j] }

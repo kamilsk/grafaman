@@ -15,7 +15,7 @@ import (
 )
 
 // NewMetricsCommand returns command to fetch metrics from Graphite.
-// TODO
+// TODO:debt
 //  - validate subset by regexp
 //  - support collapse option
 //  - support last option

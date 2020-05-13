@@ -19,12 +19,12 @@ import (
 )
 
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
-// TODO
-//  - implement auth, if needed
+// TODO:debt
 //  - validate subset by regexp
 //  - support last option
 //  - support collapse option
 //  - support graphite functions (e.g. sum, etc.)
+//  - implement auth, if needed
 func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		grafanaURL   string
@@ -89,8 +89,8 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 			table := simpletable.New()
 			table.Header = &simpletable.Header{
 				Cells: []*simpletable.Cell{
-					{Align: simpletable.AlignCenter, Text: "Metric"},
-					{Align: simpletable.AlignCenter, Text: "Hits"},
+					{Text: "Metric"},
+					{Text: "Hits"},
 				},
 			}
 			for _, metric := range report.Metrics {

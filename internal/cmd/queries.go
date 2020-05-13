@@ -13,7 +13,7 @@ import (
 )
 
 // NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
-// TODO
+// TODO:debt
 //  - validate subset by regexp
 //  - implement auth, if needed
 func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
