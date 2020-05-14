@@ -14,3 +14,6 @@ require (
 	go.octolab.org/toolkit/cli v0.0.9
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 )
+
+// hg -> git
+replace bitbucket.org/tebeka/strftime => github.com/tebeka/strftime v0.1.4
