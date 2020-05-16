@@ -4,6 +4,8 @@ import (
 	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"go.octolab.org/fn"
 )
 
 // New returns the new root command.
@@ -11,10 +13,15 @@ import (
 //  - add defaults for grafana and graphite endpoints
 //    - read from env
 //    - read from .env (app.toml, .env.paas)
-//    - by ldflags (+ add `egg` issue)
 //  - support tabular view (for `| column -t`) to output analyze
 //  - support json view to output analyze by jq
 func New() *cobra.Command {
+	fn.Must(
+		func() error { return viper.BindEnv("grafana", "GRAFANA_URL") },
+		func() error { return viper.BindEnv("dashboard", "GRAFANA_DASHBOARD") },
+		func() error { return viper.BindEnv("graphite", "GRAPHITE_URL") },
+		func() error { return viper.BindEnv("metrics", "GRAPHITE_METRICS") },
+	)
 	const (
 		formatDefault     = "default"
 		formatCompact     = "compact"

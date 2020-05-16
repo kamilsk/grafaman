@@ -5,7 +5,7 @@ import (
 
 	"github.com/alexeyco/simpletable"
 	"github.com/spf13/cobra"
-	"go.octolab.org/fn"
+	"github.com/spf13/viper"
 	"go.octolab.org/unsafe"
 
 	entity "github.com/kamilsk/grafaman/internal/provider"
@@ -18,9 +18,6 @@ import (
 //  - implement auth, if needed
 func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 	var (
-		endpoint   string
-		uid        string
-		subset     string
 		trim       []string
 		duplicates bool
 		raw        bool
@@ -30,16 +27,29 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 		Use:   "queries",
 		Short: "fetch queries from a Grafana dashboard",
 		Long:  "Fetch queries from a Grafana dashboard.",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			flags := cmd.Flags()
+			if err := viper.BindPFlag("grafana", flags.Lookup("grafana")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("dashboard", flags.Lookup("dashboard")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("metrics", flags.Lookup("metrics")); err != nil {
+				return err
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			provider, err := grafana.New(endpoint)
+			provider, err := grafana.New(viper.GetString("grafana"))
 			if err != nil {
 				return err
 			}
-			dashboard, err := provider.Fetch(cmd.Context(), uid)
+			dashboard, err := provider.Fetch(cmd.Context(), viper.GetString("dashboard"))
 			if err != nil {
 				return err
 			}
-			dashboard.Subset = subset
+			dashboard.Subset = viper.GetString("metrics")
 
 			queries, err := dashboard.Queries(entity.Transform{
 				SkipRaw:        raw,
@@ -75,16 +85,14 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 		},
 	}
 	flags := command.Flags()
-	flags.StringVarP(&endpoint, "endpoint", "e", "", "Grafana API endpoint.")
-	flags.StringVarP(&uid, "dashboard", "d", "", "A dashboard unique identifier.")
-	flags.StringVarP(&subset, "subset", "s", "", "The required subset of metrics. Must be a simple prefix.")
-	flags.StringArrayVar(&trim, "trim", nil, "Trim prefixes from queries.")
-	flags.BoolVar(&duplicates, "allow-duplicates", false, "Allow duplicates of queries.")
-	flags.BoolVar(&raw, "raw", false, "Leave the original values of queries.")
-	flags.BoolVar(&sort, "sort", false, "Need to sort queries.")
-	fn.Must(
-		func() error { return command.MarkFlagRequired("endpoint") },
-		func() error { return command.MarkFlagRequired("dashboard") },
-	)
+	flags.StringP("grafana", "e", "", "Grafana API endpoint.")
+	flags.StringP("dashboard", "d", "", "A dashboard unique identifier.")
+	flags.StringP("metrics", "m", "", "The required subset of metrics. Must be a simple prefix.")
+	{
+		flags.StringArrayVar(&trim, "trim", nil, "Trim prefixes from queries.")
+		flags.BoolVar(&duplicates, "allow-duplicates", false, "Allow duplicates of queries.")
+		flags.BoolVar(&raw, "raw", false, "Leave the original values of queries.")
+		flags.BoolVar(&sort, "sort", false, "Need to sort queries.")
+	}
 	return &command
 }

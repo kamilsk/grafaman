@@ -51,6 +51,13 @@ $ grafaman coverage \
     --exclude='*.count' --exclude='*.max' --exclude='*.min' --exclude='*.sum'
 ```
 
+Supported environment variables:
+
+- GRAFANA_URL
+- GRAFANA_DASHBOARD
+- GRAPHITE_URL
+- GRAPHITE_METRICS
+
 ### Fetch metrics from [Graphite][]
 
 ```bash
@@ -82,6 +89,8 @@ $ curl -sSfL https://raw.githubusercontent.com/kamilsk/grafaman/master/bin/insta
 $ wget -qO-  https://raw.githubusercontent.com/kamilsk/grafaman/master/bin/install | sh
 ```
 
+> don't forget about [security](https://www.idontplaydarts.com/2016/04/detecting-curl-pipe-bash-server-side/).
+
 ### Source
 
 ```bash
@@ -91,7 +100,7 @@ $ go get github.com/kamilsk/grafaman@latest
 $ egg tools add github.com/kamilsk/grafaman@latest
 ```
 
-> [egg][]<sup id="anchor-egg">[1](#egg)</sup> is an `extended go get`.
+> [egg][] is an `extended go get`.
 
 ### Bash and Zsh completions
 

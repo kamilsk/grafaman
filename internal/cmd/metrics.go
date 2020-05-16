@@ -7,7 +7,7 @@ import (
 
 	"github.com/alexeyco/simpletable"
 	"github.com/spf13/cobra"
-	"go.octolab.org/fn"
+	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 	"go.octolab.org/unsafe"
 
@@ -23,8 +23,6 @@ import (
 //  - implement auth, if needed
 func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 	var (
-		endpoint string
-		subset   string
 		collapse int
 		last     time.Duration
 		fast     bool
@@ -33,12 +31,22 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 		Use:   "metrics",
 		Short: "fetch metrics from Graphite",
 		Long:  "Fetch metrics from Graphite.",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			flags := cmd.Flags()
+			if err := viper.BindPFlag("graphite", flags.Lookup("graphite")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("metrics", flags.Lookup("metrics")); err != nil {
+				return err
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			provider, err := graphite.New(endpoint)
+			provider, err := graphite.New(viper.GetString("graphite"))
 			if err != nil {
 				return err
 			}
-			metrics, err := provider.Fetch(cmd.Context(), subset, fast)
+			metrics, err := provider.Fetch(cmd.Context(), viper.GetString("metrics"), fast)
 			if err != nil {
 				return err
 			}
@@ -68,14 +76,12 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 		},
 	}
 	flags := command.Flags()
-	flags.StringVarP(&endpoint, "endpoint", "e", "", "Graphite API endpoint.")
-	flags.StringVarP(&subset, "subset", "s", "", "The required subset of metrics. Must be a simple prefix.")
-	flags.IntVarP(&collapse, "collapse", "c", 0, "How many levels from the right to collapse by wildcard.")
-	flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
-	flags.BoolVar(&fast, "fast", false, "Use tilde `~` to fetch all metrics by one query if supported.")
-	fn.Must(
-		func() error { return command.MarkFlagRequired("endpoint") },
-		func() error { return command.MarkFlagRequired("subset") },
-	)
+	flags.StringP("graphite", "e", "", "Graphite API endpoint.")
+	flags.StringP("metrics", "m", "", "The required subset of metrics. Must be a simple prefix.")
+	{
+		flags.IntVarP(&collapse, "collapse", "c", 0, "How many levels from the right to collapse by wildcard.")
+		flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
+		flags.BoolVar(&fast, "fast", false, "Use tilde `~` to fetch all metrics by one query if supported.")
+	}
 	return &command
 }

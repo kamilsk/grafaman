@@ -7,7 +7,7 @@ import (
 
 	"github.com/alexeyco/simpletable"
 	"github.com/spf13/cobra"
-	"go.octolab.org/fn"
+	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 	"go.octolab.org/unsafe"
 	"golang.org/x/sync/errgroup"
@@ -27,25 +27,37 @@ import (
 //  - implement auth, if needed
 func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 	var (
-		grafanaURL   string
-		dashboardUID string
-		graphiteURL  string
-		subset       string
-		exclude      []string
-		trim         []string
-		last         time.Duration
-		fast         bool
+		exclude []string
+		trim    []string
+		last    time.Duration
+		fast    bool
 	)
 	command := cobra.Command{
 		Use:   "coverage",
 		Short: "calculates metrics coverage",
 		Long:  "Calculates metrics coverage by queries.",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			flags := cmd.Flags()
+			if err := viper.BindPFlag("grafana", flags.Lookup("grafana")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("dashboard", flags.Lookup("dashboard")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("graphite", flags.Lookup("graphite")); err != nil {
+				return err
+			}
+			if err := viper.BindPFlag("metrics", flags.Lookup("metrics")); err != nil {
+				return err
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			metricsProvider, err := graphite.New(graphiteURL)
+			metricsProvider, err := graphite.New(viper.GetString("graphite"))
 			if err != nil {
 				return err
 			}
-			dashboardProvider, err := grafana.New(grafanaURL)
+			dashboardProvider, err := grafana.New(viper.GetString("grafana"))
 			if err != nil {
 				return err
 			}
@@ -57,12 +69,12 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var err error
-				metrics, err = metricsProvider.Fetch(ctx, subset, fast)
+				metrics, err = metricsProvider.Fetch(ctx, viper.GetString("metrics"), fast)
 				return err
 			})
 			g.Go(func() error {
 				var err error
-				dashboard, err = dashboardProvider.Fetch(ctx, dashboardUID)
+				dashboard, err = dashboardProvider.Fetch(ctx, viper.GetString("dashboard"))
 				return err
 			})
 			if err := g.Wait(); err != nil {
@@ -113,19 +125,15 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 		},
 	}
 	flags := command.Flags()
-	flags.StringVar(&grafanaURL, "grafana", "", "Grafana API endpoint.")
-	flags.StringVarP(&dashboardUID, "dashboard", "d", "", "A dashboard unique identifier.")
-	flags.StringVar(&graphiteURL, "graphite", "", "Graphite API endpoint.")
-	flags.StringVarP(&subset, "subset", "s", "", "The required subset of metrics. Must be a simple prefix.")
-	flags.StringArrayVar(&exclude, "exclude", nil, "Patterns to exclude metrics from coverage, e.g. *.median")
-	flags.StringArrayVar(&trim, "trim", nil, "Trim prefixes from queries.")
-	flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
-	flags.BoolVar(&fast, "fast", false, "Use tilde `~` to fetch all metrics by one query if supported.")
-	fn.Must(
-		func() error { return command.MarkFlagRequired("grafana") },
-		func() error { return command.MarkFlagRequired("dashboard") },
-		func() error { return command.MarkFlagRequired("graphite") },
-		func() error { return command.MarkFlagRequired("subset") },
-	)
+	flags.String("grafana", "", "Grafana API endpoint.")
+	flags.StringP("dashboard", "d", "", "A dashboard unique identifier.")
+	flags.String("graphite", "", "Graphite API endpoint.")
+	flags.StringP("metrics", "m", "", "The required subset of metrics. Must be a simple prefix.")
+	{
+		flags.StringArrayVar(&exclude, "exclude", nil, "Patterns to exclude metrics from coverage, e.g. *.median")
+		flags.StringArrayVar(&trim, "trim", nil, "Trim prefixes from queries.")
+		flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
+		flags.BoolVar(&fast, "fast", false, "Use tilde `~` to fetch all metrics by one query if supported.")
+	}
 	return &command
 }
