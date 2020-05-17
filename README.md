@@ -11,7 +11,7 @@
 $ grafaman coverage \
     --grafana https://grafana.api/ -d DTknF4rik \
     --graphite https://graphite.api/ \
-    --subset apps.services.awesome-service
+    --metrics apps.services.awesome-service
 # +--------------------------------------------------------------------+--------+
 # | Metric                                                             | Hits   |
 # +--------------------------------------------------------------------+--------+
@@ -46,19 +46,19 @@ and how many of them are presented at [Grafana][] dashboards.
 $ grafaman coverage \
     --grafana https://grafana.api/ -d DTknF4rik \
     --graphite https://graphite.api/ \
-    -s apps.services.awesome-service \
+    -m apps.services.awesome-service \
     --trim='complex.$env.' --trim='env.$env.' \
     --exclude='*.count' --exclude='*.max' --exclude='*.min' --exclude='*.sum'
 ```
 
-Supported environment variables:
+**Supported environment variables:**
 
 - GRAFANA_URL
 - GRAFANA_DASHBOARD
 - GRAPHITE_URL
 - GRAPHITE_METRICS
 
-Supported config files by default:
+**Supported config files by default:**
 
 - .env.paas
 - app.toml
@@ -68,14 +68,14 @@ located at current working directory.
 ### Fetch metrics from [Graphite][]
 
 ```bash
-$ grafaman metrics -e https://graphite.api/ -s apps.services.awesome-service
+$ grafaman metrics -e https://graphite.api/ -m apps.services.awesome-service
 ```
 
 ### Fetch queries from [Grafana][]
 
 ```bash
 $ grafaman queries -e https://grafana.api/ -d DTknF4rik \
-    -s apps.services.awesome-service \
+    -m apps.services.awesome-service \
     --trim='complex.$env.' --trim='env.$env.' \
     --sort
 ```
