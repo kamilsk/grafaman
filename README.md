@@ -58,6 +58,13 @@ Supported environment variables:
 - GRAPHITE_URL
 - GRAPHITE_METRICS
 
+Supported config files by default:
+
+- .env.paas
+- app.toml
+
+located at current working directory.
+
 ### Fetch metrics from [Graphite][]
 
 ```bash

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -10,18 +12,9 @@ import (
 
 // New returns the new root command.
 // TODO:debt
-//  - add defaults for grafana and graphite endpoints
-//    - read from env
-//    - read from .env (app.toml, .env.paas)
 //  - support tabular view (for `| column -t`) to output analyze
 //  - support json view to output analyze by jq
 func New() *cobra.Command {
-	fn.Must(
-		func() error { return viper.BindEnv("grafana", "GRAFANA_URL") },
-		func() error { return viper.BindEnv("dashboard", "GRAFANA_DASHBOARD") },
-		func() error { return viper.BindEnv("graphite", "GRAPHITE_URL") },
-		func() error { return viper.BindEnv("metrics", "GRAPHITE_METRICS") },
-	)
 	const (
 		formatDefault     = "default"
 		formatCompact     = "compact"
@@ -60,7 +53,24 @@ func New() *cobra.Command {
 				return errors.Errorf("invalid format %q, only %v are available", format, formats)
 			}
 			style = *selected
-			return nil
+
+			config := viper.New()
+			config.SetConfigFile(viper.GetString("config"))
+			config.SetConfigType("dotenv")
+			err := config.ReadInConfig()
+			if err == nil {
+				return viper.MergeConfigMap(config.AllSettings())
+			}
+
+			if os.IsNotExist(err) {
+				config.SetConfigFile("app.toml")
+				config.SetConfigType("toml")
+				if err := config.ReadInConfig(); err == nil {
+					return viper.MergeConfigMap(config.Sub("envs.local.env_vars").AllSettings())
+				}
+				err = nil
+			}
+			return err
 		},
 		SilenceErrors: false,
 		SilenceUsage:  true,
@@ -72,5 +82,25 @@ func New() *cobra.Command {
 	)
 	flags := command.PersistentFlags()
 	flags.StringVarP(&format, "format", "f", formatDefault, "Output format.")
+	flags.String("env-file", ".env.paas", "Read in a file of environment variables. Fallback to app.toml.")
+	fn.Must(
+		func() error { return viper.BindPFlag("config", flags.Lookup("env-file")) },
+		func() error {
+			viper.RegisterAlias("grafana", "grafana_url")
+			return viper.BindEnv("grafana", "GRAFANA_URL")
+		},
+		func() error {
+			viper.RegisterAlias("dashboard", "grafana_dashboard")
+			return viper.BindEnv("dashboard", "GRAFANA_DASHBOARD")
+		},
+		func() error {
+			viper.RegisterAlias("graphite", "graphite_url")
+			return viper.BindEnv("graphite", "GRAPHITE_URL")
+		},
+		func() error {
+			viper.RegisterAlias("metrics", "graphite_metrics")
+			return viper.BindEnv("metrics", "GRAPHITE_METRICS")
+		},
+	)
 	return &command
 }
