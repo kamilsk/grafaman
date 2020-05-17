@@ -11,7 +11,7 @@ import (
 )
 
 type Dashboard struct {
-	Subset    string
+	Prefix    string
 	RawData   []Query
 	Variables []Variable
 }
@@ -20,7 +20,7 @@ func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
 	transformed := make(Queries, 0, len(dashboard.RawData))
 
 	for _, raw := range dashboard.RawData {
-		if dashboard.Subset != "" && !strings.Contains(string(raw), dashboard.Subset) {
+		if dashboard.Prefix != "" && !strings.Contains(string(raw), dashboard.Prefix) {
 			continue
 		}
 

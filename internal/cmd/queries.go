@@ -12,10 +12,11 @@ import (
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 )
 
-// NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
 // TODO:debt
-//  - validate subset by regexp
+//  - validate metrics by regexp
 //  - implement auth, if needed
+
+// NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
 func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		trim       []string
@@ -49,7 +50,7 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			dashboard.Subset = viper.GetString("metrics")
+			dashboard.Prefix = viper.GetString("metrics")
 
 			queries, err := dashboard.Queries(entity.Transform{
 				SkipRaw:        raw,

@@ -31,11 +31,13 @@ type provider struct {
 	endpoint url.URL
 }
 
+// Fetch takes a dashboard JSON model and extracts queries and variables from it.
+// Documentation: https://grafana.com/docs/grafana/latest/http_api/dashboard/#get-dashboard-by-uid.
 func (provider *provider) Fetch(ctx context.Context, uid string) (*entity.Dashboard, error) {
-	const method = "/api/dashboards/uid/"
+	const source = "/api/dashboards/uid/"
 
 	u := provider.endpoint
-	u.Path = path.Join(u.Path, method, uid)
+	u.Path = path.Join(u.Path, source, uid)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "create Grafana dashboard base request")

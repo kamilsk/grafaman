@@ -14,13 +14,13 @@ import (
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 )
 
-// NewMetricsCommand returns command to fetch metrics from Graphite.
 // TODO:debt
-//  - validate subset by regexp
+//  - validate metrics by regexp
 //  - support collapse option
-//  - support last option
 //  - replace recursion by worker pool
 //  - implement auth, if needed
+
+// NewMetricsCommand returns command to fetch metrics from Graphite.
 func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		collapse int
@@ -46,7 +46,7 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			metrics, err := provider.Fetch(cmd.Context(), viper.GetString("metrics"), fast)
+			metrics, err := provider.Fetch(cmd.Context(), viper.GetString("metrics"), last, fast)
 			if err != nil {
 				return err
 			}

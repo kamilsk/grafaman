@@ -35,18 +35,20 @@ type provider struct {
 	endpoint url.URL
 }
 
-func (provider *provider) Fetch(ctx context.Context, subset string, fast bool) (entity.Metrics, error) {
-	const method = "/metrics/find"
+// Fetch walks through the endpoint and takes all metrics with the specified prefix.
+// Documentation: https://graphite-api.readthedocs.io/en/latest/api.html#metrics-find.
+func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Duration, fast bool) (entity.Metrics, error) {
+	const source = "/metrics/find"
 
 	u := provider.endpoint
-	u.Path = path.Join(u.Path, method)
+	u.Path = path.Join(u.Path, source)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "create Graphite metrics base request")
 	}
-	q, week := req.URL.Query(), 7*24*time.Hour
-	q.Add(fromKey, strconv.Itoa(int(time.Now().Add(-week).Unix())))
-	q.Add(queryKey, subset)
+	q := req.URL.Query()
+	q.Add(fromKey, strconv.FormatInt(time.Now().Add(-last).Unix(), 10))
+	q.Add(queryKey, prefix)
 	req.URL.RawQuery = q.Encode()
 
 	// try to fetch fast by one query

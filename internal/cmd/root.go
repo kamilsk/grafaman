@@ -10,10 +10,11 @@ import (
 	"go.octolab.org/fn"
 )
 
-// New returns the new root command.
 // TODO:debt
 //  - support tabular view (for `| column -t`) to output analyze
 //  - support json view to output analyze by jq
+
+// New returns the new root command.
 func New() *cobra.Command {
 	const (
 		formatDefault     = "default"

@@ -18,13 +18,13 @@ import (
 	"github.com/kamilsk/grafaman/internal/reporter/coverage"
 )
 
-// NewCoverageCommand returns command to calculate metrics coverage by queries.
 // TODO:debt
-//  - validate subset by regexp
-//  - support last option
+//  - validate metrics by regexp
 //  - support collapse option
 //  - support graphite functions (e.g. sum, etc.)
 //  - implement auth, if needed
+
+// NewCoverageCommand returns command to calculate metrics coverage by queries.
 func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 	var (
 		exclude []string
@@ -69,7 +69,7 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var err error
-				metrics, err = metricsProvider.Fetch(ctx, viper.GetString("metrics"), fast)
+				metrics, err = metricsProvider.Fetch(ctx, viper.GetString("metrics"), last, fast)
 				return err
 			})
 			g.Go(func() error {
