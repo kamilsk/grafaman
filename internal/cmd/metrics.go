@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/alexeyco/simpletable"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 	"go.octolab.org/unsafe"
 
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
+	"github.com/kamilsk/grafaman/internal/validator"
 )
 
 // TODO:debt
@@ -33,11 +35,21 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 		Long:  "Fetch metrics from Graphite.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
-			if err := viper.BindPFlag("graphite", flags.Lookup("graphite")); err != nil {
+			if err := viper.BindPFlag("graphite_url", flags.Lookup("graphite")); err != nil {
 				return err
 			}
-			if err := viper.BindPFlag("metrics", flags.Lookup("metrics")); err != nil {
+			if err := viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")); err != nil {
 				return err
+			}
+			if viper.GetString("graphite") == "" {
+				return errors.New("please provide Graphite API endpoint")
+			}
+			metrics, checker := viper.GetString("metrics"), validator.Metric()
+			if metrics == "" {
+				return errors.New("please provide metric prefix")
+			}
+			if !checker(metrics) {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", metrics)
 			}
 			return nil
 		},

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/alexeyco/simpletable"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
@@ -16,6 +17,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/reporter/coverage"
+	"github.com/kamilsk/grafaman/internal/validator"
 )
 
 // TODO:debt
@@ -38,17 +40,30 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 		Long:  "Calculates metrics coverage by queries.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
-			if err := viper.BindPFlag("grafana", flags.Lookup("grafana")); err != nil {
+			if err := viper.BindPFlag("grafana_url", flags.Lookup("grafana")); err != nil {
 				return err
 			}
-			if err := viper.BindPFlag("dashboard", flags.Lookup("dashboard")); err != nil {
+			if err := viper.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")); err != nil {
 				return err
 			}
-			if err := viper.BindPFlag("graphite", flags.Lookup("graphite")); err != nil {
+			if err := viper.BindPFlag("graphite_url", flags.Lookup("graphite")); err != nil {
 				return err
 			}
-			if err := viper.BindPFlag("metrics", flags.Lookup("metrics")); err != nil {
+			if err := viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")); err != nil {
 				return err
+			}
+			if viper.GetString("grafana") == "" {
+				return errors.New("please provide Grafana API endpoint")
+			}
+			if viper.GetString("dashboard") == "" {
+				return errors.New("please provide a dashboard unique identifier")
+			}
+			metrics, checker := viper.GetString("metrics"), validator.Metric()
+			if metrics == "" {
+				return errors.New("please provide metric prefix")
+			}
+			if !checker(metrics) {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", metrics)
 			}
 			return nil
 		},

@@ -4,12 +4,14 @@ import (
 	"fmt"
 
 	"github.com/alexeyco/simpletable"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.octolab.org/unsafe"
 
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
+	"github.com/kamilsk/grafaman/internal/validator"
 )
 
 // TODO:debt
@@ -30,14 +32,23 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 		Long:  "Fetch queries from a Grafana dashboard.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
-			if err := viper.BindPFlag("grafana", flags.Lookup("grafana")); err != nil {
+			if err := viper.BindPFlag("grafana_url", flags.Lookup("grafana")); err != nil {
 				return err
 			}
-			if err := viper.BindPFlag("dashboard", flags.Lookup("dashboard")); err != nil {
+			if err := viper.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")); err != nil {
 				return err
 			}
-			if err := viper.BindPFlag("metrics", flags.Lookup("metrics")); err != nil {
+			if err := viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")); err != nil {
 				return err
+			}
+			if viper.GetString("grafana") == "" {
+				return errors.New("please provide Grafana API endpoint")
+			}
+			if viper.GetString("dashboard") == "" {
+				return errors.New("please provide a dashboard unique identifier")
+			}
+			if metrics, checker := viper.GetString("metrics"), validator.Metric(); metrics != "" && !checker(metrics) {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, see examples", metrics)
 			}
 			return nil
 		},
