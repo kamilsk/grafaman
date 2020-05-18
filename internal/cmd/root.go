@@ -82,8 +82,8 @@ func New() *cobra.Command {
 		NewQueriesCommand(&style),
 	)
 	flags := command.PersistentFlags()
-	flags.StringVarP(&format, "format", "f", formatDefault, "Output format.")
-	flags.String("env-file", ".env.paas", "Read in a file of environment variables. Fallback to app.toml.")
+	flags.StringVarP(&format, "format", "f", formatDefault, "output format")
+	flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
 	fn.Must(
 		func() error { return viper.BindPFlag("config", flags.Lookup("env-file")) },
 		func() error {

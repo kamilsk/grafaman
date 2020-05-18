@@ -27,7 +27,7 @@ $ grafaman coverage \
 # +--------------------------------------------------------------------+--------+
 ```
 
-Full description of the idea is available [here][design.page].
+A full description of the idea is available [here][design.page].
 
 ## 🏆 Motivation
 
@@ -47,6 +47,7 @@ $ grafaman coverage \
     --grafana https://grafana.api/ -d DTknF4rik \
     --graphite https://graphite.api/ \
     -m apps.services.awesome-service \
+    --last 24h \
     --trim='complex.$env.' --trim='env.$env.' \
     --exclude='*.count' --exclude='*.max' --exclude='*.min' --exclude='*.sum'
 ```
@@ -68,7 +69,7 @@ located at current working directory.
 ### Fetch metrics from [Graphite][]
 
 ```bash
-$ grafaman metrics -e https://graphite.api/ -m apps.services.awesome-service
+$ grafaman metrics -e https://graphite.api/ -m apps.services.awesome-service --last 24h
 ```
 
 ### Fetch queries from [Grafana][]
@@ -96,7 +97,7 @@ $ curl -sSfL https://raw.githubusercontent.com/kamilsk/grafaman/master/bin/insta
 $ wget -qO-  https://raw.githubusercontent.com/kamilsk/grafaman/master/bin/install | sh
 ```
 
-> don't forget about [security](https://www.idontplaydarts.com/2016/04/detecting-curl-pipe-bash-server-side/).
+> Don't forget about [security](https://www.idontplaydarts.com/2016/04/detecting-curl-pipe-bash-server-side/).
 
 ### Source
 
@@ -114,7 +115,11 @@ $ egg tools add github.com/kamilsk/grafaman@latest
 ```bash
 $ grafaman completion bash > /path/to/bash_completion.d/grafaman.sh
 $ grafaman completion zsh  > /path/to/zsh-completions/_grafaman.zsh
+# or autodetect
+$ source <(grafaman completion)
 ```
+
+> See `kubectl` [documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#enabling-shell-autocompletion).
 
 ---
 

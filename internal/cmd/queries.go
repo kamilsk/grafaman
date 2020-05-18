@@ -86,14 +86,14 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 		},
 	}
 	flags := command.Flags()
-	flags.StringP("grafana", "e", "", "Grafana API endpoint.")
-	flags.StringP("dashboard", "d", "", "A dashboard unique identifier.")
-	flags.StringP("metrics", "m", "", "The required subset of metrics. Must be a simple prefix.")
+	flags.StringP("grafana", "e", "", "Grafana API endpoint")
+	flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
+	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 	{
-		flags.StringArrayVar(&trim, "trim", nil, "Trim prefixes from queries.")
-		flags.BoolVar(&duplicates, "allow-duplicates", false, "Allow duplicates of queries.")
-		flags.BoolVar(&raw, "raw", false, "Leave the original values of queries.")
-		flags.BoolVar(&sort, "sort", false, "Need to sort queries.")
+		flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
+		flags.BoolVar(&duplicates, "allow-duplicates", false, "allow duplicates of queries")
+		flags.BoolVar(&raw, "raw", false, "leave the original values of queries")
+		flags.BoolVar(&sort, "sort", false, "need to sort queries")
 	}
 	return &command
 }

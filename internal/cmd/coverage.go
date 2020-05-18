@@ -125,15 +125,15 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 		},
 	}
 	flags := command.Flags()
-	flags.String("grafana", "", "Grafana API endpoint.")
-	flags.StringP("dashboard", "d", "", "A dashboard unique identifier.")
-	flags.String("graphite", "", "Graphite API endpoint.")
-	flags.StringP("metrics", "m", "", "The required subset of metrics. Must be a simple prefix.")
+	flags.String("grafana", "", "Grafana API endpoint")
+	flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
+	flags.String("graphite", "", "Graphite API endpoint")
+	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 	{
-		flags.StringArrayVar(&exclude, "exclude", nil, "Patterns to exclude metrics from coverage, e.g. *.median")
-		flags.StringArrayVar(&trim, "trim", nil, "Trim prefixes from queries.")
-		flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
-		flags.BoolVar(&fast, "fast", false, "Use tilde `~` to fetch all metrics by one query if supported.")
+		flags.StringArrayVar(&exclude, "exclude", nil, "patterns to exclude metrics from coverage, e.g. *.median")
+		flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
+		flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
+		flags.BoolVar(&fast, "fast", false, "use tilde `~` to fetch all metrics by one query if supported")
 	}
 	return &command
 }

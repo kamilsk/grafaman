@@ -76,12 +76,12 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 		},
 	}
 	flags := command.Flags()
-	flags.StringP("graphite", "e", "", "Graphite API endpoint.")
-	flags.StringP("metrics", "m", "", "The required subset of metrics. Must be a simple prefix.")
+	flags.StringP("graphite", "e", "", "Graphite API endpoint")
+	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 	{
-		flags.IntVarP(&collapse, "collapse", "c", 0, "How many levels from the right to collapse by wildcard.")
-		flags.DurationVar(&last, "last", xtime.Week, "The last interval to fetch.")
-		flags.BoolVar(&fast, "fast", false, "Use tilde `~` to fetch all metrics by one query if supported.")
+		flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
+		flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
+		flags.BoolVar(&fast, "fast", false, "use tilde `~` to fetch all metrics by one query if supported")
 	}
 	return &command
 }
