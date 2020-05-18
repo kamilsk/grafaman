@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/alexeyco/simpletable"
@@ -10,9 +8,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
-	"go.octolab.org/unsafe"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/kamilsk/grafaman/internal/presenter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
@@ -21,7 +19,6 @@ import (
 )
 
 // TODO:debt
-//  - validate metrics by regexp
 //  - support collapse option
 //  - support graphite functions (e.g. sum, etc.)
 //  - implement auth, if needed
@@ -113,30 +110,7 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 				return err
 			}
 
-			table := simpletable.New()
-			table.Header = &simpletable.Header{
-				Cells: []*simpletable.Cell{
-					{Text: "Metric"},
-					{Text: "Hits"},
-				},
-			}
-			for _, metric := range report.Metrics {
-				r := []*simpletable.Cell{
-					{Text: metric.Name},
-					{Align: simpletable.AlignRight, Text: strconv.Itoa(metric.Hits)},
-				}
-				table.Body.Cells = append(table.Body.Cells, r)
-			}
-			table.Footer = &simpletable.Footer{
-				Cells: []*simpletable.Cell{
-					{Align: simpletable.AlignRight, Text: "Total"},
-					{Align: simpletable.AlignRight, Text: fmt.Sprintf("%.2f%%", report.Total)},
-				},
-			}
-			table.SetStyle(style)
-
-			unsafe.DoSilent(fmt.Fprintln(cmd.OutOrStdout(), table.String()))
-			return nil
+			return presenter.PrintCoverage(cmd.OutOrStdout(), report, style)
 		},
 	}
 	flags := command.Flags()

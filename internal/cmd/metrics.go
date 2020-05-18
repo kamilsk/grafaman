@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"sort"
 	"time"
 
@@ -10,14 +9,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
-	"go.octolab.org/unsafe"
 
+	"github.com/kamilsk/grafaman/internal/presenter"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/validator"
 )
 
 // TODO:debt
-//  - validate metrics by regexp
 //  - support collapse option
 //  - replace recursion by worker pool
 //  - implement auth, if needed
@@ -64,27 +62,7 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 			}
 			sort.Sort(metrics)
 
-			table := simpletable.New()
-			table.Header = &simpletable.Header{
-				Cells: []*simpletable.Cell{
-					{Text: "Metric"},
-				},
-			}
-			for _, metric := range metrics {
-				r := []*simpletable.Cell{
-					{Text: string(metric)},
-				}
-				table.Body.Cells = append(table.Body.Cells, r)
-			}
-			table.Footer = &simpletable.Footer{
-				Cells: []*simpletable.Cell{
-					{Text: fmt.Sprintf("Total: %d", metrics.Len())},
-				},
-			}
-			table.SetStyle(style)
-
-			unsafe.DoSilent(fmt.Fprintln(cmd.OutOrStdout(), table.String()))
-			return nil
+			return presenter.PrintMetrics(cmd.OutOrStdout(), metrics, style)
 		},
 	}
 	flags := command.Flags()
