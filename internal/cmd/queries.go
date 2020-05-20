@@ -1,19 +1,17 @@
 package cmd
 
 import (
-	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/kamilsk/grafaman/internal/presenter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/validator"
 )
 
 // NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
-func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
+func NewQueriesCommand(printer interface{ PrintQueries(entity.Queries) error }) *cobra.Command {
 	var (
 		trim       []string
 		duplicates bool
@@ -67,7 +65,7 @@ func NewQueriesCommand(style *simpletable.Style) *cobra.Command {
 				return err
 			}
 
-			return presenter.PrintQueries(cmd.OutOrStdout(), queries, style)
+			return printer.PrintQueries(queries)
 		},
 	}
 	flags := command.Flags()

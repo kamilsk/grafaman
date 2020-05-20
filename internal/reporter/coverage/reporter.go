@@ -21,8 +21,8 @@ type Report struct {
 }
 
 type Metric struct {
-	Name string
-	Hits int
+	Name string `json:"name"`
+	Hits int    `json:"hits"`
 }
 
 func (reporter *reporter) Report(metrics entity.Metrics, queries entity.Queries) (*Report, error) {

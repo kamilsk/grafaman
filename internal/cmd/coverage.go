@@ -3,14 +3,12 @@ package cmd
 import (
 	"time"
 
-	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/kamilsk/grafaman/internal/presenter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
@@ -24,7 +22,7 @@ import (
 //  - implement auth, if needed
 
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
-func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
+func NewCoverageCommand(printer interface{ PrintCoverage(*coverage.Report) error }) *cobra.Command {
 	var (
 		exclude []string
 		trim    []string
@@ -110,7 +108,7 @@ func NewCoverageCommand(style *simpletable.Style) *cobra.Command {
 				return err
 			}
 
-			return presenter.PrintCoverage(cmd.OutOrStdout(), report, style)
+			return printer.PrintCoverage(report)
 		},
 	}
 	flags := command.Flags()

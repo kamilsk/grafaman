@@ -4,13 +4,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 
-	"github.com/kamilsk/grafaman/internal/presenter"
+	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/validator"
 )
@@ -21,7 +20,7 @@ import (
 //  - implement auth, if needed
 
 // NewMetricsCommand returns command to fetch metrics from Graphite.
-func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
+func NewMetricsCommand(printer interface{ PrintMetrics(entity.Metrics) error }) *cobra.Command {
 	var (
 		collapse int
 		last     time.Duration
@@ -62,7 +61,7 @@ func NewMetricsCommand(style *simpletable.Style) *cobra.Command {
 			}
 			sort.Sort(metrics)
 
-			return presenter.PrintMetrics(cmd.OutOrStdout(), metrics, style)
+			return printer.PrintMetrics(metrics)
 		},
 	}
 	flags := command.Flags()

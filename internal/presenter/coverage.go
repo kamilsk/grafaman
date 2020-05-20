@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -11,7 +12,22 @@ import (
 	"github.com/kamilsk/grafaman/internal/reporter/coverage"
 )
 
-func PrintCoverage(output io.Writer, report *coverage.Report, style *simpletable.Style) error {
+func (printer *Printer) PrintCoverage(report *coverage.Report) error {
+	switch printer.format {
+	case formatJSON:
+		return PrintCoverageAsJSON(printer.output, report)
+	case formatTSV:
+		return PrintCoverageAsTSV(printer.output, report)
+	default:
+		return PrintCoverageAsTable(printer.output, report, styles[printer.format])
+	}
+}
+
+func PrintCoverageAsJSON(output io.Writer, report *coverage.Report) error {
+	return errors.Wrap(json.NewEncoder(output).Encode(report.Metrics), "presenter: output result as json")
+}
+
+func PrintCoverageAsTable(output io.Writer, report *coverage.Report, style *simpletable.Style) error {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
@@ -35,5 +51,14 @@ func PrintCoverage(output io.Writer, report *coverage.Report, style *simpletable
 	table.SetStyle(style)
 
 	_, err := fmt.Fprintln(output, table.String())
-	return errors.Wrap(err, "presenter: output result")
+	return errors.Wrap(err, "presenter: output result as table")
+}
+
+func PrintCoverageAsTSV(output io.Writer, report *coverage.Report) error {
+	for _, metric := range report.Metrics {
+		if _, err := fmt.Fprintln(output, metric.Name, "\t", strconv.Itoa(metric.Hits)); err != nil {
+			return errors.Wrap(err, "presenter: output result as TSV")
+		}
+	}
+	return nil
 }

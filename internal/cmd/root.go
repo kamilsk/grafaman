@@ -3,57 +3,27 @@ package cmd
 import (
 	"os"
 
-	"github.com/alexeyco/simpletable"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
-)
 
-// TODO:debt
-//  - support tabular view (for `| column -t`) to output analyze
-//  - support json view to output analyze by jq
+	"github.com/kamilsk/grafaman/internal/presenter"
+)
 
 // New returns the new root command.
 func New() *cobra.Command {
-	const (
-		formatDefault     = "default"
-		formatCompact     = "compact"
-		formatCompactLite = "compact-lite"
-		formatMarkdown    = "markdown"
-		formatRounded     = "rounded"
-		formatUnicode     = "unicode"
-	)
 	var (
 		format  string
-		formats = []string{
-			formatDefault,
-			formatCompact,
-			formatCompactLite,
-			formatMarkdown,
-			formatRounded,
-			formatUnicode,
-		}
-		valid = map[string]*simpletable.Style{
-			formatDefault:     simpletable.StyleDefault,
-			formatCompact:     simpletable.StyleCompact,
-			formatCompactLite: simpletable.StyleCompactLite,
-			formatMarkdown:    simpletable.StyleMarkdown,
-			formatRounded:     simpletable.StyleRounded,
-			formatUnicode:     simpletable.StyleUnicode,
-		}
-		style simpletable.Style
+		printer = new(presenter.Printer)
 	)
 	command := cobra.Command{
 		Use:   "grafaman",
 		Short: "Metrics coverage reporter",
 		Long:  "Metrics coverage reporter for Graphite and Grafana.",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			selected, is := valid[format]
-			if !is {
-				return errors.Errorf("invalid format %q, only %v are available", format, formats)
+			if err := printer.SetOutput(cmd.OutOrStdout()).SetFormat(format); err != nil {
+				return err
 			}
-			style = *selected
 
 			config := viper.New()
 			config.SetConfigFile(viper.GetString("config"))
@@ -77,12 +47,12 @@ func New() *cobra.Command {
 		SilenceUsage:  true,
 	}
 	command.AddCommand(
-		NewCoverageCommand(&style),
-		NewMetricsCommand(&style),
-		NewQueriesCommand(&style),
+		NewCoverageCommand(printer),
+		NewMetricsCommand(printer),
+		NewQueriesCommand(printer),
 	)
 	flags := command.PersistentFlags()
-	flags.StringVarP(&format, "format", "f", formatDefault, "output format")
+	flags.StringVarP(&format, "format", "f", printer.DefaultFormat(), "output format")
 	flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
 	fn.Must(
 		func() error { return viper.BindPFlag("config", flags.Lookup("env-file")) },
