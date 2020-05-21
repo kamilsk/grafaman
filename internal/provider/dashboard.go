@@ -31,7 +31,7 @@ func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
 
 		exp, _, err := parser.ParseExpr(string(raw))
 		if err != nil {
-			return nil, errors.Wrapf(err, "parse expression %q", raw)
+			return nil, errors.Wrapf(err, "dashboard: parse expression %q", raw)
 		}
 		for _, query := range exp.Metrics() {
 			for _, prefix := range cfg.TrimPrefixes {

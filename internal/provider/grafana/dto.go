@@ -41,7 +41,9 @@ func convertTargets(in []target) []entity.Query {
 	out := make([]entity.Query, 0, len(in))
 
 	for _, target := range in {
-		out = append(out, entity.Query(target.Query))
+		if target.Query != "" {
+			out = append(out, entity.Query(target.Query))
+		}
 	}
 
 	return out
