@@ -66,6 +66,42 @@ $ grafaman coverage \
 
 located at current working directory.
 
+**Supported output formats:**
+
+- table view
+  - default
+  - compact
+  - compact-lite
+  - markdown
+  - rounded
+  - unicode
+- json
+```bash
+$ grafaman coverage ... -f json | jq
+# [
+#   {
+#     "name": "apps.services.awesome-service.jaeger.finished_spans_sampled_n",
+#     "hits": 0
+#   },
+#   ...
+#   {
+#     "name": "apps.services.awesome-service.go.pod-5dbdcd5dbb-6z58f.threads",
+#     "hits": 0
+#   }
+# ]
+```
+- tsv
+```bash
+$ grafaman coverage ... -f tsv | column -t
+# apps.services.awesome-service.jaeger.finished_spans_sampled_n         0
+# apps.services.awesome-service.rpc.client.success.ok.percentile.75     1
+# apps.services.awesome-service.rpc.client.success.ok.percentile.95     1
+# apps.services.awesome-service.rpc.client.success.ok.percentile.99     2
+# apps.services.awesome-service.rpc.client.success.ok.percentile.999    1
+# ...                                                                 ...
+# apps.services.awesome-service.go.pod-5dbdcd5dbb-6z58f.threads         0
+```
+
 ### Fetch metrics from [Graphite][]
 
 ```bash
