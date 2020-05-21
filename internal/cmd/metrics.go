@@ -24,7 +24,6 @@ func NewMetricsCommand(printer interface{ PrintMetrics(entity.Metrics) error }) 
 	var (
 		collapse int
 		last     time.Duration
-		fast     bool
 	)
 	command := cobra.Command{
 		Use:   "metrics",
@@ -55,7 +54,7 @@ func NewMetricsCommand(printer interface{ PrintMetrics(entity.Metrics) error }) 
 			if err != nil {
 				return err
 			}
-			metrics, err := provider.Fetch(cmd.Context(), viper.GetString("metrics"), last, fast)
+			metrics, err := provider.Fetch(cmd.Context(), viper.GetString("metrics"), last)
 			if err != nil {
 				return err
 			}
@@ -70,7 +69,6 @@ func NewMetricsCommand(printer interface{ PrintMetrics(entity.Metrics) error }) 
 	{
 		flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
 		flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
-		flags.BoolVar(&fast, "fast", false, "use tilde `~` to fetch all metrics by one query if supported")
 	}
 	return &command
 }

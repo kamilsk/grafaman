@@ -27,7 +27,6 @@ func NewCoverageCommand(printer interface{ PrintCoverage(*coverage.Report) error
 		exclude []string
 		trim    []string
 		last    time.Duration
-		fast    bool
 	)
 	command := cobra.Command{
 		Use:   "coverage",
@@ -79,7 +78,7 @@ func NewCoverageCommand(printer interface{ PrintCoverage(*coverage.Report) error
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var err error
-				metrics, err = metricsProvider.Fetch(ctx, viper.GetString("metrics"), last, fast)
+				metrics, err = metricsProvider.Fetch(ctx, viper.GetString("metrics"), last)
 				return err
 			})
 			g.Go(func() error {
@@ -120,7 +119,6 @@ func NewCoverageCommand(printer interface{ PrintCoverage(*coverage.Report) error
 		flags.StringArrayVar(&exclude, "exclude", nil, "patterns to exclude metrics from coverage, e.g. *.median")
 		flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
 		flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
-		flags.BoolVar(&fast, "fast", false, "use tilde `~` to fetch all metrics by one query if supported")
 	}
 	return &command
 }

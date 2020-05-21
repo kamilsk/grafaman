@@ -37,7 +37,7 @@ type provider struct {
 
 // Fetch walks through the endpoint and takes all metrics with the specified prefix.
 // Documentation: https://graphite-api.readthedocs.io/en/latest/api.html#metrics-find.
-func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Duration, fast bool) (entity.Metrics, error) {
+func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Duration) (entity.Metrics, error) {
 	const source = "/metrics/find"
 
 	u := provider.endpoint
@@ -51,15 +51,6 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 	q.Add(queryKey, prefix)
 	req.URL.RawQuery = q.Encode()
 
-	// try to fetch fast by one query
-	if fast { // TODO:research fastFetch returns invalid state
-		metrics, err := provider.fastFetch(ctx, req)
-		if err == nil && metrics.Len() > 0 {
-			return metrics, nil
-		}
-	}
-
-	// fallback to recursive algorithm
 	var (
 		aggregator = make(chan dto, runtime.GOMAXPROCS(0))
 		metrics    = make(entity.Metrics, 0, 8)
@@ -78,32 +69,6 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 	})
 
 	return metrics, g.Wait()
-}
-
-func (provider *provider) fastFetch(ctx context.Context, req *http.Request) (entity.Metrics, error) {
-	req = req.Clone(ctx)
-	q := req.URL.Query()
-	q.Set(queryKey, q.Get(queryKey)+".~")
-	req.URL.RawQuery = q.Encode()
-
-	resp, err := provider.client.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "Graphite metrics fast fetch request")
-	}
-	defer safe.Close(resp.Body, unsafe.Ignore)
-
-	var nodes []dto
-	if err := json.NewDecoder(resp.Body).Decode(&nodes); err != nil {
-		return nil, errors.Wrap(err, "decode Graphite metrics fast fetch response")
-	}
-
-	metrics := make(entity.Metrics, 0, len(nodes)/2)
-	for _, node := range nodes {
-		if node.Leaf == 1 {
-			metrics = append(metrics, entity.Metric(node.ID))
-		}
-	}
-	return metrics, nil
 }
 
 func (provider *provider) fetch(ctx context.Context, out chan<- dto, req *http.Request) error {
