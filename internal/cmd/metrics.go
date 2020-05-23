@@ -14,11 +14,6 @@ import (
 	"github.com/kamilsk/grafaman/internal/validator"
 )
 
-// TODO:debt
-//  - support collapse option
-//  - replace recursion by worker pool
-//  - implement auth, if needed
-
 // NewMetricsCommand returns command to fetch metrics from Graphite.
 func NewMetricsCommand(printer interface{ PrintMetrics(entity.Metrics) error }) *cobra.Command {
 	var (

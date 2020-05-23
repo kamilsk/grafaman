@@ -16,11 +16,6 @@ import (
 	"github.com/kamilsk/grafaman/internal/validator"
 )
 
-// TODO:debt
-//  - support collapse option
-//  - support graphite functions (e.g. sum, etc.)
-//  - implement auth, if needed
-
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
 func NewCoverageCommand(printer interface{ PrintCoverage(*coverage.Report) error }) *cobra.Command {
 	var (
