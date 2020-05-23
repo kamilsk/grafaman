@@ -3,11 +3,11 @@ package graphite
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"path"
 	"runtime"
-	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
@@ -47,8 +47,10 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 		return nil, errors.Wrap(err, "create Graphite metrics base request")
 	}
 	q := req.URL.Query()
-	q.Add(fromKey, strconv.FormatInt(time.Now().Add(-last).Unix(), 10))
-	q.Add(queryKey, prefix)
+	q.Add(formatParam, "json")
+	q.Add(fromParam, fmt.Sprintf("now-%s", last))
+	q.Add(untilParam, "now")
+	q.Add(queryParam, prefix)
 	req.URL.RawQuery = q.Encode()
 
 	var (
@@ -93,7 +95,7 @@ func (provider *provider) fetch(ctx context.Context, out chan<- dto, req *http.R
 		g.Go(func() error {
 			req := req.Clone(ctx)
 			q := req.URL.Query()
-			q.Set(queryKey, query)
+			q.Set(queryParam, query)
 			req.URL.RawQuery = q.Encode()
 			return provider.fetch(ctx, out, req)
 		})

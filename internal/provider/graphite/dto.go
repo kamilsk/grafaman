@@ -1,8 +1,10 @@
 package graphite
 
 const (
-	fromKey  = "from"
-	queryKey = "query"
+	formatParam = "format"
+	fromParam   = "from"
+	untilParam  = "until"
+	queryParam  = "query"
 )
 
 type dto struct {
