@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 deactivate () {
     unset _ARCH
     unset _BINPATH
