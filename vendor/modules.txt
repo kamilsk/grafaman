@@ -4,7 +4,7 @@ github.com/alexeyco/simpletable
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
-# github.com/go-graphite/carbonapi v0.0.0-20200503122241-661001c7a79e
+# github.com/go-graphite/carbonapi v0.0.0-20200527185106-f03dada833e3
 github.com/go-graphite/carbonapi/pkg/parser
 # github.com/gobwas/glob v0.2.3
 github.com/gobwas/glob
@@ -51,9 +51,9 @@ github.com/spf13/cobra
 github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/spf13/viper v1.6.3
+# github.com/spf13/viper v1.7.0
 github.com/spf13/viper
-# github.com/stretchr/testify v1.5.1
+# github.com/stretchr/testify v1.6.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/subosito/gotenv v1.2.0
@@ -62,19 +62,22 @@ github.com/subosito/gotenv
 go.octolab.org/errors
 go.octolab.org/fn
 go.octolab.org/safe
+go.octolab.org/sequence
 go.octolab.org/time
 go.octolab.org/unsafe
 # go.octolab.org/toolkit/cli v0.0.9
 go.octolab.org/toolkit/cli/cobra
 go.octolab.org/toolkit/cli/internal/os/shell
-# golang.org/x/sync v0.0.0-20190423024810-112230192c58
+# golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20190412213103-97732733099d
+# golang.org/x/sys v0.0.0-20190624142023-c5567b49c5d0
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.0
+# golang.org/x/text v0.3.2
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 # gopkg.in/ini.v1 v1.51.0
 gopkg.in/ini.v1
 # gopkg.in/yaml.v2 v2.2.8
 gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+gopkg.in/yaml.v3

@@ -12,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.octolab.org/safe"
+	"go.octolab.org/sequence"
 	"go.octolab.org/unsafe"
 	"golang.org/x/sync/errgroup"
 
@@ -22,7 +23,7 @@ import (
 func New(endpoint string) (*provider, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, errors.Wrap(err, "prepare Graphite metrics provider endpoint URL")
+		return nil, errors.Wrap(err, "graphite: prepare metrics provider endpoint URL")
 	}
 	return &provider{
 		client:   &http.Client{},
@@ -42,63 +43,123 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 
 	u := provider.endpoint
 	u.Path = path.Join(u.Path, source)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "create Graphite metrics base request")
+		return nil, errors.Wrap(err, "graphite: create metrics base request")
 	}
-	q := req.URL.Query()
+	q := request.URL.Query()
 	q.Add(formatParam, "json")
 	q.Add(fromParam, fmt.Sprintf("now-%s", last))
 	q.Add(untilParam, "now")
 	q.Add(queryParam, prefix)
-	req.URL.RawQuery = q.Encode()
+	request.URL.RawQuery = q.Encode()
 
 	var (
-		aggregator = make(chan dto, runtime.GOMAXPROCS(0))
-		metrics    = make(entity.Metrics, 0, 8)
+		aggregator = make(chan dto, 256)
+		result     = make(chan []dto, 256)
+		metrics    = make(entity.Metrics, 0, 256)
+		requests   = make(chan *http.Request, 256)
 	)
 
-	g, ctx := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		for node := range aggregator {
-			metrics = append(metrics, entity.Metric(node.ID))
+	main, ctx := errgroup.WithContext(ctx)
+	main.Go(func() error {
+		for {
+			select {
+			case node, ok := <-aggregator:
+				if !ok {
+					return nil
+				}
+				metrics = append(metrics, entity.Metric(node.ID))
+			case <-ctx.Done():
+				return errors.Wrap(ctx.Err(), "graphite: aggregator process")
+			}
+		}
+	})
+	main.Go(func() error {
+		defer close(aggregator)
+		defer close(requests)
+		var counter int
+
+		requests <- request
+		counter++
+
+		for counter > 0 {
+			select {
+			case nodes, ok := <-result:
+				counter--
+				if !ok {
+					return nil
+				}
+				for _, node := range nodes {
+					if node.Leaf == 1 {
+						select {
+						case aggregator <- node:
+						case <-ctx.Done():
+							return errors.Wrap(ctx.Err(), "graphite: add metric")
+						}
+						continue
+					}
+					request := request.Clone(ctx)
+					q := request.URL.Query()
+					q.Set(queryParam, node.ID+".*")
+					request.URL.RawQuery = q.Encode()
+					select {
+					case requests <- request:
+						counter++
+					case <-ctx.Done():
+						return errors.Wrap(ctx.Err(), "graphite: add request")
+					}
+				}
+			case <-ctx.Done():
+				return errors.Wrap(ctx.Err(), "graphite: request manager process")
+			}
 		}
 		return nil
 	})
-	g.Go(func() error {
-		defer close(aggregator)
-		return provider.fetch(ctx, aggregator, req)
-	})
 
-	return metrics, g.Wait()
-}
-
-func (provider *provider) fetch(ctx context.Context, out chan<- dto, req *http.Request) error {
-	resp, err := provider.client.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "Graphite metrics recursive fetch request")
-	}
-	defer safe.Close(resp.Body, unsafe.Ignore)
-
-	var nodes []dto
-	if err := json.NewDecoder(resp.Body).Decode(&nodes); err != nil {
-		return errors.Wrap(err, "decode Graphite metrics fetch response")
-	}
-
-	g, ctx := errgroup.WithContext(ctx)
-	for _, node := range nodes {
-		if node.Leaf == 1 {
-			out <- node
-			continue
-		}
-		query := node.ID + ".*"
-		g.Go(func() error {
-			req := req.Clone(ctx)
-			q := req.URL.Query()
-			q.Set(queryParam, query)
-			req.URL.RawQuery = q.Encode()
-			return provider.fetch(ctx, out, req)
+	pool, ctx := errgroup.WithContext(ctx)
+	for range sequence.Simple(runtime.GOMAXPROCS(0)) {
+		pool.Go(func() error {
+			for {
+				select {
+				case request, ok := <-requests:
+					if !ok {
+						return nil
+					}
+					data, err := provider.fetch(request)
+					if err != nil {
+						return err
+					}
+					select {
+					case result <- data:
+					case <-ctx.Done():
+						return errors.Wrap(ctx.Err(), "graphite: worker write process")
+					}
+				case <-ctx.Done():
+					return errors.Wrap(ctx.Err(), "graphite: worker read process")
+				}
+			}
 		})
 	}
-	return g.Wait()
+	if err := pool.Wait(); err != nil {
+		close(result)
+		return nil, err
+	}
+
+	return metrics, main.Wait()
+}
+
+func (provider *provider) fetch(request *http.Request) ([]dto, error) {
+	response, err := provider.client.Do(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "graphite: metrics fetch request")
+	}
+	defer safe.Close(response.Body, unsafe.Ignore)
+
+	var nodes []dto
+	if err := json.NewDecoder(response.Body).Decode(&nodes); err != nil {
+		return nil, errors.Wrap(err, "graphite: decode metrics fetch response")
+	}
+
+	return nodes, nil
 }

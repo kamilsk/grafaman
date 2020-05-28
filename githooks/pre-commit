@@ -3,3 +3,4 @@
 set -euo pipefail
 
 make deps-tidy deps-fetch lint format
+git diff --quiet --exit-code
