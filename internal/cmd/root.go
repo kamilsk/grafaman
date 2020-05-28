@@ -36,8 +36,8 @@ func New() *cobra.Command {
 			if os.IsNotExist(err) {
 				config.SetConfigFile("app.toml")
 				config.SetConfigType("toml")
-				if err := config.ReadInConfig(); err == nil {
-					return viper.MergeConfigMap(config.Sub("envs.local.env_vars").AllSettings())
+				if err, sub := config.ReadInConfig(), config.Sub("envs.local.env_vars"); err == nil && sub != nil {
+					return viper.MergeConfigMap(sub.AllSettings())
 				}
 				err = nil
 			}
