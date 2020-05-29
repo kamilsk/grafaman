@@ -10,6 +10,9 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/kamilsk/retry/v5"
+	"github.com/kamilsk/retry/v5/backoff"
+	"github.com/kamilsk/retry/v5/strategy"
 	"github.com/pkg/errors"
 	"go.octolab.org/safe"
 	"go.octolab.org/sequence"
@@ -150,9 +153,27 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 }
 
 func (provider *provider) fetch(request *http.Request) ([]dto, error) {
-	response, err := provider.client.Do(request)
-	if err != nil {
-		return nil, errors.Wrap(err, "graphite: metrics fetch request")
+	var response *http.Response
+
+	what := func(ctx context.Context) error {
+		var err error
+		response, err = provider.client.Do(request)
+		if err != nil {
+			return errors.Wrap(err, "graphite: metrics fetch request")
+		}
+		return nil
+	}
+	how := retry.How{
+		strategy.Limit(3),
+		strategy.Backoff(
+			backoff.Linear(50 * time.Millisecond),
+		),
+		strategy.CheckError(
+			strategy.NetworkError(strategy.Strict),
+		),
+	}
+	if err := retry.Do(request.Context(), what, how...); err != nil {
+		return nil, err
 	}
 	defer safe.Close(response.Body, unsafe.Ignore)
 

@@ -28,6 +28,10 @@ github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
+# github.com/kamilsk/retry/v5 v5.0.0-rc5
+github.com/kamilsk/retry/v5
+github.com/kamilsk/retry/v5/backoff
+github.com/kamilsk/retry/v5/strategy
 # github.com/magiconair/properties v1.8.1
 github.com/magiconair/properties
 # github.com/mattn/go-runewidth v0.0.9

@@ -6,6 +6,7 @@ require (
 	github.com/alexeyco/simpletable v0.0.0-20200203113705-55bd62a5b8df
 	github.com/go-graphite/carbonapi v0.0.0-20200527185106-f03dada833e3
 	github.com/gobwas/glob v0.2.3
+	github.com/kamilsk/retry/v5 v5.0.0-rc5
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0

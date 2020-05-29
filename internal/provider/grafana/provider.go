@@ -6,7 +6,11 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"time"
 
+	"github.com/kamilsk/retry/v5"
+	"github.com/kamilsk/retry/v5/backoff"
+	"github.com/kamilsk/retry/v5/strategy"
 	"github.com/pkg/errors"
 	"go.octolab.org/safe"
 	"go.octolab.org/unsafe"
@@ -18,7 +22,7 @@ import (
 func New(endpoint string) (*provider, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, errors.Wrap(err, "prepare Grafana dashboard provider endpoint URL")
+		return nil, errors.Wrap(err, "grafana: prepare dashboard provider endpoint URL")
 	}
 	return &provider{
 		client:   &http.Client{},
@@ -38,22 +42,39 @@ func (provider *provider) Fetch(ctx context.Context, uid string) (*entity.Dashbo
 
 	u := provider.endpoint
 	u.Path = path.Join(u.Path, source, uid)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "create Grafana dashboard base request")
+		return nil, errors.Wrap(err, "grafana: create dashboard base request")
 	}
 
-	resp, err := provider.client.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "Grafana dashboard fetch request")
+	var response *http.Response
+	what := func(ctx context.Context) error {
+		var err error
+		response, err = provider.client.Do(request)
+		if err != nil {
+			return errors.Wrap(err, "grafana: dashboard fetch request")
+		}
+		return nil
 	}
-	defer safe.Close(resp.Body, unsafe.Ignore)
+	how := retry.How{
+		strategy.Limit(3),
+		strategy.Backoff(
+			backoff.Linear(50 * time.Millisecond),
+		),
+		strategy.CheckError(
+			strategy.NetworkError(strategy.Strict),
+		),
+	}
+	if err := retry.Do(request.Context(), what, how...); err != nil {
+		return nil, err
+	}
+	defer safe.Close(response.Body, unsafe.Ignore)
 
 	var payload struct {
 		Dashboard dashboard `json:"dashboard"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return nil, errors.Wrap(err, "decode Grafana dashboard fetch response")
+	if err := json.NewDecoder(response.Body).Decode(&payload); err != nil {
+		return nil, errors.Wrap(err, "grafana: decode dashboard fetch response")
 	}
 
 	result := entity.Dashboard{
