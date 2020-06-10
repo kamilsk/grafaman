@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
@@ -17,7 +18,10 @@ import (
 )
 
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
-func NewCoverageCommand(printer interface{ PrintCoverage(*coverage.Report) error }) *cobra.Command {
+func NewCoverageCommand(
+	logger *logrus.Logger,
+	printer interface{ PrintCoverage(*coverage.Report) error },
+) *cobra.Command {
 	var (
 		exclude []string
 		trim    []string
@@ -57,11 +61,11 @@ func NewCoverageCommand(printer interface{ PrintCoverage(*coverage.Report) error
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			metricsProvider, err := graphite.New(viper.GetString("graphite"))
+			metricsProvider, err := graphite.New(viper.GetString("graphite"), logger)
 			if err != nil {
 				return err
 			}
-			dashboardProvider, err := grafana.New(viper.GetString("grafana"))
+			dashboardProvider, err := grafana.New(viper.GetString("grafana"), logger)
 			if err != nil {
 				return err
 			}

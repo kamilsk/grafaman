@@ -4,6 +4,7 @@
 
 [![Build][build.icon]][build.page]
 [![Template][template.icon]][template.page]
+[![Coverage][coverage.icon]][coverage.page]
 
 ## 💡 Idea
 
@@ -163,6 +164,8 @@ made with ❤️ for everyone
 
 [build.page]:       https://travis-ci.com/kamilsk/grafaman
 [build.icon]:       https://travis-ci.com/kamilsk/grafaman.svg?branch=master
+[coverage.page]:    https://codeclimate.com/github/kamilsk/grafaman/test_coverage
+[coverage.icon]:    https://api.codeclimate.com/v1/badges/eff058c43cf569c1d860/test_coverage
 [design.page]:      https://www.notion.so/octolab/grafaman-06e6fcd46c924126ae134c69dafbca6c?r=0b753cbf767346f5a6fd51194829a2f3
 [promo.page]:       https://github.com/kamilsk/grafaman
 [template.page]:    https://github.com/octomation/go-tool

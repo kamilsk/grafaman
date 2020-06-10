@@ -1,7 +1,7 @@
 # sourced by https://github.com/octomation/makefiles
 
 .DEFAULT_GOAL = test-with-coverage
-GIT_HOOKS     = post-merge pre-commit
+GIT_HOOKS     = post-merge pre-commit pre-push
 GO_VERSIONS   = 1.13 1.14
 
 SHELL := /bin/bash -euo pipefail # `explain set -euo pipefail`
@@ -105,7 +105,7 @@ go-generate:
 .PHONY: lint
 lint:
 	@if command -v golangci-lint > /dev/null; then \
-		golangci-lint run ./...; \
+		`which time` -- golangci-lint run ./...; \
 	else \
 		go vet $(PACKAGES); \
 	fi
@@ -183,15 +183,29 @@ toolset:
 	@( \
 		GOFLAGS=$(TOOLFLAGS); \
 		cd tools; \
+		go mod tidy; \
 		go mod download; \
 		if [[ "`go env GOFLAGS`" =~ -mod=vendor ]]; then go mod vendor; fi; \
 		go generate tools.go; \
 	)
 
+ifdef GIT_HOOKS
+
 .PHONY: hooks
 hooks:
 	@ls .git/hooks | grep -v .sample | sed 's|.*|.git/hooks/&|' | xargs rm -f || true
 	@for hook in $(GIT_HOOKS); do cp githooks/$$hook .git/hooks/; done
+
+define hook_tpl
+.PHONY: $(1)
+$(1):
+	@githooks/$(1)
+endef
+
+render_hook_tpl = $(eval $(call hook_tpl,$(hook)))
+$(foreach hook,$(GIT_HOOKS),$(render_hook_tpl))
+
+endif
 
 ifdef GO_VERSIONS
 

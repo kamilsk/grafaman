@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"io/ioutil"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
@@ -13,16 +17,28 @@ import (
 // New returns the new root command.
 func New() *cobra.Command {
 	var (
+		debug   bool
 		format  string
+		logger  = logrus.New()
 		printer = new(presenter.Printer)
 	)
 	command := cobra.Command{
 		Use:   "grafaman",
-		Short: "Metrics coverage reporter",
+		Short: "metrics coverage reporter",
 		Long:  "Metrics coverage reporter for Graphite and Grafana.",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := printer.SetOutput(cmd.OutOrStdout()).SetFormat(format); err != nil {
 				return err
+			}
+
+			logger.SetOutput(ioutil.Discard)
+			if debug {
+				logger.SetLevel(logrus.DebugLevel)
+				logger.SetOutput(cmd.ErrOrStderr())
+				go func() {
+					logger.Warning("start listen and serve pprof at http://localhost:8888/debug/pprof/")
+					logger.Fatal(http.ListenAndServe(":8888", http.DefaultServeMux))
+				}()
 			}
 
 			config := viper.New()
@@ -47,11 +63,12 @@ func New() *cobra.Command {
 		SilenceUsage:  true,
 	}
 	command.AddCommand(
-		NewCoverageCommand(printer),
-		NewMetricsCommand(printer),
-		NewQueriesCommand(printer),
+		NewCoverageCommand(logger, printer),
+		NewMetricsCommand(logger, printer),
+		NewQueriesCommand(logger, printer),
 	)
 	flags := command.PersistentFlags()
+	flags.BoolVar(&debug, "debug", false, "enable debug")
 	flags.StringVarP(&format, "format", "f", printer.DefaultFormat(), "output format")
 	flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
 	fn.Must(

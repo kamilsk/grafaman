@@ -9,16 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = template.Must(template.New("version").Parse(`{{.Name}}:
-  version     : {{.Version}}
-  build date  : {{.BuildDate}}
-  git hash    : {{.GitHash}}
-  go version  : {{.GoVersion}}
-  go compiler : {{.GoCompiler}}
-  platform    : {{.Platform}}
-  features    : {{.Features}}
-`))
-
 // NewVersionCommand returns a command that helps to build version info.
 //
 //  $ cli version
@@ -31,10 +21,10 @@ var version = template.Must(template.New("version").Parse(`{{.Name}}:
 //    platform    : darwin/amd64
 //    features    : featureA=true, featureB=false
 //
-func NewVersionCommand(release, date, hash string, features ...string) *cobra.Command {
+func NewVersionCommand(release, date, hash string, features ...Feature) *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
-		Short: "Show application version",
+		Short: "show application version",
 		Long:  "Show application version.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return version.Execute(cmd.OutOrStdout(), struct {
@@ -45,7 +35,7 @@ func NewVersionCommand(release, date, hash string, features ...string) *cobra.Co
 				GoVersion  string
 				GoCompiler string
 				Platform   string
-				Features   string
+				Features   fmt.Stringer
 			}{
 				Name:       root(cmd).Name(),
 				Version:    release,
@@ -54,8 +44,44 @@ func NewVersionCommand(release, date, hash string, features ...string) *cobra.Co
 				GoVersion:  runtime.Version(),
 				GoCompiler: runtime.Compiler,
 				Platform:   fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-				Features:   strings.Join(features, ", "),
+				Features:   Features(features),
 			})
 		},
 	}
 }
+
+// Feature describe a feature.
+type Feature struct {
+	Name    string
+	Enabled bool
+}
+
+// String returns a string representation of the feature.
+func (feature Feature) String() string {
+	return fmt.Sprintf("%s=%v", feature.Name, feature.Enabled)
+}
+
+// Features defines a list of features.
+type Features []Feature
+
+// String returns a string representation of the feature list.
+func (features Features) String() string {
+	if len(features) == 0 {
+		return "-"
+	}
+	list := make([]string, 0, len(features))
+	for _, feature := range features {
+		list = append(list, feature.String())
+	}
+	return strings.Join(list, ", ")
+}
+
+var version = template.Must(template.New("version").Parse(`{{.Name}}:
+  version     : {{.Version}}
+  build date  : {{.BuildDate}}
+  git hash    : {{.GitHash}}
+  go version  : {{.GoVersion}}
+  go compiler : {{.GoCompiler}}
+  platform    : {{.Platform}}
+  features    : {{.Features}}
+`))

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -11,7 +12,10 @@ import (
 )
 
 // NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
-func NewQueriesCommand(printer interface{ PrintQueries(entity.Queries) error }) *cobra.Command {
+func NewQueriesCommand(
+	logger *logrus.Logger,
+	printer interface{ PrintQueries(entity.Queries) error },
+) *cobra.Command {
 	var (
 		trim       []string
 		duplicates bool
@@ -45,7 +49,7 @@ func NewQueriesCommand(printer interface{ PrintQueries(entity.Queries) error }) 
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			provider, err := grafana.New(viper.GetString("grafana"))
+			provider, err := grafana.New(viper.GetString("grafana"), logger)
 			if err != nil {
 				return err
 			}

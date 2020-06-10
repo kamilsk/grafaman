@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
@@ -15,7 +16,10 @@ import (
 )
 
 // NewMetricsCommand returns command to fetch metrics from Graphite.
-func NewMetricsCommand(printer interface{ PrintMetrics(entity.Metrics) error }) *cobra.Command {
+func NewMetricsCommand(
+	logger *logrus.Logger,
+	printer interface{ PrintMetrics(entity.Metrics) error },
+) *cobra.Command {
 	var (
 		collapse int
 		last     time.Duration
@@ -45,7 +49,7 @@ func NewMetricsCommand(printer interface{ PrintMetrics(entity.Metrics) error }) 
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			provider, err := graphite.New(viper.GetString("graphite"))
+			provider, err := graphite.New(viper.GetString("graphite"), logger)
 			if err != nil {
 				return err
 			}

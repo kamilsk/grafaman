@@ -12,6 +12,7 @@ import (
 	"github.com/kamilsk/retry/v5/backoff"
 	"github.com/kamilsk/retry/v5/strategy"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"go.octolab.org/safe"
 	"go.octolab.org/unsafe"
 
@@ -19,20 +20,22 @@ import (
 )
 
 // New returns an instance of Grafana dashboard provider.
-func New(endpoint string) (*provider, error) {
+func New(endpoint string, logger *logrus.Logger) (*provider, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "grafana: prepare dashboard provider endpoint URL")
 	}
 	return &provider{
-		client:   &http.Client{},
+		client:   &http.Client{Timeout: time.Second},
 		endpoint: *u,
+		logger:   logger,
 	}, nil
 }
 
 type provider struct {
 	client   *http.Client
 	endpoint url.URL
+	logger   *logrus.Logger
 }
 
 // Fetch takes a dashboard JSON model and extracts queries and variables from it.
@@ -50,10 +53,14 @@ func (provider *provider) Fetch(ctx context.Context, uid string) (*entity.Dashbo
 	var response *http.Response
 	what := func(ctx context.Context) error {
 		var err error
-		response, err = provider.client.Do(request)
+		logger := provider.logger.WithField("url", request.URL.String())
+		logger.Info("start to fetch data")
+		response, err = provider.client.Do(request) // nolint:bodyclose
 		if err != nil {
+			logger.WithError(err).Error("fail fetch data")
 			return errors.Wrap(err, "grafana: dashboard fetch request")
 		}
+		logger.Info("success fetch data")
 		return nil
 	}
 	how := retry.How{

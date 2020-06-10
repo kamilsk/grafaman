@@ -15,6 +15,7 @@ archives:
 
 brews:
   - name: grafaman
+    caveats:
     commit_author:
       name:  Kamil Samigullin
       email: kamil@samigullin.info
