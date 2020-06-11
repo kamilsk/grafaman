@@ -19,6 +19,7 @@ func New() *cobra.Command {
 	var (
 		debug   bool
 		format  string
+		verbose int
 		logger  = logrus.New()
 		printer = new(presenter.Printer)
 	)
@@ -33,8 +34,17 @@ func New() *cobra.Command {
 
 			logger.SetOutput(ioutil.Discard)
 			if debug {
-				logger.SetLevel(logrus.DebugLevel)
 				logger.SetOutput(cmd.ErrOrStderr())
+				switch {
+				case verbose == 1:
+					logger.SetLevel(logrus.WarnLevel)
+				case verbose == 2:
+					logger.SetLevel(logrus.InfoLevel)
+				case verbose > 2:
+					logger.SetLevel(logrus.DebugLevel)
+				default:
+					logrus.SetLevel(logrus.ErrorLevel)
+				}
 				go func() {
 					logger.Warning("start listen and serve pprof at http://localhost:8888/debug/pprof/")
 					logger.Fatal(http.ListenAndServe(":8888", http.DefaultServeMux))
@@ -70,6 +80,7 @@ func New() *cobra.Command {
 	flags := command.PersistentFlags()
 	flags.BoolVar(&debug, "debug", false, "enable debug")
 	flags.StringVarP(&format, "format", "f", printer.DefaultFormat(), "output format")
+	flags.CountVarP(&verbose, "verbose", "v", "increase the verbosity of messages if debug enabled")
 	flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
 	fn.Must(
 		func() error { return viper.BindPFlag("config", flags.Lookup("env-file")) },
