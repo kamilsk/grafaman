@@ -45,6 +45,9 @@ func NewCoverageCommand(
 			if err := viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")); err != nil {
 				return err
 			}
+			if err := viper.BindPFlag("filter", flags.Lookup("filter")); err != nil {
+				return err
+			}
 			if viper.GetString("grafana") == "" {
 				return errors.New("please provide Grafana API endpoint")
 			}
@@ -114,6 +117,7 @@ func NewCoverageCommand(
 	flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
 	flags.String("graphite", "", "Graphite API endpoint")
 	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
+	flags.String("filter", "", "exclude metrics by pattern, e.g. some.*.metric")
 	{
 		flags.StringArrayVar(&exclude, "exclude", nil, "patterns to exclude metrics from coverage, e.g. *.median")
 		flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")

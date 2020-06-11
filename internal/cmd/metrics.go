@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 
+	"github.com/kamilsk/grafaman/internal/filter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/validator"
@@ -36,6 +38,9 @@ func NewMetricsCommand(
 			if err := viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")); err != nil {
 				return err
 			}
+			if err := viper.BindPFlag("filter", flags.Lookup("filter")); err != nil {
+				return err
+			}
 			if viper.GetString("graphite") == "" {
 				return errors.New("please provide Graphite API endpoint")
 			}
@@ -57,6 +62,10 @@ func NewMetricsCommand(
 			if err != nil {
 				return err
 			}
+			metrics, err = filter.Filter(metrics, concat(viper.GetString("filter"), viper.GetString("metrics")))
+			if err != nil {
+				return err
+			}
 			sort.Sort(metrics)
 
 			return printer.PrintMetrics(metrics)
@@ -65,9 +74,17 @@ func NewMetricsCommand(
 	flags := command.Flags()
 	flags.StringP("graphite", "e", "", "Graphite API endpoint")
 	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
+	flags.String("filter", "", "exclude metrics by pattern, e.g. some.*.metric")
 	{
 		flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
 		flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
 	}
 	return &command
+}
+
+func concat(filter, prefix string) string {
+	if strings.HasPrefix(filter, prefix) {
+		return prefix
+	}
+	return prefix + "." + filter
 }
