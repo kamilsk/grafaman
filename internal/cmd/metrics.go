@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -62,7 +61,7 @@ func NewMetricsCommand(
 			if err != nil {
 				return err
 			}
-			metrics, err = filter.Filter(metrics, concat(viper.GetString("filter"), viper.GetString("metrics")))
+			metrics, err = filter.Filter(metrics, viper.GetString("filter"), viper.GetString("metrics"))
 			if err != nil {
 				return err
 			}
@@ -80,11 +79,4 @@ func NewMetricsCommand(
 		flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
 	}
 	return &command
-}
-
-func concat(filter, prefix string) string {
-	if strings.HasPrefix(filter, prefix) {
-		return prefix
-	}
-	return prefix + "." + filter
 }

@@ -10,6 +10,7 @@ import (
 	xtime "go.octolab.org/time"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/kamilsk/grafaman/internal/filter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
@@ -81,6 +82,10 @@ func NewCoverageCommand(
 			g.Go(func() error {
 				var err error
 				metrics, err = metricsProvider.Fetch(ctx, viper.GetString("metrics"), last)
+				if err != nil {
+					return err
+				}
+				metrics, err = filter.Filter(metrics, viper.GetString("filter"), viper.GetString("metrics"))
 				return err
 			})
 			g.Go(func() error {
