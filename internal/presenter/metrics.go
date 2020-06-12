@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
@@ -18,7 +19,7 @@ func (printer *Printer) PrintMetrics(metrics entity.Metrics) error {
 	case formatTSV:
 		return PrintMetricsAsTSV(printer.output, metrics)
 	default:
-		return PrintMetricsAsTable(printer.output, metrics, styles[printer.format])
+		return PrintMetricsAsTable(printer.output, metrics, styles[printer.format], printer.prefix)
 	}
 }
 
@@ -26,16 +27,16 @@ func PrintMetricsAsJSON(output io.Writer, metrics entity.Metrics) error {
 	return errors.Wrap(json.NewEncoder(output).Encode(metrics), "presenter: output result as json")
 }
 
-func PrintMetricsAsTable(output io.Writer, metrics entity.Metrics, style *simpletable.Style) error {
+func PrintMetricsAsTable(output io.Writer, metrics entity.Metrics, style *simpletable.Style, prefix string) error {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
-			{Text: "Metric"},
+			{Text: fmt.Sprintf("Metric of %s", prefix)},
 		},
 	}
 	for _, metric := range metrics {
 		r := []*simpletable.Cell{
-			{Text: string(metric)},
+			{Text: strings.TrimPrefix(strings.TrimPrefix(string(metric), prefix), ".")},
 		}
 		table.Body.Cells = append(table.Body.Cells, r)
 	}

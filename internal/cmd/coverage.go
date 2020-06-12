@@ -21,7 +21,10 @@ import (
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
 func NewCoverageCommand(
 	logger *logrus.Logger,
-	printer interface{ PrintCoverage(*coverage.Report) error },
+	printer interface {
+		SetPrefix(string)
+		PrintCoverage(*coverage.Report) error
+	},
 ) *cobra.Command {
 	var (
 		exclude []string
@@ -30,7 +33,7 @@ func NewCoverageCommand(
 	)
 	command := cobra.Command{
 		Use:   "coverage",
-		Short: "calculates metrics coverage",
+		Short: "calculates metrics coverage by queries",
 		Long:  "Calculates metrics coverage by queries.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
@@ -114,6 +117,7 @@ func NewCoverageCommand(
 				return err
 			}
 
+			printer.SetPrefix(viper.GetString("metrics"))
 			return printer.PrintCoverage(report)
 		},
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
@@ -19,7 +20,7 @@ func (printer *Printer) PrintCoverage(report *coverage.Report) error {
 	case formatTSV:
 		return PrintCoverageAsTSV(printer.output, report)
 	default:
-		return PrintCoverageAsTable(printer.output, report, styles[printer.format])
+		return PrintCoverageAsTable(printer.output, report, styles[printer.format], printer.prefix)
 	}
 }
 
@@ -27,17 +28,17 @@ func PrintCoverageAsJSON(output io.Writer, report *coverage.Report) error {
 	return errors.Wrap(json.NewEncoder(output).Encode(report.Metrics), "presenter: output result as json")
 }
 
-func PrintCoverageAsTable(output io.Writer, report *coverage.Report, style *simpletable.Style) error {
+func PrintCoverageAsTable(output io.Writer, report *coverage.Report, style *simpletable.Style, prefix string) error {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
-			{Text: "Metric"},
+			{Text: fmt.Sprintf("Metric of %s", prefix)},
 			{Text: "Hits"},
 		},
 	}
 	for _, metric := range report.Metrics {
 		r := []*simpletable.Cell{
-			{Text: metric.Name},
+			{Text: strings.TrimPrefix(strings.TrimPrefix(metric.Name, prefix), ".")},
 			{Align: simpletable.AlignRight, Text: strconv.Itoa(metric.Hits)},
 		}
 		table.Body.Cells = append(table.Body.Cells, r)

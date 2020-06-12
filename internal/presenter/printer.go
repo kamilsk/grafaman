@@ -9,6 +9,7 @@ import (
 
 type Printer struct {
 	format string
+	prefix string
 	output io.Writer
 }
 
@@ -29,6 +30,10 @@ func (printer *Printer) SetFormat(format string) error {
 	}
 	printer.format = format
 	return nil
+}
+
+func (printer *Printer) SetPrefix(prefix string) {
+	printer.prefix = prefix
 }
 
 func (printer *Printer) SetOutput(output io.Writer) *Printer {

@@ -19,7 +19,10 @@ import (
 // NewMetricsCommand returns command to fetch metrics from Graphite.
 func NewMetricsCommand(
 	logger *logrus.Logger,
-	printer interface{ PrintMetrics(entity.Metrics) error },
+	printer interface {
+		SetPrefix(string)
+		PrintMetrics(entity.Metrics) error
+	},
 ) *cobra.Command {
 	var (
 		collapse int
@@ -67,6 +70,7 @@ func NewMetricsCommand(
 			}
 			sort.Sort(metrics)
 
+			printer.SetPrefix(viper.GetString("metrics"))
 			return printer.PrintMetrics(metrics)
 		},
 	}
