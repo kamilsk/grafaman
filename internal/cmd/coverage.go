@@ -5,11 +5,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/filter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
@@ -68,23 +70,20 @@ func NewCoverageCommand(
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			metricsProvider, err := graphite.New(viper.GetString("graphite"), logger)
-			if err != nil {
-				return err
-			}
-			dashboardProvider, err := grafana.New(viper.GetString("grafana"), logger)
-			if err != nil {
-				return err
-			}
-
 			var (
 				metrics   entity.Metrics
 				dashboard *entity.Dashboard
 			)
+
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
-				var err error
-				metrics, err = metricsProvider.Fetch(ctx, viper.GetString("metrics"), last)
+				var provider entity.Graphite
+				provider, err := graphite.New(viper.GetString("graphite"), logger)
+				if err != nil {
+					return err
+				}
+				provider = cache.Wrap(provider, afero.NewOsFs(), logger)
+				metrics, err = provider.Fetch(ctx, viper.GetString("metrics"), last)
 				if err != nil {
 					return err
 				}
@@ -92,8 +91,11 @@ func NewCoverageCommand(
 				return err
 			})
 			g.Go(func() error {
-				var err error
-				dashboard, err = dashboardProvider.Fetch(ctx, viper.GetString("dashboard"))
+				provider, err := grafana.New(viper.GetString("grafana"), logger)
+				if err != nil {
+					return err
+				}
+				dashboard, err = provider.Fetch(ctx, viper.GetString("dashboard"))
 				return err
 			})
 			if err := g.Wait(); err != nil {
