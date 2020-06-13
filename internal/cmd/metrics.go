@@ -58,12 +58,13 @@ func NewMetricsCommand(
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var provider cache.Graphite
+			var provider entity.Graphite
 			provider, err := graphite.New(viper.GetString("graphite"), logger)
 			if err != nil {
 				return err
 			}
-			provider = cache.Wrap(provider, afero.NewOsFs())
+			provider = cache.Wrap(provider, afero.NewOsFs(), logger)
+
 			metrics, err := provider.Fetch(cmd.Context(), viper.GetString("metrics"), last)
 			if err != nil {
 				return err
