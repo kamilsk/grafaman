@@ -6,10 +6,12 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	xtime "go.octolab.org/time"
 
+	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/filter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
@@ -56,10 +58,12 @@ func NewMetricsCommand(
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			var provider cache.Graphite
 			provider, err := graphite.New(viper.GetString("graphite"), logger)
 			if err != nil {
 				return err
 			}
+			provider = cache.Wrap(provider, afero.NewOsFs())
 			metrics, err := provider.Fetch(cmd.Context(), viper.GetString("metrics"), last)
 			if err != nil {
 				return err

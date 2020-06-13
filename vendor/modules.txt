@@ -4,7 +4,7 @@ github.com/alexeyco/simpletable
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
-# github.com/go-graphite/carbonapi v0.0.0-20200527185106-f03dada833e3
+# github.com/go-graphite/carbonapi v0.0.0-20200608160053-a9af620bd4b5
 github.com/go-graphite/carbonapi/pkg/parser
 # github.com/gobwas/glob v0.2.3
 github.com/gobwas/glob
@@ -48,7 +48,7 @@ github.com/pkg/errors
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.6.0
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.1.2
+# github.com/spf13/afero v1.2.2
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.3.0

@@ -4,12 +4,13 @@ go 1.13
 
 require (
 	github.com/alexeyco/simpletable v0.0.0-20200203113705-55bd62a5b8df
-	github.com/go-graphite/carbonapi v0.0.0-20200527185106-f03dada833e3
+	github.com/go-graphite/carbonapi v0.0.0-20200608160053-a9af620bd4b5
 	github.com/gobwas/glob v0.2.3
 	github.com/kamilsk/retry/v5 v5.0.0-rc5
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
+	github.com/spf13/afero v1.2.2
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.6.1
