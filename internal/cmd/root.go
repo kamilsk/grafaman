@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
 
+	"github.com/kamilsk/grafaman/internal/config"
 	"github.com/kamilsk/grafaman/internal/presenter"
 )
 
@@ -20,6 +21,7 @@ func New() *cobra.Command {
 		debug   bool
 		format  string
 		verbose int
+		cfg     = new(config.Config)
 		logger  = logrus.New()
 		printer = new(presenter.Printer)
 	)
@@ -51,18 +53,18 @@ func New() *cobra.Command {
 				}()
 			}
 
-			config := viper.New()
-			config.SetConfigFile(viper.GetString("config"))
-			config.SetConfigType("dotenv")
-			err := config.ReadInConfig()
+			cfg := viper.New()
+			cfg.SetConfigFile(viper.GetString("config"))
+			cfg.SetConfigType("dotenv")
+			err := cfg.ReadInConfig()
 			if err == nil {
-				return viper.MergeConfigMap(config.AllSettings())
+				return viper.MergeConfigMap(cfg.AllSettings())
 			}
 
 			if os.IsNotExist(err) {
-				config.SetConfigFile("app.toml")
-				config.SetConfigType("toml")
-				if err, sub := config.ReadInConfig(), config.Sub("envs.local.env_vars"); err == nil && sub != nil {
+				cfg.SetConfigFile("app.toml")
+				cfg.SetConfigType("toml")
+				if err, sub := cfg.ReadInConfig(), cfg.Sub("envs.local.env_vars"); err == nil && sub != nil {
 					return viper.MergeConfigMap(sub.AllSettings())
 				}
 				err = nil
@@ -73,15 +75,17 @@ func New() *cobra.Command {
 		SilenceUsage:  true,
 	}
 	command.AddCommand(
-		NewCoverageCommand(logger, printer),
-		NewMetricsCommand(logger, printer),
-		NewQueriesCommand(logger, printer),
+		NewCoverageCommand(cfg, logger, printer),
+		NewMetricsCommand(cfg, logger, printer),
+		NewQueriesCommand(cfg, logger, printer),
 	)
 	flags := command.PersistentFlags()
+	{
+		flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
+	}
 	flags.BoolVar(&debug, "debug", false, "enable debug")
 	flags.StringVarP(&format, "format", "f", printer.DefaultFormat(), "output format")
 	flags.CountVarP(&verbose, "verbose", "v", "increase the verbosity of messages if debug enabled")
-	flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
 	fn.Must(
 		func() error { return viper.BindPFlag("config", flags.Lookup("env-file")) },
 		func() error {

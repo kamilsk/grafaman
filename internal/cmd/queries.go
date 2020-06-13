@@ -5,7 +5,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.octolab.org/fn"
 
+	"github.com/kamilsk/grafaman/internal/config"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/validator"
@@ -13,6 +15,7 @@ import (
 
 // NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
 func NewQueriesCommand(
+	cfg *config.Config,
 	logger *logrus.Logger,
 	printer interface{ PrintQueries(entity.Queries) error },
 ) *cobra.Command {
@@ -22,43 +25,42 @@ func NewQueriesCommand(
 		raw        bool
 		sort       bool
 	)
+
 	command := cobra.Command{
 		Use:   "queries",
 		Short: "fetch queries from a Grafana dashboard",
 		Long:  "Fetch queries from a Grafana dashboard.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
-			if err := viper.BindPFlag("grafana_url", flags.Lookup("grafana")); err != nil {
-				return err
-			}
-			if err := viper.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")); err != nil {
-				return err
-			}
-			if err := viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")); err != nil {
-				return err
-			}
-			if viper.GetString("grafana") == "" {
+			fn.Must(
+				func() error { return viper.BindPFlag("grafana_url", flags.Lookup("grafana")) },
+				func() error { return viper.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
+				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
+				func() error { return viper.Unmarshal(cfg) },
+			)
+
+			if cfg.Grafana.URL == "" {
 				return errors.New("please provide Grafana API endpoint")
 			}
-			if viper.GetString("dashboard") == "" {
+			if cfg.Grafana.Dashboard == "" {
 				return errors.New("please provide a dashboard unique identifier")
 			}
-			if metrics, checker := viper.GetString("metrics"), validator.Metric(); metrics != "" && !checker(metrics) {
-				return errors.Errorf("invalid metric prefix: %s; it must be simple, see examples", metrics)
+			if metrics, checker := cfg.Graphite.Prefix, validator.Metric(); metrics != "" && !checker(metrics) {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", metrics)
 			}
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			provider, err := grafana.New(viper.GetString("grafana"), logger)
+			provider, err := grafana.New(cfg.Grafana.URL, logger)
 			if err != nil {
 				return err
 			}
-			dashboard, err := provider.Fetch(cmd.Context(), viper.GetString("dashboard"))
+			dashboard, err := provider.Fetch(cmd.Context(), cfg.Grafana.Dashboard)
 			if err != nil {
 				return err
 			}
-			dashboard.Prefix = viper.GetString("metrics")
 
+			dashboard.Prefix = cfg.Graphite.Prefix
 			queries, err := dashboard.Queries(entity.Transform{
 				SkipRaw:        raw,
 				SkipDuplicates: duplicates,
@@ -72,15 +74,17 @@ func NewQueriesCommand(
 			return printer.PrintQueries(queries)
 		},
 	}
+
 	flags := command.Flags()
-	flags.StringP("grafana", "e", "", "Grafana API endpoint")
-	flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
-	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 	{
-		flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
-		flags.BoolVar(&duplicates, "allow-duplicates", false, "allow duplicates of queries")
-		flags.BoolVar(&raw, "raw", false, "leave the original values of queries")
-		flags.BoolVar(&sort, "sort", false, "need to sort queries")
+		flags.StringP("grafana", "e", "", "Grafana API endpoint")
+		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
+		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 	}
+	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
+	flags.BoolVar(&duplicates, "allow-duplicates", false, "allow duplicates of queries")
+	flags.BoolVar(&raw, "raw", false, "leave the original values of queries")
+	flags.BoolVar(&sort, "sort", false, "need to sort queries")
+
 	return &command
 }
