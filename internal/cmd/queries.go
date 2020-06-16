@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
 
-	"github.com/kamilsk/grafaman/internal/config"
+	"github.com/kamilsk/grafaman/internal/cnf"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/validator"
@@ -15,7 +15,7 @@ import (
 
 // NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
 func NewQueriesCommand(
-	cfg *config.Config,
+	config *cnf.Config,
 	logger *logrus.Logger,
 	printer interface{ PrintQueries(entity.Queries) error },
 ) *cobra.Command {
@@ -36,31 +36,31 @@ func NewQueriesCommand(
 				func() error { return viper.BindPFlag("grafana_url", flags.Lookup("grafana")) },
 				func() error { return viper.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
 				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
-				func() error { return viper.Unmarshal(cfg) },
+				func() error { return viper.Unmarshal(config) },
 			)
 
-			if cfg.Grafana.URL == "" {
+			if config.Grafana.URL == "" {
 				return errors.New("please provide Grafana API endpoint")
 			}
-			if cfg.Grafana.Dashboard == "" {
+			if config.Grafana.Dashboard == "" {
 				return errors.New("please provide a dashboard unique identifier")
 			}
-			if metrics, checker := cfg.Graphite.Prefix, validator.Metric(); metrics != "" && !checker(metrics) {
+			if metrics, checker := config.Graphite.Prefix, validator.Metric(); metrics != "" && !checker(metrics) {
 				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", metrics)
 			}
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			provider, err := grafana.New(cfg.Grafana.URL, logger)
+			provider, err := grafana.New(config.Grafana.URL, logger)
 			if err != nil {
 				return err
 			}
-			dashboard, err := provider.Fetch(cmd.Context(), cfg.Grafana.Dashboard)
+			dashboard, err := provider.Fetch(cmd.Context(), config.Grafana.Dashboard)
 			if err != nil {
 				return err
 			}
 
-			dashboard.Prefix = cfg.Graphite.Prefix
+			dashboard.Prefix = config.Graphite.Prefix
 			queries, err := dashboard.Queries(entity.Transform{
 				SkipRaw:        raw,
 				SkipDuplicates: duplicates,

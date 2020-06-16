@@ -3,10 +3,10 @@ package cobra
 import (
 	"fmt"
 	"runtime"
-	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
+	"go.octolab.org/toolkit/config"
 )
 
 // NewVersionCommand returns a command that helps to build version info.
@@ -21,7 +21,7 @@ import (
 //    platform    : darwin/amd64
 //    features    : featureA=true, featureB=false
 //
-func NewVersionCommand(release, date, hash string, features ...Feature) *cobra.Command {
+func NewVersionCommand(release, date, hash string, features ...config.Feature) *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "show application version",
@@ -44,36 +44,10 @@ func NewVersionCommand(release, date, hash string, features ...Feature) *cobra.C
 				GoVersion:  runtime.Version(),
 				GoCompiler: runtime.Compiler,
 				Platform:   fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-				Features:   Features(features),
+				Features:   config.Features(features),
 			})
 		},
 	}
-}
-
-// Feature describe a feature.
-type Feature struct {
-	Name    string
-	Enabled bool
-}
-
-// String returns a string representation of the feature.
-func (feature Feature) String() string {
-	return fmt.Sprintf("%s=%v", feature.Name, feature.Enabled)
-}
-
-// Features defines a list of features.
-type Features []Feature
-
-// String returns a string representation of the feature list.
-func (features Features) String() string {
-	if len(features) == 0 {
-		return "-"
-	}
-	list := make([]string, 0, len(features))
-	for _, feature := range features {
-		list = append(list, feature.String())
-	}
-	return strings.Join(list, ", ")
 }
 
 var version = template.Must(template.New("version").Parse(`{{.Name}}:

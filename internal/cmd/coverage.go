@@ -13,7 +13,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/kamilsk/grafaman/internal/cache"
-	"github.com/kamilsk/grafaman/internal/config"
+	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/filter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
@@ -24,7 +24,7 @@ import (
 
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
 func NewCoverageCommand(
-	cfg *config.Config,
+	config *cnf.Config,
 	logger *logrus.Logger,
 	printer interface {
 		SetPrefix(string)
@@ -49,23 +49,23 @@ func NewCoverageCommand(
 				func() error { return viper.BindPFlag("graphite_url", flags.Lookup("graphite")) },
 				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
 				func() error { return viper.BindPFlag("filter", flags.Lookup("filter")) },
-				func() error { return viper.Unmarshal(cfg) },
+				func() error { return viper.Unmarshal(config) },
 			)
 
-			if cfg.Grafana.URL == "" {
+			if config.Grafana.URL == "" {
 				return errors.New("please provide Grafana API endpoint")
 			}
-			if cfg.Grafana.Dashboard == "" {
+			if config.Grafana.Dashboard == "" {
 				return errors.New("please provide a dashboard unique identifier")
 			}
-			if cfg.Graphite.Prefix == "" {
+			if config.Graphite.Prefix == "" {
 				return errors.New("please provide metric prefix")
 			}
 			checker := validator.Metric()
-			if !checker(cfg.Graphite.Prefix) {
+			if !checker(config.Graphite.Prefix) {
 				return errors.Errorf(
 					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
-					cfg.Graphite.Prefix,
+					config.Graphite.Prefix,
 				)
 			}
 			return nil
@@ -79,24 +79,24 @@ func NewCoverageCommand(
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var provider entity.Graphite
-				provider, err := graphite.New(cfg.Graphite.URL, logger)
+				provider, err := graphite.New(config.Graphite.URL, logger)
 				if err != nil {
 					return err
 				}
 				provider = cache.Wrap(provider, afero.NewOsFs(), logger)
-				metrics, err = provider.Fetch(ctx, cfg.Graphite.Prefix, last)
+				metrics, err = provider.Fetch(ctx, config.Graphite.Prefix, last)
 				if err != nil {
 					return err
 				}
-				metrics, err = filter.Filter(metrics, cfg.Graphite.Filter, cfg.Graphite.Prefix)
+				metrics, err = filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
 				return err
 			})
 			g.Go(func() error {
-				provider, err := grafana.New(cfg.Grafana.URL, logger)
+				provider, err := grafana.New(config.Grafana.URL, logger)
 				if err != nil {
 					return err
 				}
-				dashboard, err = provider.Fetch(ctx, cfg.Grafana.Dashboard)
+				dashboard, err = provider.Fetch(ctx, config.Grafana.Dashboard)
 				return err
 			})
 			if err := g.Wait(); err != nil {
@@ -120,7 +120,7 @@ func NewCoverageCommand(
 				return err
 			}
 
-			printer.SetPrefix(cfg.Graphite.Prefix)
+			printer.SetPrefix(config.Graphite.Prefix)
 			return printer.PrintCoverage(report)
 		},
 	}

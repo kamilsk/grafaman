@@ -1,5 +1,6 @@
-package config
+package cnf
 
+// Config contains all necessary tool configuration.
 type Config struct {
 	Grafana struct {
 		URL       string `mapstructure:"grafana"`

@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
 
-	"github.com/kamilsk/grafaman/internal/config"
+	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/presenter"
 )
 
@@ -21,7 +21,7 @@ func New() *cobra.Command {
 		debug   bool
 		format  string
 		verbose int
-		cfg     = new(config.Config)
+		config  = new(cnf.Config)
 		logger  = logrus.New()
 		printer = new(presenter.Printer)
 	)
@@ -75,9 +75,9 @@ func New() *cobra.Command {
 		SilenceUsage:  true,
 	}
 	command.AddCommand(
-		NewCoverageCommand(cfg, logger, printer),
-		NewMetricsCommand(cfg, logger, printer),
-		NewQueriesCommand(cfg, logger, printer),
+		NewCoverageCommand(config, logger, printer),
+		NewMetricsCommand(config, logger, printer),
+		NewQueriesCommand(config, logger, printer),
 	)
 	flags := command.PersistentFlags()
 	{

@@ -60,6 +60,16 @@ func (decorator *graphite) Fetch(ctx context.Context, prefix string, last time.D
 		return nil, errors.Wrap(err, "cache: fetch data")
 	}
 	data.TTL = now.Add(xtime.Day).Unix()
+	{
+		if err := file.Truncate(0); err != nil {
+			logger.WithError(err).Error("reset cache")
+			return nil, errors.Wrap(err, "cache: reset")
+		}
+		if _, err := file.Seek(0, io.SeekStart); err != nil {
+			logger.WithError(err).Error("prepare cache to write")
+			return nil, errors.Wrap(err, "cache: prepare to write")
+		}
+	}
 	if err := json.NewEncoder(file).Encode(data); err != nil {
 		logger.WithError(err).Error("write data to cache")
 		return nil, errors.Wrap(err, "cache: write data")

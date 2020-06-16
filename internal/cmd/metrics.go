@@ -13,7 +13,7 @@ import (
 	xtime "go.octolab.org/time"
 
 	"github.com/kamilsk/grafaman/internal/cache"
-	"github.com/kamilsk/grafaman/internal/config"
+	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/filter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
@@ -22,7 +22,7 @@ import (
 
 // NewMetricsCommand returns command to fetch metrics from Graphite.
 func NewMetricsCommand(
-	cfg *config.Config,
+	config *cnf.Config,
 	logger *logrus.Logger,
 	printer interface {
 		SetPrefix(string)
@@ -44,43 +44,43 @@ func NewMetricsCommand(
 				func() error { return viper.BindPFlag("graphite_url", flags.Lookup("graphite")) },
 				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
 				func() error { return viper.BindPFlag("filter", flags.Lookup("filter")) },
-				func() error { return viper.Unmarshal(cfg) },
+				func() error { return viper.Unmarshal(config) },
 			)
 
-			if cfg.Graphite.URL == "" {
+			if config.Graphite.URL == "" {
 				return errors.New("please provide Graphite API endpoint")
 			}
-			if cfg.Graphite.Prefix == "" {
+			if config.Graphite.Prefix == "" {
 				return errors.New("please provide metric prefix")
 			}
 			checker := validator.Metric()
-			if !checker(cfg.Graphite.Prefix) {
+			if !checker(config.Graphite.Prefix) {
 				return errors.Errorf(
 					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
-					cfg.Graphite.Prefix,
+					config.Graphite.Prefix,
 				)
 			}
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var provider entity.Graphite
-			provider, err := graphite.New(cfg.Graphite.URL, logger)
+			provider, err := graphite.New(config.Graphite.URL, logger)
 			if err != nil {
 				return err
 			}
 			provider = cache.Wrap(provider, afero.NewOsFs(), logger)
 
-			metrics, err := provider.Fetch(cmd.Context(), cfg.Graphite.Prefix, last)
+			metrics, err := provider.Fetch(cmd.Context(), config.Graphite.Prefix, last)
 			if err != nil {
 				return err
 			}
-			metrics, err = filter.Filter(metrics, cfg.Graphite.Filter, cfg.Graphite.Prefix)
+			metrics, err = filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
 			if err != nil {
 				return err
 			}
 			sort.Sort(metrics)
 
-			printer.SetPrefix(cfg.Graphite.Prefix)
+			printer.SetPrefix(config.Graphite.Prefix)
 			return printer.PrintMetrics(metrics)
 		},
 	}
