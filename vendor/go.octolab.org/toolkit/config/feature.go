@@ -7,6 +7,7 @@ import (
 
 // Feature describe a feature.
 type Feature struct {
+	ID      [16]byte
 	Name    string
 	Enabled bool
 }
@@ -29,4 +30,26 @@ func (features Features) String() string {
 		list = append(list, feature.String())
 	}
 	return strings.Join(list, ", ")
+}
+
+// FindByID finds and returns Feature by passed ID.
+// If nothing found it returns empty Feature.
+func (features Features) FindByID(id [16]byte) Feature {
+	for _, feature := range features {
+		if feature.ID == id {
+			return feature
+		}
+	}
+	return Feature{}
+}
+
+// FindByName finds and returns Feature by passed name.
+// If nothing found it returns empty Feature.
+func (features Features) FindByName(name string) Feature {
+	for _, feature := range features {
+		if feature.Name == name {
+			return feature
+		}
+	}
+	return Feature{}
 }
