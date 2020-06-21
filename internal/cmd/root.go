@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"io/ioutil"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
+	"go.octolab.org/toolkit/cli/debugger"
 
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/presenter"
@@ -47,10 +46,13 @@ func New() *cobra.Command {
 				default:
 					logrus.SetLevel(logrus.ErrorLevel)
 				}
-				go func() {
-					logger.Warning("start listen and serve pprof at http://localhost:8888/debug/pprof/")
-					logger.Fatal(http.ListenAndServe(":8888", http.DefaultServeMux))
-				}()
+
+				d, err := debugger.New(debugger.WithSpecificHost("localhost:"))
+				if err != nil {
+					return err
+				}
+				host, _ := d.Debug(func(err error) { logger.WithError(err).Fatal("run debugger") })
+				logger.Warningf("start listen and serve pprof at http://%s/debug/pprof/", host)
 			}
 
 			cfg := viper.New()

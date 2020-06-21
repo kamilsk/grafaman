@@ -90,6 +90,7 @@ github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef/go.mod h1:cIg4er
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/mock v1.2.0/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/mock v1.3.1/go.mod h1:sBzyDLLjw3U8JLTeZvSv8jJB+tU5PVekmnlKIyFUx0Y=
+github.com/golang/mock v1.4.3 h1:GV+pQPG/EUUbkh47niozDcADz6go/dUwhVzdUQHIVRw=
 github.com/golang/mock v1.4.3/go.mod h1:UOMv5ysSaYNkG+OFQykRIcU/QvvxJf3p21QfJ2Bt3cw=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
@@ -275,8 +276,8 @@ github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.octolab.org v0.0.29 h1:po7K0h+W28p6ckOo8OmkuilbKVfwKjuzhUzCD8Lxu7I=
 go.octolab.org v0.0.29/go.mod h1:qcFUaCKzejCMyAUEvonJNYCkfzo1pMXEOME2LAi9w94=
-go.octolab.org/toolkit/cli v0.0.12 h1:s9KL19D8ykNaIDdhxNhVZQCtY+eWzL8TZW7sxWEmKZ8=
-go.octolab.org/toolkit/cli v0.0.12/go.mod h1:lHB9cu+Dgfx1KzOn96ClI8cTDGURmmHo8GWgWpN3hKc=
+go.octolab.org/toolkit/cli v0.1.1 h1:e1gWJVMejAL8SpggUKGavpENIHT01lCvpevj7BQzt+o=
+go.octolab.org/toolkit/cli v0.1.1/go.mod h1:lHB9cu+Dgfx1KzOn96ClI8cTDGURmmHo8GWgWpN3hKc=
 go.octolab.org/toolkit/config v0.0.2 h1:Fdd0jg4oJ4shhzgejUBPT5PPe8z9BALkgktweKG9c80=
 go.octolab.org/toolkit/config v0.0.2/go.mod h1:dI3TlD3b4t0ilP7T+q0BYs6mhYBXm8i4TCLqCabykBA=
 go.octolab.org/toolkit/config v0.0.3 h1:ggIUfHBjldbMzkuecBpWuySlN33ZgB6G7NAoPQYDgIE=
