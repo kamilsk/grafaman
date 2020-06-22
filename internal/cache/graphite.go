@@ -17,7 +17,7 @@ import (
 	. "github.com/kamilsk/grafaman/internal/provider"
 )
 
-func Wrap(provider Graphite, fs afero.Fs, logger *logrus.Logger) Graphite {
+func WrapGraphiteProvider(provider Graphite, fs afero.Fs, logger *logrus.Logger) *graphite {
 	return &graphite{provider, fs, logger}
 }
 
@@ -28,11 +28,9 @@ type graphite struct {
 }
 
 func (decorator *graphite) Fetch(ctx context.Context, prefix string, last time.Duration) (Metrics, error) {
-	const ext = ".grafaman.json"
-
-	cache := filepath.Join(os.TempDir(), prefix) + ext
-	logger := decorator.logger.WithField("file", cache)
-	file, err := decorator.fs.OpenFile(cache, os.O_RDWR|os.O_CREATE, 0644)
+	key := decorator.Key(prefix)
+	logger := decorator.logger.WithField("file", key)
+	file, err := decorator.fs.OpenFile(key, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		logger.WithError(err).Error("read data from cache")
 		return nil, errors.Wrap(err, "cache: read data")
@@ -76,4 +74,8 @@ func (decorator *graphite) Fetch(ctx context.Context, prefix string, last time.D
 	}
 	logger.Info("store cache for one day")
 	return data.Metrics, nil
+}
+
+func (decorator *graphite) Key(prefix string) string {
+	return filepath.Join(os.TempDir(), prefix) + ".grafaman.json"
 }

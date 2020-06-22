@@ -32,6 +32,7 @@ func NewMetricsCommand(
 	var (
 		collapse int
 		last     time.Duration
+		noCache  bool
 	)
 
 	command := cobra.Command{
@@ -68,7 +69,9 @@ func NewMetricsCommand(
 			if err != nil {
 				return err
 			}
-			provider = cache.Wrap(provider, afero.NewOsFs(), logger)
+			if !noCache {
+				provider = cache.WrapGraphiteProvider(provider, afero.NewOsFs(), logger)
+			}
 
 			metrics, err := provider.Fetch(cmd.Context(), config.Graphite.Prefix, last)
 			if err != nil {
@@ -93,6 +96,7 @@ func NewMetricsCommand(
 	}
 	flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
 	flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
+	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
 
 	return &command
 }

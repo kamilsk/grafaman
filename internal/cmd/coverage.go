@@ -35,6 +35,7 @@ func NewCoverageCommand(
 		exclude []string
 		trim    []string
 		last    time.Duration
+		noCache bool
 	)
 
 	command := cobra.Command{
@@ -83,7 +84,10 @@ func NewCoverageCommand(
 				if err != nil {
 					return err
 				}
-				provider = cache.Wrap(provider, afero.NewOsFs(), logger)
+				if !noCache {
+					provider = cache.WrapGraphiteProvider(provider, afero.NewOsFs(), logger)
+				}
+
 				metrics, err = provider.Fetch(ctx, config.Graphite.Prefix, last)
 				if err != nil {
 					return err
@@ -136,6 +140,7 @@ func NewCoverageCommand(
 	flags.StringArrayVar(&exclude, "exclude", nil, "patterns to exclude metrics from coverage, e.g. *.median")
 	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
 	flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
+	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
 
 	return &command
 }
