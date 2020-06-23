@@ -77,6 +77,7 @@ func New() *cobra.Command {
 		SilenceUsage:  true,
 	}
 	command.AddCommand(
+		NewCacheLookupCommand(config, logger),
 		NewCoverageCommand(config, logger, printer),
 		NewMetricsCommand(config, logger, printer),
 		NewQueriesCommand(config, logger, printer),
