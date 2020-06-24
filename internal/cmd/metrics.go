@@ -4,6 +4,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/c-bata/go-prompt"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
@@ -17,6 +18,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/filter"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
+	"github.com/kamilsk/grafaman/internal/repl"
 	"github.com/kamilsk/grafaman/internal/validator"
 )
 
@@ -33,6 +35,7 @@ func NewMetricsCommand(
 		collapse int
 		last     time.Duration
 		noCache  bool
+		replMode bool
 	)
 
 	command := cobra.Command{
@@ -77,14 +80,19 @@ func NewMetricsCommand(
 			if err != nil {
 				return err
 			}
-			metrics, err = filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
-			if err != nil {
-				return err
-			}
-			sort.Sort(metrics)
 
 			printer.SetPrefix(config.Graphite.Prefix)
-			return printer.PrintMetrics(metrics)
+			if !replMode {
+				metrics, err = filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
+				if err != nil {
+					return err
+				}
+				sort.Sort(metrics)
+
+				return printer.PrintMetrics(metrics)
+			}
+			prompt.New(repl.NewExecutor(config.Graphite.Prefix, metrics, printer, logger), repl.NewCompleter()).Run()
+			return nil
 		},
 	}
 
@@ -97,6 +105,7 @@ func NewMetricsCommand(
 	flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
 	flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
+	flags.BoolVar(&replMode, "repl", false, "enable repl mode")
 
 	return &command
 }
