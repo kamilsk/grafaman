@@ -91,7 +91,10 @@ func NewMetricsCommand(
 
 				return printer.PrintMetrics(metrics)
 			}
-			prompt.New(repl.NewExecutor(config.Graphite.Prefix, metrics, printer, logger), repl.NewCompleter()).Run()
+			prompt.New(
+				repl.NewMetricsExecutor(config.Graphite.Prefix, metrics, printer, logger),
+				repl.NewMetricsCompleter(metrics),
+			).Run()
 			return nil
 		},
 	}

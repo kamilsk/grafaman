@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"sort"
 	"time"
 
+	"github.com/c-bata/go-prompt"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
@@ -18,6 +20,7 @@ import (
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
+	"github.com/kamilsk/grafaman/internal/repl"
 	"github.com/kamilsk/grafaman/internal/reporter/coverage"
 	"github.com/kamilsk/grafaman/internal/validator"
 )
@@ -32,10 +35,11 @@ func NewCoverageCommand(
 	},
 ) *cobra.Command {
 	var (
-		exclude []string
-		trim    []string
-		last    time.Duration
-		noCache bool
+		exclude  []string
+		trim     []string
+		last     time.Duration
+		noCache  bool
+		replMode bool
 	)
 
 	command := cobra.Command{
@@ -92,7 +96,12 @@ func NewCoverageCommand(
 				if err != nil {
 					return err
 				}
-				metrics, err = filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
+				for _, pattern := range exclude {
+					metrics, err = filter.Exclude(metrics, pattern)
+					if err != nil {
+						break
+					}
+				}
 				return err
 			})
 			g.Go(func() error {
@@ -118,14 +127,26 @@ func NewCoverageCommand(
 				return err
 			}
 
-			reporter := coverage.New(exclude)
-			report, err := reporter.Report(metrics, queries)
-			if err != nil {
-				return err
-			}
-
 			printer.SetPrefix(config.Graphite.Prefix)
-			return printer.PrintCoverage(report)
+			if !replMode {
+				metrics, err := filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
+				if err != nil {
+					return err
+				}
+				sort.Sort(metrics)
+
+				report, err := coverage.New().Report(metrics, queries)
+				if err != nil {
+					return err
+				}
+
+				return printer.PrintCoverage(report)
+			}
+			prompt.New(
+				repl.NewCoverageExecutor(config.Graphite.Prefix, metrics, queries, printer, logger),
+				repl.NewMetricsCompleter(metrics),
+			).Run()
+			return nil
 		},
 	}
 
@@ -141,6 +162,7 @@ func NewCoverageCommand(
 	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
 	flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
+	flags.BoolVar(&replMode, "repl", false, "enable repl mode")
 
 	return &command
 }

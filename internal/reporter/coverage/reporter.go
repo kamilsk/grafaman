@@ -7,13 +7,11 @@ import (
 	entity "github.com/kamilsk/grafaman/internal/provider"
 )
 
-func New(exclude []string) *reporter {
-	return &reporter{exclude: exclude}
+func New() *reporter {
+	return &reporter{}
 }
 
-type reporter struct {
-	exclude []string
-}
+type reporter struct{}
 
 type Report struct {
 	Metrics []Metric
@@ -26,11 +24,6 @@ type Metric struct {
 }
 
 func (reporter *reporter) Report(metrics entity.Metrics, queries entity.Queries) (*Report, error) {
-	metrics, err := reporter.filter(metrics)
-	if err != nil {
-		return nil, errors.Wrap(err, "coverage: filter metrics")
-	}
-
 	report := Report{Metrics: make([]Metric, 0, len(metrics))}
 	coverage := make(map[entity.Metric]int, len(metrics))
 	for _, query := range queries {
@@ -51,21 +44,4 @@ func (reporter *reporter) Report(metrics entity.Metrics, queries entity.Queries)
 		report.Total = 100 * float64(len(coverage)) / float64(len(metrics))
 	}
 	return &report, nil
-}
-
-func (reporter *reporter) filter(metrics entity.Metrics) (entity.Metrics, error) {
-	for _, exclude := range reporter.exclude {
-		matcher, err := glob.Compile(exclude)
-		if err != nil {
-			return nil, errors.Wrapf(err, "compile pattern %q", exclude)
-		}
-		filtered := metrics[:0]
-		for _, metric := range metrics {
-			if !matcher.Match(string(metric)) {
-				filtered = append(filtered, metric)
-			}
-		}
-		metrics = filtered
-	}
-	return metrics, nil
 }
