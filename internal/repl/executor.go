@@ -8,13 +8,14 @@ import (
 	"github.com/kamilsk/grafaman/internal/filter"
 	"github.com/kamilsk/grafaman/internal/model"
 	"github.com/kamilsk/grafaman/internal/provider"
-	"github.com/kamilsk/grafaman/internal/reporter/coverage"
 )
 
 func NewCoverageExecutor(
 	prefix string,
 	metrics provider.Metrics,
-	queries provider.Queries,
+	reporter interface {
+		Report(provider.Metrics) model.Report
+	},
 	printer interface{ PrintCoverage(model.Report) error },
 	logger *logrus.Logger,
 ) func(string) {
@@ -25,12 +26,6 @@ func NewCoverageExecutor(
 			return
 		}
 		sort.Sort(metrics)
-
-		reporter, err := coverage.New(queries)
-		if err != nil {
-			logger.WithError(err).Error("repl: make report")
-			return
-		}
 
 		if err := printer.PrintCoverage(reporter.Report(metrics)); err != nil {
 			logger.WithError(err).Error("repl: print coverage report")
