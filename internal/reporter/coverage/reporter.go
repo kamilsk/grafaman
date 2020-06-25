@@ -4,6 +4,7 @@ import (
 	"github.com/gobwas/glob"
 	"github.com/pkg/errors"
 
+	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 )
 
@@ -23,18 +24,8 @@ type reporter struct {
 	matchers []glob.Glob
 }
 
-type Report struct {
-	Metrics []Metric
-	Total   float64
-}
-
-type Metric struct {
-	Name string `json:"name"`
-	Hits int    `json:"hits"`
-}
-
-func (reporter *reporter) Report(metrics entity.Metrics) *Report {
-	report := Report{Metrics: make([]Metric, 0, len(metrics))}
+func (reporter *reporter) Report(metrics entity.Metrics) model.Report {
+	report := model.Report{Metrics: make([]model.Metric, 0, len(metrics))}
 	coverage := make(map[entity.Metric]int, len(metrics))
 	for _, matcher := range reporter.matchers {
 		for _, metric := range metrics {
@@ -44,10 +35,10 @@ func (reporter *reporter) Report(metrics entity.Metrics) *Report {
 		}
 	}
 	for _, metric := range metrics {
-		report.Metrics = append(report.Metrics, Metric{Name: string(metric), Hits: coverage[metric]})
+		report.Metrics = append(report.Metrics, model.Metric{Name: string(metric), Hits: coverage[metric]})
 	}
 	if len(metrics) > 0 {
 		report.Total = 100 * float64(len(coverage)) / float64(len(metrics))
 	}
-	return &report
+	return report
 }

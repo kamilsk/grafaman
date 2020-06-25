@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kamilsk/grafaman/internal/filter"
+	"github.com/kamilsk/grafaman/internal/model"
 	"github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/reporter/coverage"
 )
@@ -14,7 +15,7 @@ func NewCoverageExecutor(
 	prefix string,
 	metrics provider.Metrics,
 	queries provider.Queries,
-	printer interface{ PrintCoverage(*coverage.Report) error },
+	printer interface{ PrintCoverage(model.Report) error },
 	logger *logrus.Logger,
 ) func(string) {
 	return func(pattern string) {

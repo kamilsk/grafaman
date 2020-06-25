@@ -17,6 +17,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/filter"
+	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
@@ -31,7 +32,7 @@ func NewCoverageCommand(
 	logger *logrus.Logger,
 	printer interface {
 		SetPrefix(string)
-		PrintCoverage(*coverage.Report) error
+		PrintCoverage(model.Report) error
 	},
 ) *cobra.Command {
 	var (

@@ -10,10 +10,10 @@ import (
 	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
 
-	"github.com/kamilsk/grafaman/internal/reporter/coverage"
+	"github.com/kamilsk/grafaman/internal/model"
 )
 
-func (printer *Printer) PrintCoverage(report *coverage.Report) error {
+func (printer *Printer) PrintCoverage(report model.Report) error {
 	switch printer.format {
 	case formatJSON:
 		return PrintCoverageAsJSON(printer.output, report)
@@ -24,11 +24,11 @@ func (printer *Printer) PrintCoverage(report *coverage.Report) error {
 	}
 }
 
-func PrintCoverageAsJSON(output io.Writer, report *coverage.Report) error {
+func PrintCoverageAsJSON(output io.Writer, report model.Report) error {
 	return errors.Wrap(json.NewEncoder(output).Encode(report.Metrics), "presenter: output result as json")
 }
 
-func PrintCoverageAsTable(output io.Writer, report *coverage.Report, style *simpletable.Style, prefix string) error {
+func PrintCoverageAsTable(output io.Writer, report model.Report, style *simpletable.Style, prefix string) error {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
@@ -55,7 +55,7 @@ func PrintCoverageAsTable(output io.Writer, report *coverage.Report, style *simp
 	return errors.Wrap(err, "presenter: output result as table")
 }
 
-func PrintCoverageAsTSV(output io.Writer, report *coverage.Report) error {
+func PrintCoverageAsTSV(output io.Writer, report model.Report) error {
 	for _, metric := range report.Metrics {
 		if _, err := fmt.Fprintln(output, metric.Name, "\t", strconv.Itoa(metric.Hits)); err != nil {
 			return errors.Wrap(err, "presenter: output result as TSV")
