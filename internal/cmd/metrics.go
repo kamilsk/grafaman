@@ -83,7 +83,7 @@ func NewMetricsCommand(
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
-				metrics, err = filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
+				metrics, err = filter.Filter(metrics, config.Pattern())
 				if err != nil {
 					return err
 				}
@@ -92,7 +92,7 @@ func NewMetricsCommand(
 				return printer.PrintMetrics(metrics)
 			}
 			prompt.New(
-				repl.NewMetricsExecutor(config.Graphite.Prefix, metrics, printer, logger),
+				repl.Prefix(config.Graphite.Prefix, repl.NewMetricsExecutor(metrics, printer, logger)),
 				repl.NewMetricsCompleter(metrics),
 			).Run()
 			return nil

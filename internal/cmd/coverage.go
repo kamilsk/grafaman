@@ -135,7 +135,7 @@ func NewCoverageCommand(
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
-				metrics, err := filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
+				metrics, err := filter.Filter(metrics, config.Pattern())
 				if err != nil {
 					return err
 				}
@@ -144,7 +144,7 @@ func NewCoverageCommand(
 				return printer.PrintCoverage(reporter.Report(metrics))
 			}
 			prompt.New(
-				repl.NewCoverageExecutor(config.Graphite.Prefix, metrics, reporter, printer, logger),
+				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageExecutor(metrics, reporter, printer, logger)),
 				repl.NewMetricsCompleter(metrics),
 			).Run()
 			return nil

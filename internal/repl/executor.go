@@ -11,7 +11,6 @@ import (
 )
 
 func NewCoverageExecutor(
-	prefix string,
 	metrics provider.Metrics,
 	reporter interface {
 		Report(provider.Metrics) model.Report
@@ -20,7 +19,7 @@ func NewCoverageExecutor(
 	logger *logrus.Logger,
 ) func(string) {
 	return func(pattern string) {
-		metrics, err := filter.Filter(metrics, pattern, prefix)
+		metrics, err := filter.Filter(metrics, pattern)
 		if err != nil {
 			logger.WithError(err).WithField("pattern", pattern).Error("repl: filter metrics")
 			return
@@ -35,13 +34,12 @@ func NewCoverageExecutor(
 }
 
 func NewMetricsExecutor(
-	prefix string,
 	metrics provider.Metrics,
 	printer interface{ PrintMetrics(provider.Metrics) error },
 	logger *logrus.Logger,
 ) func(string) {
 	return func(pattern string) {
-		metrics, err := filter.Filter(metrics, pattern, prefix)
+		metrics, err := filter.Filter(metrics, pattern)
 		if err != nil {
 			logger.WithError(err).WithField("pattern", pattern).Error("repl: filter metrics")
 			return

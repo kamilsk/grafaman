@@ -1,8 +1,6 @@
 package filter
 
 import (
-	"strings"
-
 	"github.com/gobwas/glob"
 	"github.com/pkg/errors"
 
@@ -28,13 +26,9 @@ func Exclude(metrics provider.Metrics, pattern string) (provider.Metrics, error)
 	return filtered, nil
 }
 
-func Filter(metrics provider.Metrics, pattern, prefix string) (provider.Metrics, error) {
+func Filter(metrics provider.Metrics, pattern string) (provider.Metrics, error) {
 	if len(metrics) == 0 || pattern == "" {
 		return metrics, nil
-	}
-
-	if !strings.HasPrefix(pattern, prefix) {
-		pattern = prefix + "." + pattern
 	}
 
 	matcher, err := glob.Compile(pattern)
