@@ -25,14 +25,13 @@ func NewCoverageExecutor(
 		}
 		sort.Sort(metrics)
 
-		reporter := coverage.New(queries)
-		report, err := reporter.Report(metrics)
+		reporter, err := coverage.New(queries)
 		if err != nil {
 			logger.WithError(err).Error("repl: make report")
 			return
 		}
 
-		if err := printer.PrintCoverage(report); err != nil {
+		if err := printer.PrintCoverage(reporter.Report(metrics)); err != nil {
 			logger.WithError(err).Error("repl: print coverage report")
 			return
 		}
