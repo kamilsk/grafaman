@@ -7,11 +7,13 @@ import (
 	entity "github.com/kamilsk/grafaman/internal/provider"
 )
 
-func New() *reporter {
-	return &reporter{}
+func New(queries entity.Queries) *reporter {
+	return &reporter{queries}
 }
 
-type reporter struct{}
+type reporter struct {
+	queries entity.Queries
+}
 
 type Report struct {
 	Metrics []Metric
@@ -23,10 +25,10 @@ type Metric struct {
 	Hits int    `json:"hits"`
 }
 
-func (reporter *reporter) Report(metrics entity.Metrics, queries entity.Queries) (*Report, error) {
+func (reporter *reporter) Report(metrics entity.Metrics) (*Report, error) {
 	report := Report{Metrics: make([]Metric, 0, len(metrics))}
 	coverage := make(map[entity.Metric]int, len(metrics))
-	for _, query := range queries {
+	for _, query := range reporter.queries {
 		matcher, err := glob.Compile(string(query))
 		if err != nil {
 			return nil, errors.Wrapf(err, "coverage: compile pattern %q", query)

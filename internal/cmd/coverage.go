@@ -127,6 +127,7 @@ func NewCoverageCommand(
 				return err
 			}
 
+			reporter := coverage.New(queries)
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
 				metrics, err := filter.Filter(metrics, config.Graphite.Filter, config.Graphite.Prefix)
@@ -135,7 +136,7 @@ func NewCoverageCommand(
 				}
 				sort.Sort(metrics)
 
-				report, err := coverage.New().Report(metrics, queries)
+				report, err := reporter.Report(metrics)
 				if err != nil {
 					return err
 				}

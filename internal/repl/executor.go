@@ -25,7 +25,8 @@ func NewCoverageExecutor(
 		}
 		sort.Sort(metrics)
 
-		report, err := coverage.New().Report(metrics, queries)
+		reporter := coverage.New(queries)
+		report, err := reporter.Report(metrics)
 		if err != nil {
 			logger.WithError(err).Error("repl: make report")
 			return
