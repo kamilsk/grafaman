@@ -79,7 +79,7 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/subosito/gotenv v1.2.0
 github.com/subosito/gotenv
-# go.octolab.org v0.0.29
+# go.octolab.org v0.1.0
 go.octolab.org/errors
 go.octolab.org/fn
 go.octolab.org/safe
@@ -93,7 +93,7 @@ go.octolab.org/toolkit/cli/internal/os/shell
 # go.octolab.org/toolkit/config v0.0.3
 go.octolab.org/toolkit/config
 go.octolab.org/toolkit/config/http
-# golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
+# golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e
 golang.org/x/sys/unix

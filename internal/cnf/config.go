@@ -17,7 +17,7 @@ type Config struct {
 
 func (config Config) Pattern() string {
 	pattern, prefix := config.Graphite.Filter, config.Graphite.Prefix
-	if !strings.HasPrefix(pattern, prefix) {
+	if pattern != "" && !strings.HasPrefix(pattern, prefix) {
 		pattern = prefix + "." + pattern
 	}
 	return pattern
