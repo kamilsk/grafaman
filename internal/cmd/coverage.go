@@ -143,9 +143,10 @@ func NewCoverageCommand(
 
 				return printer.PrintCoverage(reporter.Report(metrics))
 			}
+			sort.Sort(metrics)
 			prompt.New(
 				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageExecutor(metrics, reporter, printer, logger)),
-				repl.NewMetricsCompleter(metrics),
+				repl.NewMetricsCompleter(config.Graphite.Prefix, metrics),
 			).Run()
 			return nil
 		},
