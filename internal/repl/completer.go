@@ -28,12 +28,17 @@ func NewMetricsCompleter(prefix string, metrics provider.Metrics) func(prompt.Do
 			return nil
 		}
 
-		segments := strings.Count(pattern, ".")
+		// TODO:refactoring better naming
+		segmentO := strings.Count(origin, ".")
+		segmentP := strings.Count(pattern, ".")
+
 		registry := make(map[string]struct{})
 		for _, metric := range metrics {
 			metric := string(metric)
 			if matcher.Match(metric) {
-				registry[strings.SplitN(metric, ".", segments+2)[segments]] = struct{}{}
+				suggestion := strings.Join(strings.SplitAfterN(origin, ".", segmentO+1)[:segmentO], "")
+				suggestion += strings.SplitAfterN(metric, ".", segmentP+2)[segmentP]
+				registry[suggestion] = struct{}{}
 			}
 		}
 		if len(registry) == 0 {

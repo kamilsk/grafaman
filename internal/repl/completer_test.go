@@ -26,8 +26,8 @@ func TestCompleter(t *testing.T) {
 				return *buf.Document()
 			}(),
 			expected: []prompt.Suggest{
-				{Text: "service"},
-				{Text: "token_per_url"},
+				{Text: "service."},
+				{Text: "token_per_url."},
 			},
 		},
 		"first char": {
@@ -39,7 +39,7 @@ func TestCompleter(t *testing.T) {
 				return *buf.Document()
 			}(),
 			expected: []prompt.Suggest{
-				{Text: "service"},
+				{Text: "service."},
 			},
 		},
 		"first char with wildcard": {
@@ -51,7 +51,7 @@ func TestCompleter(t *testing.T) {
 				return *buf.Document()
 			}(),
 			expected: []prompt.Suggest{
-				{Text: "service"},
+				{Text: "service."},
 			},
 		},
 		"first word": {
@@ -63,7 +63,7 @@ func TestCompleter(t *testing.T) {
 				return *buf.Document()
 			}(),
 			expected: []prompt.Suggest{
-				{Text: "service"},
+				{Text: "service."},
 			},
 		},
 		"first complete word": {
@@ -75,8 +75,8 @@ func TestCompleter(t *testing.T) {
 				return *buf.Document()
 			}(),
 			expected: []prompt.Suggest{
-				{Text: "api"},
-				{Text: "rpc"},
+				{Text: "service.api."},
+				{Text: "service.rpc."},
 			},
 		},
 	}
