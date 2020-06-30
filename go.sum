@@ -255,8 +255,8 @@ github.com/soheilhy/cmux v0.1.4/go.mod h1:IM3LyeVVIOuxMH7sFAkER9+bJ4dT7Ms6E4xg4k
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/spf13/afero v1.1.2 h1:m8/z1t7/fwjysjQRYbP0RD+bUIF/8tJwPdEZsI83ACI=
 github.com/spf13/afero v1.1.2/go.mod h1:j4pytiNVoe2o6bmDsKpLACNPDBIoEAkihy7loJ1B0CQ=
-github.com/spf13/afero v1.3.0 h1:Ysnmjh1Di8EaWaBv40CYR4IdaIsBc5996Gh1oZzCBKk=
-github.com/spf13/afero v1.3.0/go.mod h1:5KUK8ByomD5Ti5Artl0RtHeI5pTF7MIDuXL3yY520V4=
+github.com/spf13/afero v1.3.1 h1:GPTpEAuNr98px18yNQ66JllNil98wfRZ/5Ukny8FeQA=
+github.com/spf13/afero v1.3.1/go.mod h1:5KUK8ByomD5Ti5Artl0RtHeI5pTF7MIDuXL3yY520V4=
 github.com/spf13/cast v1.3.0 h1:oget//CVOEoFewqQxwr0Ej5yjygnqGkvggSE/gB35Q8=
 github.com/spf13/cast v1.3.0/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
 github.com/spf13/cobra v1.0.0 h1:6m/oheQuQ13N9ks4hubMG6BnvwOeaJrqSPLahSnczz8=
@@ -290,8 +290,8 @@ github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.octolab.org v0.0.29 h1:po7K0h+W28p6ckOo8OmkuilbKVfwKjuzhUzCD8Lxu7I=
 go.octolab.org v0.0.29/go.mod h1:qcFUaCKzejCMyAUEvonJNYCkfzo1pMXEOME2LAi9w94=
-go.octolab.org v0.1.0 h1:+0fjkbSbPRhERp5rVj3BTDYrL21LuffFEMBfUzl+BoA=
-go.octolab.org v0.1.0/go.mod h1:qcFUaCKzejCMyAUEvonJNYCkfzo1pMXEOME2LAi9w94=
+go.octolab.org v0.2.0 h1:g8KDZFA3DsWDNvqIjeKsZthPLFp2R7dhz3T3t+7uajg=
+go.octolab.org v0.2.0/go.mod h1:qcFUaCKzejCMyAUEvonJNYCkfzo1pMXEOME2LAi9w94=
 go.octolab.org/toolkit/cli v0.1.1 h1:e1gWJVMejAL8SpggUKGavpENIHT01lCvpevj7BQzt+o=
 go.octolab.org/toolkit/cli v0.1.1/go.mod h1:lHB9cu+Dgfx1KzOn96ClI8cTDGURmmHo8GWgWpN3hKc=
 go.octolab.org/toolkit/config v0.0.2 h1:Fdd0jg4oJ4shhzgejUBPT5PPe8z9BALkgktweKG9c80=

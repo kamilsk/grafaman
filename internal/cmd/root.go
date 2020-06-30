@@ -76,12 +76,6 @@ func New() *cobra.Command {
 		SilenceErrors: false,
 		SilenceUsage:  true,
 	}
-	command.AddCommand(
-		NewCacheLookupCommand(config, logger),
-		NewCoverageCommand(config, logger, printer),
-		NewMetricsCommand(config, logger, printer),
-		NewQueriesCommand(config, logger, printer),
-	)
 	flags := command.PersistentFlags()
 	{
 		flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
@@ -107,6 +101,12 @@ func New() *cobra.Command {
 			viper.RegisterAlias("metrics", "graphite_metrics")
 			return viper.BindEnv("metrics", "GRAPHITE_METRICS")
 		},
+	)
+	command.AddCommand(
+		NewCacheLookupCommand(config, logger),
+		NewCoverageCommand(config, logger, printer),
+		NewMetricsCommand(config, logger, printer),
+		NewQueriesCommand(config, logger, printer),
 	)
 	return &command
 }
