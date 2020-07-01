@@ -7,37 +7,46 @@ import (
 	"github.com/c-bata/go-prompt"
 	"github.com/gobwas/glob"
 
-	"github.com/kamilsk/grafaman/internal/provider"
+	"github.com/kamilsk/grafaman/internal/model"
 )
 
 // NewMetricsCompleter returns naive implementation to autocomplete user input.
-func NewMetricsCompleter(prefix string, metrics provider.Metrics) func(prompt.Document) []prompt.Suggest {
+func NewMetricsCompleter(prefix string, metrics model.Metrics) func(prompt.Document) []prompt.Suggest {
 	prefix += "."
 	return func(document prompt.Document) []prompt.Suggest {
-		origin := document.TextBeforeCursor()
-		pattern := origin
+		input := document.TextBeforeCursor()
+
+		pattern := input
 		if !strings.HasPrefix(pattern, prefix) {
 			pattern = prefix + pattern
 		}
 		if !strings.HasSuffix(pattern, "*") {
 			pattern += "*"
 		}
+		matcher := glob.MustCompile(pattern)
 
-		matcher, err := glob.Compile(pattern)
-		if err != nil {
-			return nil
-		}
-
-		// TODO:refactoring better naming
-		segmentO := strings.Count(origin, ".")
-		segmentP := strings.Count(pattern, ".")
+		segmentsInInput := strings.Count(input, ".")
+		segmentsInFullPattern := strings.Count(pattern, ".")
 
 		registry := make(map[string]struct{})
 		for _, metric := range metrics {
 			metric := string(metric)
 			if matcher.Match(metric) {
-				suggestion := strings.Join(strings.SplitAfterN(origin, ".", segmentO+1)[:segmentO], "")
-				suggestion += strings.SplitAfterN(metric, ".", segmentP+2)[segmentP]
+				// input: s*
+				//  - 0 segments
+				//  - SplitAfter -> [s*]
+				//  - Join -> ""
+				// input: some.specific.m*
+				//  - 2 segments [some, specific]
+				//  - SplitAfter -> [some., specific., m*]
+				//  - Join -> some.specific.
+				suggestion := strings.Join(strings.SplitAfter(input, ".")[:segmentsInInput], "")
+				// metric: prefix.some.specific.metric.name.and.value, pattern: prefix.some.specific.m*
+				//  - 3 segments [prefix, some, specific]
+				//  - SplitAfterN -> [prefix., some., specific., metric., name.and.value]
+				//  - Index -> metric.
+				suggestion += strings.SplitAfterN(metric, ".", segmentsInFullPattern+2)[segmentsInFullPattern]
+				// result: some.specific.metric.
 				registry[suggestion] = struct{}{}
 			}
 		}

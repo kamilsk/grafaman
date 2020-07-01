@@ -7,13 +7,12 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/filter"
 	"github.com/kamilsk/grafaman/internal/model"
-	"github.com/kamilsk/grafaman/internal/provider"
 )
 
 func NewCoverageExecutor(
-	metrics provider.Metrics,
+	metrics model.Metrics,
 	reporter interface {
-		Report(provider.Metrics) model.Report
+		Report(model.Metrics) model.Report
 	},
 	printer interface{ PrintCoverage(model.Report) error },
 	logger *logrus.Logger,
@@ -34,8 +33,8 @@ func NewCoverageExecutor(
 }
 
 func NewMetricsExecutor(
-	metrics provider.Metrics,
-	printer interface{ PrintMetrics(provider.Metrics) error },
+	metrics model.Metrics,
+	printer interface{ PrintMetrics(model.Metrics) error },
 	logger *logrus.Logger,
 ) func(string) {
 	return func(pattern string) {

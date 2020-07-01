@@ -162,7 +162,7 @@ func NewCoverageCommand(
 	}
 	flags.StringArrayVar(&exclude, "exclude", nil, "patterns to exclude metrics from coverage, e.g. *.median")
 	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
-	flags.DurationVar(&last, "last", xtime.Week, "the last interval to fetch")
+	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
 	flags.BoolVar(&replMode, "repl", false, "enable repl mode")
 
