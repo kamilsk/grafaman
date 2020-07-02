@@ -8,6 +8,7 @@ import (
 	"go.octolab.org/fn"
 
 	"github.com/kamilsk/grafaman/internal/cnf"
+	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/validator"
@@ -17,7 +18,7 @@ import (
 func NewQueriesCommand(
 	config *cnf.Config,
 	logger *logrus.Logger,
-	printer interface{ PrintQueries(entity.Queries) error },
+	printer interface{ PrintQueries(model.Queries) error },
 ) *cobra.Command {
 	var (
 		trim       []string

@@ -5,10 +5,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/kamilsk/grafaman/internal/model"
-	entity "github.com/kamilsk/grafaman/internal/provider"
 )
 
-func New(raw entity.Queries) (*reporter, error) {
+func New(raw model.Queries) (*reporter, error) {
 	matchers := make([]glob.Glob, 0, len(raw))
 	for _, query := range raw {
 		matcher, err := glob.Compile(string(query))

@@ -8,10 +8,10 @@ import (
 	"github.com/alexeyco/simpletable"
 	"github.com/pkg/errors"
 
-	entity "github.com/kamilsk/grafaman/internal/provider"
+	"github.com/kamilsk/grafaman/internal/model"
 )
 
-func (printer *Printer) PrintQueries(queries entity.Queries) error {
+func (printer *Printer) PrintQueries(queries model.Queries) error {
 	switch printer.format {
 	case formatJSON:
 		return PrintQueriesAsJSON(printer.output, queries)
@@ -22,11 +22,11 @@ func (printer *Printer) PrintQueries(queries entity.Queries) error {
 	}
 }
 
-func PrintQueriesAsJSON(output io.Writer, queries entity.Queries) error {
+func PrintQueriesAsJSON(output io.Writer, queries model.Queries) error {
 	return errors.Wrap(json.NewEncoder(output).Encode(queries), "presenter: output result as json")
 }
 
-func PrintQueriesAsTable(output io.Writer, queries entity.Queries, style *simpletable.Style) error {
+func PrintQueriesAsTable(output io.Writer, queries model.Queries, style *simpletable.Style) error {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
@@ -50,7 +50,7 @@ func PrintQueriesAsTable(output io.Writer, queries entity.Queries, style *simple
 	return errors.Wrap(err, "presenter: output result as table")
 }
 
-func PrintQueriesAsTSV(output io.Writer, queries entity.Queries) error {
+func PrintQueriesAsTSV(output io.Writer, queries model.Queries) error {
 	for _, query := range queries {
 		if _, err := fmt.Fprintln(output, query); err != nil {
 			return errors.Wrap(err, "presenter: output result as TSV")
