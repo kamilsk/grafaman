@@ -1,6 +1,9 @@
 package grafana
 
-import entity "github.com/kamilsk/grafaman/internal/provider"
+import (
+	"github.com/kamilsk/grafaman/internal/model"
+	entity "github.com/kamilsk/grafaman/internal/provider"
+)
 
 type dashboard struct {
 	Panels     []panel `json:"panels"`
@@ -37,12 +40,12 @@ type currentOption struct {
 	Value interface{} `json:"value"` // string or []string
 }
 
-func convertTargets(in []target) []entity.Query {
-	out := make([]entity.Query, 0, len(in))
+func convertTargets(in []target) []model.Query {
+	out := make([]model.Query, 0, len(in))
 
 	for _, target := range in {
 		if target.Query != "" {
-			out = append(out, entity.Query(target.Query))
+			out = append(out, model.Query(target.Query))
 		}
 	}
 

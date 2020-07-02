@@ -5,13 +5,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	entity "github.com/kamilsk/grafaman/internal/provider"
+	"github.com/kamilsk/grafaman/internal/model"
 )
 
 func TestConvertTargets(t *testing.T) {
 	tests := map[string]struct {
 		targets  []target
-		expected []entity.Query
+		expected []model.Query
 	}{
 		"issue#7": {
 			targets: []target{
@@ -19,7 +19,7 @@ func TestConvertTargets(t *testing.T) {
 					Query: "",
 				},
 			},
-			expected: []entity.Query{},
+			expected: []model.Query{},
 		},
 	}
 
