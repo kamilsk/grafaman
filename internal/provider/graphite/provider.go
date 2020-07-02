@@ -21,7 +21,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/kamilsk/grafaman/internal/model"
-	entity "github.com/kamilsk/grafaman/internal/provider"
 )
 
 // New returns an instance of Graphite metrics provider.
@@ -45,7 +44,7 @@ type provider struct {
 
 // Fetch walks through the endpoint and takes all metrics with the specified prefix.
 // Documentation: https://graphite-api.readthedocs.io/en/latest/api.html#metrics-find.
-func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Duration) (entity.Metrics, error) {
+func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Duration) (model.MetricNames, error) {
 	const source = "/metrics/find"
 
 	u := provider.endpoint
@@ -66,7 +65,7 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 		aggregator = make(chan dto, factor)
 		result     = make(chan []dto, factor)
 		requests   = make(chan *http.Request, 10)
-		metrics    = make(entity.Metrics, 0, 512)
+		metrics    = make(model.MetricNames, 0, 512)
 	)
 
 	main, ctx := errgroup.WithContext(ctx)

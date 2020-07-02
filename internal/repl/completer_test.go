@@ -6,14 +6,14 @@ import (
 	"github.com/c-bata/go-prompt"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kamilsk/grafaman/internal/provider"
+	"github.com/kamilsk/grafaman/internal/model"
 	. "github.com/kamilsk/grafaman/internal/repl"
 )
 
 func TestCompleter(t *testing.T) {
 	tests := map[string]struct {
 		prefix   string
-		metrics  provider.Metrics
+		metrics  model.MetricNames
 		document prompt.Document
 		expected []prompt.Suggest
 	}{
@@ -89,7 +89,7 @@ func TestCompleter(t *testing.T) {
 
 // helpers
 
-var metrics = provider.Metrics{
+var metrics = model.MetricNames{
 	"apps.services.awesome.service.api.service-x_get_POST.request_time.499.count",
 	"apps.services.awesome.service.api.service-x_get_POST.request_time.499.max",
 	"apps.services.awesome.service.api.service-x_get_POST.request_time.499.mean",

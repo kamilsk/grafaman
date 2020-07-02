@@ -24,7 +24,7 @@ type reporter struct {
 	matchers []glob.Glob
 }
 
-func (reporter *reporter) Report(metrics entity.Metrics) model.Report {
+func (reporter *reporter) Report(metrics model.MetricNames) model.Report {
 	report := model.Report{Metrics: make([]model.Metric, 0, len(metrics))}
 	coverage := make(map[model.MetricName]int, len(metrics))
 	for _, matcher := range reporter.matchers {

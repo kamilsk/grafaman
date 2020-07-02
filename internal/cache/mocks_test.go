@@ -11,7 +11,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 
-	provider "github.com/kamilsk/grafaman/internal/provider"
+	model "github.com/kamilsk/grafaman/internal/model"
 )
 
 // MockGraphite is a mock of Graphite interface
@@ -38,10 +38,10 @@ func (m *MockGraphite) EXPECT() *MockGraphiteMockRecorder {
 }
 
 // Fetch mocks base method
-func (m *MockGraphite) Fetch(arg0 context.Context, arg1 string, arg2 time.Duration) (provider.Metrics, error) {
+func (m *MockGraphite) Fetch(arg0 context.Context, arg1 string, arg2 time.Duration) (model.MetricNames, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Fetch", arg0, arg1, arg2)
-	ret0, _ := ret[0].(provider.Metrics)
+	ret0, _ := ret[0].(model.MetricNames)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

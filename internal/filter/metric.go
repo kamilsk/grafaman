@@ -4,10 +4,10 @@ import (
 	"github.com/gobwas/glob"
 	"github.com/pkg/errors"
 
-	"github.com/kamilsk/grafaman/internal/provider"
+	"github.com/kamilsk/grafaman/internal/model"
 )
 
-func Exclude(metrics provider.Metrics, pattern string) (provider.Metrics, error) {
+func Exclude(metrics model.MetricNames, pattern string) (model.MetricNames, error) {
 	if len(metrics) == 0 {
 		return metrics, nil
 	}
@@ -17,7 +17,7 @@ func Exclude(metrics provider.Metrics, pattern string) (provider.Metrics, error)
 		return nil, errors.Wrapf(err, "compile pattern %q", pattern)
 	}
 
-	filtered := make(provider.Metrics, 0, len(metrics))
+	filtered := make(model.MetricNames, 0, len(metrics))
 	for _, metric := range metrics {
 		if !matcher.Match(string(metric)) {
 			filtered = append(filtered, metric)
@@ -26,7 +26,7 @@ func Exclude(metrics provider.Metrics, pattern string) (provider.Metrics, error)
 	return filtered, nil
 }
 
-func Filter(metrics provider.Metrics, pattern string) (provider.Metrics, error) {
+func Filter(metrics model.MetricNames, pattern string) (model.MetricNames, error) {
 	if len(metrics) == 0 || pattern == "" {
 		return metrics, nil
 	}
@@ -36,7 +36,7 @@ func Filter(metrics provider.Metrics, pattern string) (provider.Metrics, error) 
 		return metrics, errors.Wrapf(err, "filter: compile pattern %q", pattern)
 	}
 
-	filtered := make(provider.Metrics, 0, len(metrics))
+	filtered := make(model.MetricNames, 0, len(metrics))
 	for _, metric := range metrics {
 		if matcher.Match(string(metric)) {
 			filtered = append(filtered, metric)

@@ -16,6 +16,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/filter"
+	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/repl"
@@ -28,7 +29,7 @@ func NewMetricsCommand(
 	logger *logrus.Logger,
 	printer interface {
 		SetPrefix(string)
-		PrintMetrics(entity.Metrics) error
+		PrintMetrics(model.MetricNames) error
 	},
 ) *cobra.Command {
 	var (

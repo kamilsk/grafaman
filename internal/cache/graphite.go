@@ -14,6 +14,7 @@ import (
 	"go.octolab.org/safe"
 	xtime "go.octolab.org/time"
 
+	"github.com/kamilsk/grafaman/internal/model"
 	. "github.com/kamilsk/grafaman/internal/provider"
 )
 
@@ -27,7 +28,7 @@ type graphite struct {
 	logger   *logrus.Logger
 }
 
-func (decorator *graphite) Fetch(ctx context.Context, prefix string, last time.Duration) (Metrics, error) {
+func (decorator *graphite) Fetch(ctx context.Context, prefix string, last time.Duration) (model.MetricNames, error) {
 	key := decorator.Key(prefix)
 	logger := decorator.logger.WithField("file", key)
 	file, err := decorator.fs.OpenFile(key, os.O_RDWR|os.O_CREATE, 0644)
@@ -38,8 +39,8 @@ func (decorator *graphite) Fetch(ctx context.Context, prefix string, last time.D
 	defer safe.Close(file, func(err error) { logger.WithError(err).Warning("close cache file") })
 
 	var data struct {
-		Metrics Metrics `json:"metrics"`
-		TTL     int64   `json:"ttl"`
+		Metrics model.MetricNames `json:"metrics"`
+		TTL     int64             `json:"ttl"`
 	}
 	if err := json.NewDecoder(file).Decode(&data); err != nil && !errors.Is(err, io.EOF) {
 		logger.WithError(err).Error("decode data from cache")

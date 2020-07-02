@@ -78,7 +78,7 @@ func NewCoverageCommand(
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				metrics   entity.Metrics
+				metrics   model.MetricNames
 				dashboard *entity.Dashboard
 			)
 
