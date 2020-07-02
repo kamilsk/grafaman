@@ -29,7 +29,7 @@ func NewMetricsCommand(
 	logger *logrus.Logger,
 	printer interface {
 		SetPrefix(string)
-		PrintMetrics(model.MetricNames) error
+		PrintMetrics(model.Metrics) error
 	},
 ) *cobra.Command {
 	var (

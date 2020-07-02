@@ -38,10 +38,10 @@ func (m *MockGraphite) EXPECT() *MockGraphiteMockRecorder {
 }
 
 // Fetch mocks base method
-func (m *MockGraphite) Fetch(arg0 context.Context, arg1 string, arg2 time.Duration) (model.MetricNames, error) {
+func (m *MockGraphite) Fetch(arg0 context.Context, arg1 string, arg2 time.Duration) (model.Metrics, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Fetch", arg0, arg1, arg2)
-	ret0, _ := ret[0].(model.MetricNames)
+	ret0, _ := ret[0].(model.Metrics)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

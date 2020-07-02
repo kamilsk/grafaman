@@ -13,7 +13,7 @@ import (
 func TestCompleter(t *testing.T) {
 	tests := map[string]struct {
 		prefix   string
-		metrics  model.MetricNames
+		metrics  model.Metrics
 		document prompt.Document
 		expected []prompt.Suggest
 	}{
@@ -89,7 +89,7 @@ func TestCompleter(t *testing.T) {
 
 // helpers
 
-var metrics = model.MetricNames{
+var metrics = model.Metrics{
 	"apps.services.awesome.service.api.service-x_get_POST.request_time.499.count",
 	"apps.services.awesome.service.api.service-x_get_POST.request_time.499.max",
 	"apps.services.awesome.service.api.service-x_get_POST.request_time.499.mean",

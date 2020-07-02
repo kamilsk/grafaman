@@ -8,5 +8,5 @@ import (
 )
 
 type Graphite interface {
-	Fetch(context.Context, string, time.Duration) (model.MetricNames, error)
+	Fetch(context.Context, string, time.Duration) (model.Metrics, error)
 }

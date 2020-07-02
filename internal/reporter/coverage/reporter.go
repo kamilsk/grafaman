@@ -23,9 +23,10 @@ type reporter struct {
 	matchers []glob.Glob
 }
 
-func (reporter *reporter) Report(metrics model.MetricNames) model.Report {
-	report := model.Report{Metrics: make([]model.Metric, 0, len(metrics))}
-	coverage := make(map[model.MetricName]int, len(metrics))
+func (reporter *reporter) Report(metrics model.Metrics) model.Report {
+	report := new(model.Report)
+
+	coverage := make(map[model.Metric]int, len(metrics))
 	for _, matcher := range reporter.matchers {
 		for _, metric := range metrics {
 			if matcher.Match(string(metric)) {
@@ -33,11 +34,12 @@ func (reporter *reporter) Report(metrics model.MetricNames) model.Report {
 			}
 		}
 	}
+
 	for _, metric := range metrics {
-		report.Metrics = append(report.Metrics, model.Metric{Name: string(metric), Hits: coverage[metric]})
+		report.Add(metric, coverage[metric])
 	}
 	if len(metrics) > 0 {
 		report.Total = 100 * float64(len(coverage)) / float64(len(metrics))
 	}
-	return report
+	return *report
 }

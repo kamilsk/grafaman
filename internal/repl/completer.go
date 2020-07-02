@@ -11,7 +11,7 @@ import (
 )
 
 // NewMetricsCompleter returns naive implementation to autocomplete user input.
-func NewMetricsCompleter(prefix string, metrics model.MetricNames) func(prompt.Document) []prompt.Suggest {
+func NewMetricsCompleter(prefix string, metrics model.Metrics) func(prompt.Document) []prompt.Suggest {
 	prefix += "."
 	return func(document prompt.Document) []prompt.Suggest {
 		input := document.TextBeforeCursor()

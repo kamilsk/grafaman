@@ -5,20 +5,15 @@ import (
 	"unsafe"
 )
 
-type Metric struct {
-	Name string `json:"name"`
-	Hits int    `json:"hits"`
-}
+type Metric string
 
-type MetricName string
+type Metrics []Metric
 
-type MetricNames []MetricName
-
-func (metrics *MetricNames) Convert(src []string) {
+func (metrics *Metrics) Convert(src []string) {
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&src))
-	*metrics = *(*[]MetricName)(unsafe.Pointer(header))
+	*metrics = *(*[]Metric)(unsafe.Pointer(header))
 }
 
-func (metrics MetricNames) Len() int           { return len(metrics) }
-func (metrics MetricNames) Less(i, j int) bool { return metrics[i] < metrics[j] }
-func (metrics MetricNames) Swap(i, j int)      { metrics[i], metrics[j] = metrics[j], metrics[i] }
+func (metrics Metrics) Len() int           { return len(metrics) }
+func (metrics Metrics) Less(i, j int) bool { return metrics[i] < metrics[j] }
+func (metrics Metrics) Swap(i, j int)      { metrics[i], metrics[j] = metrics[j], metrics[i] }

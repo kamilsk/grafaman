@@ -44,7 +44,7 @@ type provider struct {
 
 // Fetch walks through the endpoint and takes all metrics with the specified prefix.
 // Documentation: https://graphite-api.readthedocs.io/en/latest/api.html#metrics-find.
-func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Duration) (model.MetricNames, error) {
+func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Duration) (model.Metrics, error) {
 	const source = "/metrics/find"
 
 	u := provider.endpoint
@@ -65,7 +65,7 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 		aggregator = make(chan dto, factor)
 		result     = make(chan []dto, factor)
 		requests   = make(chan *http.Request, 10)
-		metrics    = make(model.MetricNames, 0, 512)
+		metrics    = make(model.Metrics, 0, 512)
 	)
 
 	main, ctx := errgroup.WithContext(ctx)
@@ -77,7 +77,7 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 				if !ok {
 					return nil
 				}
-				metrics = append(metrics, model.MetricName(node.ID))
+				metrics = append(metrics, model.Metric(node.ID))
 			case <-ctx.Done():
 				provider.logger.WithError(err).Error("aggregator process timeout")
 				return errors.Wrap(ctx.Err(), "graphite: aggregator process")

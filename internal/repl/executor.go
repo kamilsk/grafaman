@@ -10,9 +10,9 @@ import (
 )
 
 func NewCoverageExecutor(
-	metrics model.MetricNames,
+	metrics model.Metrics,
 	reporter interface {
-		Report(model.MetricNames) model.Report
+		Report(model.Metrics) model.Report
 	},
 	printer interface{ PrintCoverage(model.Report) error },
 	logger *logrus.Logger,
@@ -33,8 +33,8 @@ func NewCoverageExecutor(
 }
 
 func NewMetricsExecutor(
-	metrics model.MetricNames,
-	printer interface{ PrintMetrics(model.MetricNames) error },
+	metrics model.Metrics,
+	printer interface{ PrintMetrics(model.Metrics) error },
 	logger *logrus.Logger,
 ) func(string) {
 	return func(pattern string) {
