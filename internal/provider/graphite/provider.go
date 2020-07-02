@@ -20,6 +20,7 @@ import (
 	"go.octolab.org/unsafe"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 )
 
@@ -77,7 +78,7 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 				if !ok {
 					return nil
 				}
-				metrics = append(metrics, entity.Metric(node.ID))
+				metrics = append(metrics, model.MetricName(node.ID))
 			case <-ctx.Done():
 				provider.logger.WithError(err).Error("aggregator process timeout")
 				return errors.Wrap(ctx.Err(), "graphite: aggregator process")

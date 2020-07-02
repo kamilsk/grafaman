@@ -26,7 +26,7 @@ type reporter struct {
 
 func (reporter *reporter) Report(metrics entity.Metrics) model.Report {
 	report := model.Report{Metrics: make([]model.Metric, 0, len(metrics))}
-	coverage := make(map[entity.Metric]int, len(metrics))
+	coverage := make(map[model.MetricName]int, len(metrics))
 	for _, matcher := range reporter.matchers {
 		for _, metric := range metrics {
 			if matcher.Match(string(metric)) {
