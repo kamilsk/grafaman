@@ -33,7 +33,7 @@ brews:
       (zsh_completion/"_grafaman").write output
       prefix.install_metafiles
     test: |
-      system "#{bin}/grafaman --version"
+      system "#{bin}/grafaman version"
 
 builds:
   - id: grafaman
