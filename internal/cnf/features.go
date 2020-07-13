@@ -9,6 +9,10 @@ var Features = config.Features{
 		Enabled: true,
 	},
 	{
+		Name:    "grafonnet",
+		Enabled: false,
+	},
+	{
 		Name:    "paas",
 		Enabled: true,
 	},
