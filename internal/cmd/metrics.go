@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"sort"
 	"time"
 
 	"github.com/c-bata/go-prompt"
@@ -15,7 +14,6 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
-	"github.com/kamilsk/grafaman/internal/filter"
 	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
@@ -84,15 +82,10 @@ func NewMetricsCommand(
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
-				metrics, err = filter.Filter(metrics, config.Pattern())
-				if err != nil {
-					return err
-				}
-				sort.Sort(metrics)
-
+				metrics = metrics.Filter(model.Query(config.Pattern()).MustCompile()).Sort()
 				return printer.PrintMetrics(metrics)
 			}
-			sort.Sort(metrics)
+			metrics.Sort()
 			prompt.New(
 				repl.Prefix(config.Graphite.Prefix, repl.NewMetricsExecutor(metrics, printer, logger)),
 				repl.NewMetricsCompleter(config.Graphite.Prefix, metrics),

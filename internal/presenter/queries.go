@@ -41,7 +41,7 @@ func PrintQueriesAsTable(output io.Writer, queries model.Queries, style *simplet
 	}
 	table.Footer = &simpletable.Footer{
 		Cells: []*simpletable.Cell{
-			{Text: fmt.Sprintf("Total: %d", queries.Len())},
+			{Text: fmt.Sprintf("Total: %d", len(queries))},
 		},
 	}
 	table.SetStyle(style)

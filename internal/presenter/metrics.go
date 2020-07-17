@@ -42,7 +42,7 @@ func PrintMetricsAsTable(output io.Writer, metrics model.Metrics, style *simplet
 	}
 	table.Footer = &simpletable.Footer{
 		Cells: []*simpletable.Cell{
-			{Text: fmt.Sprintf("Total: %d", metrics.Len())},
+			{Text: fmt.Sprintf("Total: %d", len(metrics))},
 		},
 	}
 	table.SetStyle(style)

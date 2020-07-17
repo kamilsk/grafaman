@@ -1,30 +1,21 @@
-package coverage
+package reporter
 
 import (
 	"github.com/gobwas/glob"
-	"github.com/pkg/errors"
 
 	"github.com/kamilsk/grafaman/internal/model"
 )
 
-func New(raw model.Queries) (*reporter, error) {
-	matchers := make([]glob.Glob, 0, len(raw))
-	for _, query := range raw {
-		matcher, err := glob.Compile(string(query))
-		if err != nil {
-			return nil, errors.Wrapf(err, "coverage: compile pattern %q", query)
-		}
-		matchers = append(matchers, matcher)
-	}
-	return &reporter{matchers}, nil
+func MustNew(queries model.Queries) *reporter {
+	return &reporter{queries.MustMatchers()}
 }
 
 type reporter struct {
 	matchers []glob.Glob
 }
 
-func (reporter *reporter) Report(metrics model.Metrics) model.Report {
-	report := new(model.Report)
+func (reporter *reporter) CoverageReport(metrics model.Metrics) model.CoverageReport {
+	report := new(model.CoverageReport)
 
 	coverage := make(map[model.Metric]int, len(metrics))
 	for _, matcher := range reporter.matchers {

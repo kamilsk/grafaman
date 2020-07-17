@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"sort"
 	"strings"
 
 	"github.com/go-graphite/carbonapi/pkg/parser"
@@ -63,7 +62,7 @@ func (dashboard *Dashboard) Queries(cfg Transform) (model.Queries, error) {
 	}
 
 	if cfg.NeedSorting {
-		sort.Sort(transformed)
+		transformed.Sort()
 	}
 	return transformed, nil
 }

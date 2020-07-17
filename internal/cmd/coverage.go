@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"sort"
 	"time"
 
 	"github.com/c-bata/go-prompt"
@@ -16,13 +15,12 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
-	"github.com/kamilsk/grafaman/internal/filter"
 	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/repl"
-	"github.com/kamilsk/grafaman/internal/reporter/coverage"
+	"github.com/kamilsk/grafaman/internal/reporter"
 	"github.com/kamilsk/grafaman/internal/validator"
 )
 
@@ -32,7 +30,7 @@ func NewCoverageCommand(
 	logger *logrus.Logger,
 	printer interface {
 		SetPrefix(string)
-		PrintCoverage(model.Report) error
+		PrintCoverage(model.CoverageReport) error
 	},
 ) *cobra.Command {
 	var (
@@ -97,13 +95,9 @@ func NewCoverageCommand(
 				if err != nil {
 					return err
 				}
-				for _, pattern := range exclude {
-					metrics, err = filter.Exclude(metrics, pattern)
-					if err != nil {
-						break
-					}
-				}
-				return err
+
+				metrics = metrics.Exclude(new(model.Queries).Convert(exclude).MustMatchers()...)
+				return nil
 			})
 			g.Go(func() error {
 				provider, err := grafana.New(config.Grafana.URL, logger)
@@ -128,24 +122,16 @@ func NewCoverageCommand(
 				return err
 			}
 
-			reporter, err := coverage.New(queries)
-			if err != nil {
-				return err
-			}
+			coverage := reporter.MustNew(queries)
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
-				metrics, err := filter.Filter(metrics, config.Pattern())
-				if err != nil {
-					return err
-				}
-				sort.Sort(metrics)
-
-				return printer.PrintCoverage(reporter.Report(metrics))
+				metrics := metrics.Filter(model.Query(config.Pattern()).MustCompile()).Sort()
+				return printer.PrintCoverage(coverage.CoverageReport(metrics))
 			}
-			sort.Sort(metrics)
+			metrics.Sort()
 			prompt.New(
-				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageExecutor(metrics, reporter, printer, logger)),
+				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageExecutor(metrics, coverage, printer, logger)),
 				repl.NewMetricsCompleter(config.Graphite.Prefix, metrics),
 			).Run()
 			return nil
