@@ -61,7 +61,7 @@ github.com/pkg/term/termios
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.6.0
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.3.1
+# github.com/spf13/afero v1.3.2
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.3.0
