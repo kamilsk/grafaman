@@ -28,9 +28,9 @@ brews:
     install: |
       bin.install "grafaman"
       output = Utils.popen_read("#{bin}/grafaman completion bash")
-      (bash_completion/"grafaman").write output
+      (bash_completion/grafaman).write output
       output = Utils.popen_read("#{bin}/grafaman completion zsh")
-      (zsh_completion/"_grafaman").write output
+      (zsh_completion/_grafaman).write output
       prefix.install_metafiles
     test: |
       system "#{bin}/grafaman version"

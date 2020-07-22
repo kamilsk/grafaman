@@ -158,6 +158,17 @@ $ source <(grafaman completion)
 
 > See `kubectl` [documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/#enabling-shell-autocompletion).
 
+## 🤲 Outcomes
+
+### 👨‍🔬 Research
+
+#### Metric index to autocomplete
+
+- [github.com/armon/go-radix](https://github.com/armon/go-radix)
+- [github.com/fanyang01/radix](https://github.com/fanyang01/radix)
+- [github.com/gobwas/glob](https://github.com/gobwas/glob)
+- [github.com/tchap/go-patricia](https://github.com/tchap/go-patricia)
+
 ---
 
 made with ❤️ for everyone
