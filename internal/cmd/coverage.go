@@ -126,7 +126,7 @@ func NewCoverageCommand(
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
-				metrics := metrics.Filter(model.Query(config.Pattern()).MustCompile()).Sort()
+				metrics := metrics.Filter(config.FilterQuery().MustCompile()).Sort()
 				return printer.PrintCoverage(coverage.CoverageReport(metrics))
 			}
 			metrics.Sort()
@@ -144,7 +144,7 @@ func NewCoverageCommand(
 		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
 		flags.String("graphite", "", "Graphite API endpoint")
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-		flags.String("filter", "", "exclude metrics by pattern, e.g. some.*.metric")
+		flags.String("filter", "", "filter metrics by the specified query, e.g. some.*.metric")
 	}
 	flags.StringArrayVar(&exclude, "exclude", nil, "patterns to exclude metrics from coverage, e.g. *.median")
 	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")

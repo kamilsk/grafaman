@@ -82,7 +82,7 @@ func NewMetricsCommand(
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
-				metrics = metrics.Filter(model.Query(config.Pattern()).MustCompile()).Sort()
+				metrics = metrics.Filter(config.FilterQuery().MustCompile()).Sort()
 				return printer.PrintMetrics(metrics)
 			}
 			metrics.Sort()
@@ -98,7 +98,7 @@ func NewMetricsCommand(
 	{
 		flags.StringP("graphite", "e", "", "Graphite API endpoint")
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-		flags.String("filter", "", "exclude metrics by pattern, e.g. some.*.metric")
+		flags.String("filter", "", "filter metrics by the specified query, e.g. some.*.metric")
 	}
 	flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
 	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")

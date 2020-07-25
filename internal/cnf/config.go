@@ -1,6 +1,10 @@
 package cnf
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/kamilsk/grafaman/internal/model"
+)
 
 // Config contains all necessary tool configuration.
 type Config struct {
@@ -15,10 +19,11 @@ type Config struct {
 	} `mapstructure:",squash"`
 }
 
-func (config Config) Pattern() string {
-	pattern, prefix := config.Graphite.Filter, config.Graphite.Prefix
-	if pattern != "" && !strings.HasPrefix(pattern, prefix) {
-		pattern = prefix + "." + pattern
+// FilterQuery returns a Query to filter metrics.
+func (config Config) FilterQuery() model.Query {
+	filter, prefix := config.Graphite.Filter, config.Graphite.Prefix
+	if filter != "" && !strings.HasPrefix(filter, prefix) {
+		filter = prefix + "." + filter
 	}
-	return pattern
+	return model.Query(filter)
 }
