@@ -90,7 +90,7 @@ go.octolab.org/unsafe
 go.octolab.org/toolkit/cli/cobra
 go.octolab.org/toolkit/cli/debugger
 go.octolab.org/toolkit/cli/internal/os/shell
-# go.octolab.org/toolkit/config v0.0.3
+# go.octolab.org/toolkit/config v0.0.4
 go.octolab.org/toolkit/config
 go.octolab.org/toolkit/config/http
 # golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208

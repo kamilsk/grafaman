@@ -20,7 +20,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	go.octolab.org v0.2.0
 	go.octolab.org/toolkit/cli v0.1.1
-	go.octolab.org/toolkit/config v0.0.3
+	go.octolab.org/toolkit/config v0.0.4
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 )
 

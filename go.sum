@@ -296,8 +296,8 @@ go.octolab.org/toolkit/cli v0.1.1 h1:e1gWJVMejAL8SpggUKGavpENIHT01lCvpevj7BQzt+o
 go.octolab.org/toolkit/cli v0.1.1/go.mod h1:lHB9cu+Dgfx1KzOn96ClI8cTDGURmmHo8GWgWpN3hKc=
 go.octolab.org/toolkit/config v0.0.2 h1:Fdd0jg4oJ4shhzgejUBPT5PPe8z9BALkgktweKG9c80=
 go.octolab.org/toolkit/config v0.0.2/go.mod h1:dI3TlD3b4t0ilP7T+q0BYs6mhYBXm8i4TCLqCabykBA=
-go.octolab.org/toolkit/config v0.0.3 h1:ggIUfHBjldbMzkuecBpWuySlN33ZgB6G7NAoPQYDgIE=
-go.octolab.org/toolkit/config v0.0.3/go.mod h1:dI3TlD3b4t0ilP7T+q0BYs6mhYBXm8i4TCLqCabykBA=
+go.octolab.org/toolkit/config v0.0.4 h1:Q/MnSuRf4ttHCuAaq7PqpD8xQhEtmfK8mO9NX1IxvlA=
+go.octolab.org/toolkit/config v0.0.4/go.mod h1:dI3TlD3b4t0ilP7T+q0BYs6mhYBXm8i4TCLqCabykBA=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
