@@ -9,10 +9,10 @@ import (
 )
 
 func TestPrefix(t *testing.T) {
-	patterns := []string{
-		"pattern1",
-		"pattern2",
-		"pattern3",
+	inputs := []string{
+		"input1",
+		"input2",
+		"input3",
 		" \n\r\t ",
 	}
 
@@ -21,14 +21,14 @@ func TestPrefix(t *testing.T) {
 		expected []string
 	}{
 		"empty prefix": {
-			expected: patterns,
+			expected: inputs,
 		},
 		"non-empty prefix": {
 			prefix: "prefix",
 			expected: []string{
-				"prefix.pattern1",
-				"prefix.pattern2",
-				"prefix.pattern3",
+				"prefix.input1",
+				"prefix.input2",
+				"prefix.input3",
 				"prefix.",
 			},
 		},
@@ -36,10 +36,10 @@ func TestPrefix(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			for i, pattern := range patterns {
-				Prefix(test.prefix, func(pattern string) {
-					assert.Equal(t, test.expected[i], pattern)
-				})(pattern)
+			for i, input := range inputs {
+				Prefix(test.prefix, func(input string) {
+					assert.Equal(t, test.expected[i], input)
+				})(input)
 			}
 		})
 	}

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/c-bata/go-prompt"
-	"github.com/gobwas/glob"
 
 	"github.com/kamilsk/grafaman/internal/model"
 )
@@ -16,17 +15,17 @@ func NewMetricsCompleter(prefix string, metrics model.Metrics) func(prompt.Docum
 	return func(document prompt.Document) []prompt.Suggest {
 		input := document.TextBeforeCursor()
 
-		pattern := input
-		if !strings.HasPrefix(pattern, prefix) {
-			pattern = prefix + pattern
+		q := input
+		if !strings.HasPrefix(q, prefix) {
+			q = prefix + q
 		}
-		if !strings.HasSuffix(pattern, "*") {
-			pattern += "*"
+		if !strings.HasSuffix(q, "*") {
+			q += "*"
 		}
-		matcher := glob.MustCompile(pattern)
+		matcher := model.Query(q).MustCompile()
 
 		segmentsInInput := strings.Count(input, ".")
-		segmentsInFullPattern := strings.Count(pattern, ".")
+		segmentsInFullPattern := strings.Count(q, ".")
 
 		registry := make(map[string]struct{})
 		for _, metric := range metrics {
@@ -41,7 +40,7 @@ func NewMetricsCompleter(prefix string, metrics model.Metrics) func(prompt.Docum
 				//  - SplitAfter -> [some., specific., m*]
 				//  - Join -> some.specific.
 				suggestion := strings.Join(strings.SplitAfter(input, ".")[:segmentsInInput], "")
-				// metric: prefix.some.specific.metric.name.and.value, pattern: prefix.some.specific.m*
+				// metric: prefix.some.specific.metric.name.and.value, query: prefix.some.specific.m*
 				//  - 3 segments [prefix, some, specific]
 				//  - SplitAfterN -> [prefix., some., specific., metric., name.and.value]
 				//  - Index -> metric.

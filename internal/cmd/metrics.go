@@ -98,7 +98,7 @@ func NewMetricsCommand(
 	{
 		flags.StringP("graphite", "e", "", "Graphite API endpoint")
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-		flags.String("filter", "", "filter metrics by the specified query, e.g. some.*.metric")
+		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
 	}
 	flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
 	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")

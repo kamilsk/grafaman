@@ -144,9 +144,9 @@ func NewCoverageCommand(
 		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
 		flags.String("graphite", "", "Graphite API endpoint")
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-		flags.String("filter", "", "filter metrics by the specified query, e.g. some.*.metric")
+		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
 	}
-	flags.StringArrayVar(&exclude, "exclude", nil, "patterns to exclude metrics from coverage, e.g. *.median")
+	flags.StringArrayVar(&exclude, "exclude", nil, "queries to exclude metrics from coverage, e.g. *.median")
 	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
 	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
