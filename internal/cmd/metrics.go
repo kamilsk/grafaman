@@ -12,11 +12,10 @@ import (
 	"go.octolab.org/fn"
 	xtime "go.octolab.org/time"
 
-	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
-	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
+	"github.com/kamilsk/grafaman/internal/provider/graphite/cache"
 	"github.com/kamilsk/grafaman/internal/repl"
 )
 
@@ -64,13 +63,13 @@ func NewMetricsCommand(
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var provider entity.Graphite
+			var provider cache.Graphite
 			provider, err := graphite.New(config.Graphite.URL, logger)
 			if err != nil {
 				return err
 			}
 			if !noCache {
-				provider = cache.WrapGraphiteProvider(provider, afero.NewOsFs(), logger)
+				provider = cache.Decorate(provider, afero.NewOsFs(), logger)
 			}
 
 			metrics, err := provider.Fetch(cmd.Context(), config.Graphite.Prefix, last)

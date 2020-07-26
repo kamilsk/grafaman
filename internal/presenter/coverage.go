@@ -38,7 +38,7 @@ func PrintCoverageAsTable(output io.Writer, report model.CoverageReport, style *
 	}
 	for _, metric := range report.Metrics {
 		r := []*simpletable.Cell{
-			{Text: strings.TrimPrefix(strings.TrimPrefix(metric.Name, prefix), ".")},
+			{Text: strings.TrimPrefix(strings.TrimPrefix(metric.Metric, prefix), ".")},
 			{Align: simpletable.AlignRight, Text: strconv.Itoa(metric.Hits)},
 		}
 		table.Body.Cells = append(table.Body.Cells, r)
@@ -57,7 +57,7 @@ func PrintCoverageAsTable(output io.Writer, report model.CoverageReport, style *
 
 func PrintCoverageAsTSV(output io.Writer, report model.CoverageReport) error {
 	for _, metric := range report.Metrics {
-		if _, err := fmt.Fprintln(output, metric.Name, "\t", strconv.Itoa(metric.Hits)); err != nil {
+		if _, err := fmt.Fprintln(output, metric.Metric, "\t", strconv.Itoa(metric.Hits)); err != nil {
 			return errors.Wrap(err, "presenter: output result as TSV")
 		}
 	}

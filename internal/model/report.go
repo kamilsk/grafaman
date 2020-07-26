@@ -20,6 +20,6 @@ func (report *CoverageReport) MarshalJSON() ([]byte, error) {
 }
 
 type metricHit struct {
-	Name string `json:"name"`
-	Hits int    `json:"hits"`
+	Metric string `json:"name"`
+	Hits   int    `json:"hits"`
 }

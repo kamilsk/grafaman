@@ -3,14 +3,13 @@ package cmd
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
 
-	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
+	"github.com/kamilsk/grafaman/internal/provider/graphite/cache"
 )
 
 // NewCacheLookupCommand returns command to lookup cache.
@@ -37,10 +36,8 @@ func NewCacheLookupCommand(
 			}
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			wrapper := cache.WrapGraphiteProvider(nil, afero.NewOsFs(), logger)
-			cmd.Println(wrapper.Key(config.Graphite.Prefix))
-			return nil
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Println(cache.Filename(config.Graphite.Prefix))
 		},
 	}
 

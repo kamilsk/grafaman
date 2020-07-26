@@ -13,12 +13,12 @@ import (
 	xtime "go.octolab.org/time"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
+	"github.com/kamilsk/grafaman/internal/provider/graphite/cache"
 	"github.com/kamilsk/grafaman/internal/repl"
 	"github.com/kamilsk/grafaman/internal/reporter"
 )
@@ -80,13 +80,13 @@ func NewCoverageCommand(
 
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
-				var provider entity.Graphite
+				var provider cache.Graphite
 				provider, err := graphite.New(config.Graphite.URL, logger)
 				if err != nil {
 					return err
 				}
 				if !noCache {
-					provider = cache.WrapGraphiteProvider(provider, afero.NewOsFs(), logger)
+					provider = cache.Decorate(provider, afero.NewOsFs(), logger)
 				}
 
 				metrics, err = provider.Fetch(ctx, config.Graphite.Prefix, last)
