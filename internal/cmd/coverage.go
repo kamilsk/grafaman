@@ -21,7 +21,6 @@ import (
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/repl"
 	"github.com/kamilsk/grafaman/internal/reporter"
-	"github.com/kamilsk/grafaman/internal/validator"
 )
 
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
@@ -65,8 +64,7 @@ func NewCoverageCommand(
 			if config.Graphite.Prefix == "" {
 				return errors.New("please provide metric prefix")
 			}
-			checker := validator.Metric()
-			if !checker(config.Graphite.Prefix) {
+			if !model.Metric(config.Graphite.Prefix).Valid() {
 				return errors.Errorf(
 					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
 					config.Graphite.Prefix,

@@ -11,7 +11,6 @@ import (
 	"github.com/kamilsk/grafaman/internal/model"
 	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
-	"github.com/kamilsk/grafaman/internal/validator"
 )
 
 // NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
@@ -46,8 +45,11 @@ func NewQueriesCommand(
 			if config.Grafana.Dashboard == "" {
 				return errors.New("please provide a dashboard unique identifier")
 			}
-			if metrics, checker := config.Graphite.Prefix, validator.Metric(); metrics != "" && !checker(metrics) {
-				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", metrics)
+			if !model.Metric(config.Graphite.Prefix).Valid() {
+				return errors.Errorf(
+					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
+					config.Graphite.Prefix,
+				)
 			}
 			return nil
 		},

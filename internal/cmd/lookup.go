@@ -10,7 +10,7 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/cache"
 	"github.com/kamilsk/grafaman/internal/cnf"
-	"github.com/kamilsk/grafaman/internal/validator"
+	"github.com/kamilsk/grafaman/internal/model"
 )
 
 // NewCacheLookupCommand returns command to lookup cache.
@@ -29,8 +29,7 @@ func NewCacheLookupCommand(
 				func() error { return viper.Unmarshal(config) },
 			)
 
-			checker := validator.Metric()
-			if !checker(config.Graphite.Prefix) {
+			if !model.Metric(config.Graphite.Prefix).Valid() {
 				return errors.Errorf(
 					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
 					config.Graphite.Prefix,

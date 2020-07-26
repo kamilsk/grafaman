@@ -2,12 +2,18 @@ package model
 
 import (
 	"reflect"
+	"regexp"
 	"sort"
 	"unsafe"
 )
 
 // A Metric represents metric name.
 type Metric string
+
+// Valid checks that the metric is valid.
+func (metric Metric) Valid() bool {
+	return validator.MatchString(string(metric))
+}
 
 // Metrics represent a slice of metric names.
 type Metrics []Metric
@@ -69,3 +75,5 @@ func (metrics Metrics) Sort() Metrics {
 	sort.Strings(*(*[]string)(unsafe.Pointer(header)))
 	return metrics
 }
+
+var validator = regexp.MustCompile(`^(?:[0-9a-z-_]+\.?)*$`)
