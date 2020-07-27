@@ -1,0 +1,7 @@
+ Metric of   
+=============
+ metric.a.ok 
+ metric.b.ok 
+ metric.c.ok 
+=============
+ Total: 3    

@@ -46,7 +46,7 @@ func PrintCoverageAsTable(output io.Writer, report model.CoverageReport, style *
 	table.Footer = &simpletable.Footer{
 		Cells: []*simpletable.Cell{
 			{Align: simpletable.AlignRight, Text: "Total"},
-			{Align: simpletable.AlignRight, Text: fmt.Sprintf("%.2f%%", report.Total)},
+			{Align: simpletable.AlignRight, Text: fmt.Sprintf("%.2f%%", report.Total())},
 		},
 	}
 	table.SetStyle(style)

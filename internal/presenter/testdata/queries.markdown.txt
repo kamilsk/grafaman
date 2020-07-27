@@ -1,0 +1,7 @@
+| Query      |
+|------------|
+| metric.a.* |
+| metric.b.* |
+| metric.c.* |
+|------------|
+| Total: 3   |

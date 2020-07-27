@@ -1,0 +1,3 @@
+metric.a.ok 	 1
+metric.b.ok 	 0
+metric.c.ok 	 2

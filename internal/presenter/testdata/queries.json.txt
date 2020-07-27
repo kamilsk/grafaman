@@ -1,0 +1,1 @@
+["metric.a.*","metric.b.*","metric.c.*"]

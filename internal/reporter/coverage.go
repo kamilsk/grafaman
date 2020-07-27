@@ -29,8 +29,5 @@ func (reporter *reporter) CoverageReport(metrics model.Metrics) model.CoverageRe
 	for _, metric := range metrics {
 		report.Add(metric, coverage[metric])
 	}
-	if len(metrics) > 0 {
-		report.Total = 100 * float64(len(coverage)) / float64(len(metrics))
-	}
 	return *report
 }
