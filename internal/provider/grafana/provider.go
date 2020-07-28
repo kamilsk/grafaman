@@ -16,7 +16,7 @@ import (
 	"go.octolab.org/safe"
 	"go.octolab.org/unsafe"
 
-	entity "github.com/kamilsk/grafaman/internal/provider"
+	"github.com/kamilsk/grafaman/internal/model"
 )
 
 // New returns an instance of Grafana dashboard provider.
@@ -40,7 +40,7 @@ type provider struct {
 
 // Fetch takes a dashboard JSON model and extracts queries and variables from it.
 // Documentation: https://grafana.com/docs/grafana/latest/http_api/dashboard/#get-dashboard-by-uid.
-func (provider *provider) Fetch(ctx context.Context, uid string) (*entity.Dashboard, error) {
+func (provider *provider) Fetch(ctx context.Context, uid string) (*model.Dashboard, error) {
 	const source = "/api/dashboards/uid/"
 
 	u := provider.endpoint
@@ -78,13 +78,13 @@ func (provider *provider) Fetch(ctx context.Context, uid string) (*entity.Dashbo
 	defer safe.Close(response.Body, unsafe.Ignore)
 
 	var payload struct {
-		Dashboard dashboard `json:"dashboard"`
+		Dashboard dashboard `json:"dashboard,omitempty"`
 	}
 	if err := json.NewDecoder(response.Body).Decode(&payload); err != nil {
 		return nil, errors.Wrap(err, "grafana: decode dashboard fetch response")
 	}
 
-	result := entity.Dashboard{
+	result := model.Dashboard{
 		RawData:   convertTargets(fetchTargets(payload.Dashboard.Panels)),
 		Variables: convertVariables(fetchVariables(payload.Dashboard)),
 	}

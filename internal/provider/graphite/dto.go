@@ -8,7 +8,7 @@ const (
 )
 
 type dto struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Leaf int    `json:"leaf"`
+	ID   string `json:"id,omitempty"`
+	Text string `json:"text,omitempty"`
+	Leaf int    `json:"leaf,omitempty"`
 }

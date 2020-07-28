@@ -1,43 +1,40 @@
 package grafana
 
-import (
-	"github.com/kamilsk/grafaman/internal/model"
-	entity "github.com/kamilsk/grafaman/internal/provider"
-)
+import "github.com/kamilsk/grafaman/internal/model"
 
 type dashboard struct {
-	Panels     []panel `json:"panels"`
+	Panels     []panel `json:"panels,omitempty"`
 	Templating struct {
-		List []variable `json:"list"`
-	} `json:"templating"`
+		List []variable `json:"list,omitempty"`
+	} `json:"templating,omitempty"`
 }
 
 type panel struct {
-	ID      int      `json:"id"`
-	Title   string   `json:"title"`
-	Type    string   `json:"type"`
-	Panels  []panel  `json:"panels"`
-	Targets []target `json:"targets"`
+	ID      int      `json:"id,omitempty"`
+	Title   string   `json:"title,omitempty"`
+	Type    string   `json:"type,omitempty"`
+	Panels  []panel  `json:"panels,omitempty"`
+	Targets []target `json:"targets,omitempty"`
 }
 
 type target struct {
-	Query string `json:"target"`
+	Query string `json:"target,omitempty"`
 }
 
 type variable struct {
-	Name    string        `json:"name"`
-	Options []option      `json:"options"`
-	Current currentOption `json:"current"`
+	Name    string        `json:"name,omitempty"`
+	Options []option      `json:"options,omitempty"`
+	Current currentOption `json:"current,omitempty"`
 }
 
 type option struct {
-	Text  string `json:"text"`
-	Value string `json:"value"`
+	Text  string `json:"text,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 type currentOption struct {
-	Text  string      `json:"text"`
-	Value interface{} `json:"value"` // string or []string
+	Text  string      `json:"text,omitempty"`
+	Value interface{} `json:"value,omitempty"` // string or []string
 }
 
 func convertTargets(in []target) []model.Query {
@@ -66,13 +63,13 @@ func fetchTargets(panels []panel) []target {
 	return targets
 }
 
-func convertVariables(in []variable) []entity.Variable {
-	out := make([]entity.Variable, 0, len(in))
+func convertVariables(in []variable) []model.Variable {
+	out := make([]model.Variable, 0, len(in))
 
 	for _, v := range in {
-		variable := entity.Variable{Name: v.Name, Options: make([]entity.Option, 0, len(v.Options))}
+		variable := model.Variable{Name: v.Name, Options: make([]model.Option, 0, len(v.Options))}
 		for _, opt := range v.Options {
-			variable.Options = append(variable.Options, entity.Option{Name: opt.Text, Value: opt.Value})
+			variable.Options = append(variable.Options, model.Option{Name: opt.Text, Value: opt.Value})
 		}
 		out = append(out, variable)
 	}

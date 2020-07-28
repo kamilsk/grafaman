@@ -15,12 +15,10 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
-	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/provider/graphite/cache"
 	"github.com/kamilsk/grafaman/internal/repl"
-	"github.com/kamilsk/grafaman/internal/reporter"
 )
 
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
@@ -75,7 +73,7 @@ func NewCoverageCommand(
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				metrics   model.Metrics
-				dashboard *entity.Dashboard
+				dashboard *model.Dashboard
 			)
 
 			g, ctx := errgroup.WithContext(cmd.Context())
@@ -109,7 +107,7 @@ func NewCoverageCommand(
 				return err
 			}
 
-			queries, err := dashboard.Queries(entity.Transform{
+			queries, err := dashboard.Queries(model.Transform{
 				SkipRaw:        false,
 				SkipDuplicates: false,
 				NeedSorting:    true,
@@ -120,7 +118,7 @@ func NewCoverageCommand(
 				return err
 			}
 
-			coverage := reporter.MustNew(queries)
+			coverage := model.NewCoverageReporter(queries)
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {

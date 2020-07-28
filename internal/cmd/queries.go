@@ -9,7 +9,6 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
-	entity "github.com/kamilsk/grafaman/internal/provider"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 )
 
@@ -64,7 +63,7 @@ func NewQueriesCommand(
 			}
 
 			dashboard.Prefix = config.Graphite.Prefix
-			queries, err := dashboard.Queries(entity.Transform{
+			queries, err := dashboard.Queries(model.Transform{
 				SkipRaw:        raw,
 				SkipDuplicates: duplicates,
 				TrimPrefixes:   trim,

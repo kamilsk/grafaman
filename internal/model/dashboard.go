@@ -1,22 +1,20 @@
-package provider
+package model
 
 import (
 	"strings"
 
 	"github.com/go-graphite/carbonapi/pkg/parser"
 	"github.com/pkg/errors"
-
-	"github.com/kamilsk/grafaman/internal/model"
 )
 
 type Dashboard struct {
 	Prefix    string
-	RawData   []model.Query
+	RawData   []Query
 	Variables []Variable
 }
 
-func (dashboard *Dashboard) Queries(cfg Transform) (model.Queries, error) {
-	transformed := make(model.Queries, 0, len(dashboard.RawData))
+func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
+	transformed := make(Queries, 0, len(dashboard.RawData))
 
 	for _, raw := range dashboard.RawData {
 		if dashboard.Prefix != "" && !strings.Contains(string(raw), dashboard.Prefix) {
@@ -39,7 +37,7 @@ func (dashboard *Dashboard) Queries(cfg Transform) (model.Queries, error) {
 					break
 				}
 			}
-			queries := model.Queries{model.Query(query.Metric)}
+			queries := Queries{Query(query.Metric)}
 			if cfg.Unpack && strings.Contains(query.Metric, "$") {
 				queries.Convert(unpack(query.Metric, dashboard.Variables))
 			}
@@ -48,7 +46,7 @@ func (dashboard *Dashboard) Queries(cfg Transform) (model.Queries, error) {
 	}
 
 	if !cfg.SkipDuplicates {
-		registry := map[model.Query]struct{}{}
+		registry := map[Query]struct{}{}
 
 		// preserve order
 		iterator := transformed

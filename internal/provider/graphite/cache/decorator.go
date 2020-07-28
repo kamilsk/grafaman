@@ -46,8 +46,8 @@ func (decorator *decorator) Fetch(ctx context.Context, prefix string, last time.
 	defer safe.Close(file, func(err error) { logger.WithError(err).Warning("flush data") })
 
 	var data struct {
-		Metrics model.Metrics `json:"metrics"`
-		TTL     int64         `json:"ttl"`
+		Metrics model.Metrics `json:"metrics,omitempty"`
+		TTL     int64         `json:"ttl,omitempty"`
 	}
 	if err := json.NewDecoder(file).Decode(&data); err != nil && !errors.Is(err, io.EOF) {
 		logger.WithError(err).Error("decode data")
