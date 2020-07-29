@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/c-bata/go-prompt"
@@ -64,7 +65,7 @@ func NewMetricsCommand(
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var provider cache.Graphite
-			provider, err := graphite.New(config.Graphite.URL, logger)
+			provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: time.Second}, logger)
 			if err != nil {
 				return err
 			}

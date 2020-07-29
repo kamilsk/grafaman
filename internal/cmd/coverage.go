@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/c-bata/go-prompt"
@@ -79,7 +80,7 @@ func NewCoverageCommand(
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var provider cache.Graphite
-				provider, err := graphite.New(config.Graphite.URL, logger)
+				provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: time.Second}, logger)
 				if err != nil {
 					return err
 				}

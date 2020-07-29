@@ -24,14 +24,56 @@ func TestDumpStubs(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		resp := response{
-			Code: http.StatusOK,
-			Body: []dto{},
-		}
-
-		file, err := fs.Create("testdata/success.json")
+		file, err := fs.Create("testdata/success.1.json")
 		require.NoError(t, err)
-		require.NoError(t, json.NewEncoder(file).Encode(resp))
+		require.NoError(t, json.NewEncoder(file).Encode(response{
+			Code: http.StatusOK,
+			Body: []dto{
+				{
+					ID:   "apps.services.awesome-service",
+					Text: "awesome-service",
+					Leaf: 0,
+				},
+			},
+		}))
+		require.NoError(t, file.Close())
+
+		file, err = fs.Create("testdata/success.2.json")
+		require.NoError(t, err)
+		require.NoError(t, json.NewEncoder(file).Encode(response{
+			Code: http.StatusOK,
+			Body: []dto{
+				{
+					ID:   "apps.services.awesome-service.metric",
+					Text: "metric",
+					Leaf: 0,
+				},
+			},
+		}))
+		require.NoError(t, file.Close())
+
+		file, err = fs.Create("testdata/success.3.json")
+		require.NoError(t, err)
+		require.NoError(t, json.NewEncoder(file).Encode(response{
+			Code: http.StatusOK,
+			Body: []dto{
+				{
+					ID:   "apps.services.awesome-service.metric.a",
+					Text: "a",
+					Leaf: 1,
+				},
+				{
+					ID:   "apps.services.awesome-service.metric.b",
+					Text: "a",
+					Leaf: 1,
+				},
+				{
+					ID:   "apps.services.awesome-service.metric.c",
+					Text: "a",
+					Leaf: 1,
+				},
+			},
+		}))
 		require.NoError(t, file.Close())
 	})
 }
