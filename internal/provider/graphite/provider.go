@@ -68,7 +68,7 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 		metrics    = make(model.Metrics, 0, 512)
 	)
 
-	main, ctx := errgroup.WithContext(ctx)
+	main, mainCtx := errgroup.WithContext(ctx)
 	main.Go(func() error {
 		defer provider.logger.Info("aggregator done")
 		for {
@@ -78,9 +78,9 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 					return nil
 				}
 				metrics = append(metrics, model.Metric(node.ID))
-			case <-ctx.Done():
+			case <-mainCtx.Done():
 				provider.logger.WithError(err).Error("aggregator process timeout")
-				return errors.Wrap(ctx.Err(), "graphite: aggregator process")
+				return errors.Wrap(mainCtx.Err(), "graphite: aggregator process")
 			}
 		}
 	})
@@ -104,9 +104,9 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 				request, buffer = buffer[len(buffer)-1], buffer[:len(buffer)-1]
 				select {
 				case requests <- request:
-				case <-ctx.Done():
+				case <-mainCtx.Done():
 					provider.logger.WithError(err).Error("request manager process timeout")
-					return errors.Wrap(ctx.Err(), "graphite: request manager process")
+					return errors.Wrap(mainCtx.Err(), "graphite: request manager process")
 				}
 			}
 
@@ -119,9 +119,9 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 					for _, node := range nodes {
 						if node.Leaf == 1 {
 							select {
-							case <-ctx.Done():
+							case <-mainCtx.Done():
 								provider.logger.WithError(err).Error("add metric timeout")
-								return errors.Wrap(ctx.Err(), "graphite: add metric")
+								return errors.Wrap(mainCtx.Err(), "graphite: add metric")
 							case aggregator <- node:
 							}
 							continue
@@ -132,16 +132,16 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 						request.URL.RawQuery = q.Encode()
 						buffer = append(buffer, request)
 					}
-				case <-ctx.Done():
+				case <-mainCtx.Done():
 					provider.logger.WithError(err).Error("request manager process timeout")
-					return errors.Wrap(ctx.Err(), "graphite: request manager process")
+					return errors.Wrap(mainCtx.Err(), "graphite: request manager process")
 				}
 			}
 		}
 		return nil
 	})
 
-	pool, ctx := errgroup.WithContext(ctx)
+	pool, poolCtx := errgroup.WithContext(ctx)
 	for range sequence.Simple(factor) {
 		pool.Go(func() error {
 			defer provider.logger.Info("worker done")
@@ -157,14 +157,14 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 						return err
 					}
 					select {
-					case <-ctx.Done():
+					case <-poolCtx.Done():
 						provider.logger.WithError(err).Error("worker write process timeout")
-						return errors.Wrap(ctx.Err(), "graphite: worker write process")
+						return errors.Wrap(poolCtx.Err(), "graphite: worker write process")
 					case result <- data:
 					}
-				case <-ctx.Done():
+				case <-poolCtx.Done():
 					provider.logger.WithError(err).Error("worker read process timeout")
-					return errors.Wrap(ctx.Err(), "graphite: worker read process")
+					return errors.Wrap(poolCtx.Err(), "graphite: worker read process")
 				}
 			}
 		})
