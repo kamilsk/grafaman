@@ -141,7 +141,7 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 		return nil
 	})
 
-	pool, poolCtx := errgroup.WithContext(ctx)
+	pool, poolCtx := errgroup.WithContext(mainCtx)
 	for range sequence.Simple(factor) {
 		pool.Go(func() error {
 			defer provider.logger.Info("worker done")

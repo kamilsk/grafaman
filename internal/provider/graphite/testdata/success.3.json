@@ -1,1 +1,1 @@
-{"code":200,"body":[{"id":"apps.services.awesome-service.metric.a","text":"a","leaf":1},{"id":"apps.services.awesome-service.metric.b","text":"a","leaf":1},{"id":"apps.services.awesome-service.metric.c","text":"a","leaf":1}]}
+{"code":200,"body":[{"id":"apps.services.awesome-service.metric.a","text":"a","leaf":1},{"id":"apps.services.awesome-service.metric.b","text":"b","leaf":1},{"id":"apps.services.awesome-service.metric.c","text":"c","leaf":1}]}

@@ -64,12 +64,95 @@ func TestDumpStubs(t *testing.T) {
 				},
 				{
 					ID:   "apps.services.awesome-service.metric.b",
-					Text: "a",
+					Text: "b",
 					Leaf: 1,
 				},
 				{
 					ID:   "apps.services.awesome-service.metric.c",
+					Text: "c",
+					Leaf: 1,
+				},
+			},
+		}))
+		require.NoError(t, file.Close())
+	})
+
+	t.Run("parallel", func(t *testing.T) {
+		file, err := fs.Create("testdata/parallel.1.json")
+		require.NoError(t, err)
+		require.NoError(t, json.NewEncoder(file).Encode(response{
+			Code: http.StatusOK,
+			Body: []dto{
+				{
+					ID:   "apps.services.awesome-service",
+					Text: "awesome-service",
+					Leaf: 0,
+				},
+			},
+		}))
+		require.NoError(t, file.Close())
+
+		file, err = fs.Create("testdata/parallel.2.json")
+		require.NoError(t, err)
+		require.NoError(t, json.NewEncoder(file).Encode(response{
+			Code: http.StatusOK,
+			Body: []dto{
+				{
+					ID:   "apps.services.awesome-service.external",
+					Text: "external",
+					Leaf: 0,
+				},
+				{
+					ID:   "apps.services.awesome-service.internal",
+					Text: "internal",
+					Leaf: 0,
+				},
+			},
+		}))
+		require.NoError(t, file.Close())
+
+		file, err = fs.Create("testdata/parallel.3-1.json")
+		require.NoError(t, err)
+		require.NoError(t, json.NewEncoder(file).Encode(response{
+			Code: http.StatusOK,
+			Body: []dto{
+				{
+					ID:   "apps.services.awesome-service.external.a",
 					Text: "a",
+					Leaf: 1,
+				},
+				{
+					ID:   "apps.services.awesome-service.external.b",
+					Text: "b",
+					Leaf: 1,
+				},
+				{
+					ID:   "apps.services.awesome-service.external.c",
+					Text: "c",
+					Leaf: 1,
+				},
+			},
+		}))
+		require.NoError(t, file.Close())
+
+		file, err = fs.Create("testdata/parallel.3-2.json")
+		require.NoError(t, err)
+		require.NoError(t, json.NewEncoder(file).Encode(response{
+			Code: http.StatusOK,
+			Body: []dto{
+				{
+					ID:   "apps.services.awesome-service.internal.a",
+					Text: "a",
+					Leaf: 1,
+				},
+				{
+					ID:   "apps.services.awesome-service.internal.b",
+					Text: "b",
+					Leaf: 1,
+				},
+				{
+					ID:   "apps.services.awesome-service.internal.c",
+					Text: "c",
 					Leaf: 1,
 				},
 			},

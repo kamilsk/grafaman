@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
@@ -40,13 +42,13 @@ func TestProvider(t *testing.T) {
 		client := NewMockClient(ctrl)
 		client.EXPECT().
 			Do(gomock.Any()).
-			Return(response("testdata/success.1.json"))
+			Return(response("testdata/success.1.json")) // nolint:bodyclose
 		client.EXPECT().
 			Do(gomock.Any()).
-			Return(response("testdata/success.2.json"))
+			Return(response("testdata/success.2.json")) // nolint:bodyclose
 		client.EXPECT().
 			Do(gomock.Any()).
-			Return(response("testdata/success.3.json"))
+			Return(response("testdata/success.3.json")) // nolint:bodyclose
 
 		provider, err := New("test", client, logger)
 		require.NoError(t, err)
@@ -64,9 +66,104 @@ func TestProvider(t *testing.T) {
 		provider, err := New("test", nil, logger)
 		require.NoError(t, err)
 
-		metrics, err := provider.Fetch(nil, "apps.services.awesome-service", xtime.Day)
+		metrics, err := provider.Fetch(nil, "apps.services.awesome-service", xtime.Day) // nolint:staticcheck
 		assert.Error(t, err)
 		assert.Nil(t, metrics)
+	})
+
+	t.Run("service unavailable", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		client := NewMockClient(ctrl)
+		client.EXPECT().
+			Do(gomock.Any()).
+			Return(nil, errors.New(http.StatusText(http.StatusServiceUnavailable)))
+
+		provider, err := New("test", client, logger)
+		require.NoError(t, err)
+
+		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
+		assert.Error(t, err)
+		assert.Nil(t, metrics)
+	})
+
+	t.Run("bad response", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		client := NewMockClient(ctrl)
+		client.EXPECT().
+			Do(gomock.Any()).
+			Return(response("testdata/invalid.json")) // nolint:bodyclose
+
+		provider, err := New("test", client, logger)
+		require.NoError(t, err)
+
+		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
+		assert.Error(t, err)
+		assert.Nil(t, metrics)
+	})
+
+	t.Run("context deadline exceeded", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		ctx, cancel := context.WithCancel(ctx)
+
+		client := NewMockClient(ctrl)
+		client.EXPECT().
+			Do(gomock.Any()).
+			DoAndReturn(func(*http.Request) (*http.Response, error) {
+				time.Sleep(15 * time.Millisecond)
+				cancel()
+				return response("testdata/success.1.json")
+			})
+
+		provider, err := New("test", client, logger)
+		require.NoError(t, err)
+
+		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
+		assert.Error(t, err)
+		assert.Nil(t, metrics)
+		time.Sleep(15 * time.Millisecond)
+	})
+
+	t.Run("parallel with deadline", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		ctx, cancel := context.WithCancel(ctx)
+
+		client := NewMockClient(ctrl)
+		client.EXPECT().
+			Do(gomock.Any()).
+			Return(response("testdata/parallel.1.json")) // nolint:bodyclose
+		client.EXPECT().
+			Do(gomock.Any()).
+			Return(response("testdata/parallel.2.json")) // nolint:bodyclose
+		client.EXPECT().
+			Do(gomock.Any()).
+			DoAndReturn(func(*http.Request) (*http.Response, error) {
+				defer cancel()
+				return response("testdata/parallel.3-1.json")
+			}).
+			AnyTimes()
+		client.EXPECT().
+			Do(gomock.Any()).
+			DoAndReturn(func(*http.Request) (*http.Response, error) {
+				defer cancel()
+				return response("testdata/parallel.3-2.json")
+			}).
+			AnyTimes()
+
+		provider, err := New("test", client, logger)
+		require.NoError(t, err)
+
+		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
+		assert.Error(t, err)
+		assert.Nil(t, metrics)
+		time.Sleep(20 * time.Millisecond)
 	})
 }
 
