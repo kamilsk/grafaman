@@ -20,20 +20,20 @@ import (
 )
 
 // New returns an instance of Grafana dashboard provider.
-func New(endpoint string, logger *logrus.Logger) (*provider, error) {
+func New(endpoint string, client Client, logger *logrus.Logger) (*provider, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "grafana: prepare dashboard provider endpoint URL")
 	}
 	return &provider{
-		client:   &http.Client{Timeout: time.Second},
+		client:   client,
 		endpoint: *u,
 		logger:   logger,
 	}, nil
 }
 
 type provider struct {
-	client   *http.Client
+	client   Client
 	endpoint url.URL
 	logger   *logrus.Logger
 }

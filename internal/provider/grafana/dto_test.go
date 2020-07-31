@@ -43,15 +43,80 @@ func TestDumpStubs(t *testing.T) {
 		fs = afero.NewOsFs()
 	}
 
+	type payload struct {
+		Dashboard dashboard `json:"dashboard,omitempty"`
+	}
+
 	type response struct {
-		Code int       `json:"code,omitempty"`
-		Body dashboard `json:"body,omitempty"`
+		Code int     `json:"code,omitempty"`
+		Body payload `json:"body,omitempty"`
 	}
 
 	t.Run("success", func(t *testing.T) {
 		resp := response{
 			Code: http.StatusOK,
-			Body: dashboard{},
+			Body: payload{
+				Dashboard: dashboard{
+					Panels: []panel{
+						{
+							ID:    1,
+							Title: "Panel A",
+							Type:  "singlestat",
+							Targets: []target{
+								{
+									Query: "sumSeriesWithWildcards(movingSum(apps.services.*.rpc.*, '1min'), 3, 5)",
+								},
+							},
+						},
+						{
+							ID:    2,
+							Title: "Error rate",
+							Type:  "row",
+							Panels: []panel{
+								{
+									ID:    3,
+									Title: "Panel B",
+									Type:  "graph",
+									Targets: []target{
+										{
+											Query: "aliasByNode(movingSum(apps.services.*.errors.*, '1min'), 3, 6, 5)",
+										},
+									},
+								},
+							},
+						},
+					},
+					Templating: templating{
+						List: []variable{
+							{
+								Name:    "env",
+								Options: []option{},
+								Current: currentOption{
+									Text:  "prod",
+									Value: "prod",
+								},
+							},
+							{
+								Name: "source",
+								Options: []option{
+									{
+										Text:  "All",
+										Value: "$__all",
+									},
+									{
+										Text:  "service",
+										Value: "service",
+									},
+								},
+								Current: currentOption{
+									Text:  "All",
+									Value: []interface{}{"$__all"},
+								},
+							},
+						},
+					},
+				},
+			},
 		}
 
 		file, err := fs.Create("testdata/success.json")

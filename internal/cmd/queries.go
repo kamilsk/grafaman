@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -53,7 +56,7 @@ func NewQueriesCommand(
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			provider, err := grafana.New(config.Grafana.URL, logger)
+			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger)
 			if err != nil {
 				return err
 			}

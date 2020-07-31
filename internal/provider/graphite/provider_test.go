@@ -29,12 +29,6 @@ func TestProvider(t *testing.T) {
 	logger := logrus.New()
 	logger.SetOutput(ioutil.Discard)
 
-	t.Run("bad endpoint", func(t *testing.T) {
-		provider, err := New(":invalid", nil, logger)
-		assert.Error(t, err)
-		assert.Nil(t, provider)
-	})
-
 	t.Run("success fetch", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -60,6 +54,12 @@ func TestProvider(t *testing.T) {
 			"apps.services.awesome-service.metric.b",
 			"apps.services.awesome-service.metric.c",
 		}, metrics)
+	})
+
+	t.Run("bad endpoint", func(t *testing.T) {
+		provider, err := New(":invalid", nil, logger)
+		assert.Error(t, err)
+		assert.Nil(t, provider)
 	})
 
 	t.Run("nil context", func(t *testing.T) {

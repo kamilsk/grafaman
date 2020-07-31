@@ -97,7 +97,7 @@ func NewCoverageCommand(
 				return nil
 			})
 			g.Go(func() error {
-				provider, err := grafana.New(config.Grafana.URL, logger)
+				provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger)
 				if err != nil {
 					return err
 				}

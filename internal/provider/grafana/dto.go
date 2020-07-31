@@ -3,10 +3,8 @@ package grafana
 import "github.com/kamilsk/grafaman/internal/model"
 
 type dashboard struct {
-	Panels     []panel `json:"panels,omitempty"`
-	Templating struct {
-		List []variable `json:"list,omitempty"`
-	} `json:"templating,omitempty"`
+	Panels     []panel    `json:"panels,omitempty"`
+	Templating templating `json:"templating,omitempty"`
 }
 
 type panel struct {
@@ -15,6 +13,10 @@ type panel struct {
 	Type    string   `json:"type,omitempty"`
 	Panels  []panel  `json:"panels,omitempty"`
 	Targets []target `json:"targets,omitempty"`
+}
+
+type templating struct {
+	List []variable `json:"list,omitempty"`
 }
 
 type target struct {
