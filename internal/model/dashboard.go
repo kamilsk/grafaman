@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// A Config contains configuration to process raw queries of a Dashboard.
 type Config struct {
 	SkipRaw        bool
 	SkipDuplicates bool
@@ -15,12 +16,14 @@ type Config struct {
 	TrimPrefixes   []string
 }
 
+// A Dashboard represents Grafana dashboard.
 type Dashboard struct {
 	Prefix    string
 	RawData   []Query
 	Variables []Variable
 }
 
+// Queries applies variables to raw queries to transform them.
 func (dashboard *Dashboard) Queries(cfg Config) (Queries, error) {
 	transformed := make(Queries, 0, len(dashboard.RawData))
 
@@ -63,6 +66,7 @@ func (dashboard *Dashboard) Queries(cfg Config) (Queries, error) {
 			if _, present := registry[query]; present {
 				continue
 			}
+			registry[query] = struct{}{}
 			transformed = append(transformed, query)
 		}
 	}
@@ -86,12 +90,14 @@ func unpack(metric string, variables []Variable) []string {
 	return []string{metric}
 }
 
-type Variable struct {
-	Name    string
-	Options []Option
-}
-
+// An Option represents a possible value of the Variable.
 type Option struct {
 	Name  string
 	Value string
+}
+
+// A Variable represents a Grafana dashboard variable.
+type Variable struct {
+	Name    string
+	Options []Option
 }
