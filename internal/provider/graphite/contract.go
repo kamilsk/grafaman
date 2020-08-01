@@ -4,7 +4,7 @@ import "net/http"
 
 //go:generate mockgen -source $GOFILE -destination mocks_test.go -package ${GOPACKAGE}_test
 
-// Client defines HTTP client interface.
+// A Client defines the basic HTTP client interface.
 type Client interface {
 	Do(*http.Request) (*http.Response, error)
 }

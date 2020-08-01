@@ -6,7 +6,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/model"
 )
 
-// Config contains all necessary tool configuration.
+// A Config contains all necessary tool configuration.
 type Config struct {
 	Grafana struct {
 		URL       string `mapstructure:"grafana"`

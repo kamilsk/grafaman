@@ -81,7 +81,7 @@ func New() *cobra.Command {
 		flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
 	}
 	flags.BoolVar(&debug, "debug", false, "enable debug")
-	flags.StringVarP(&format, "format", "f", printer.DefaultFormat(), "output format")
+	flags.StringVarP(&format, "format", "f", presenter.DefaultFormat, "output format")
 	flags.CountVarP(&verbose, "verbose", "v", "increase the verbosity of messages if debug enabled")
 	fn.Must(
 		func() error { return viper.BindPFlag("config", flags.Lookup("env-file")) },

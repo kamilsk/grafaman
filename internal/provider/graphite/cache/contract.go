@@ -11,7 +11,7 @@ import (
 
 //go:generate mockgen -source $GOFILE -destination mocks_test.go -package ${GOPACKAGE}_test
 
-// Graphite defines Graphite provider interface.
+// A Graphite defines Graphite provider interface.
 type Graphite interface {
 	Fetch(context.Context, string, time.Duration) (model.Metrics, error)
 }
