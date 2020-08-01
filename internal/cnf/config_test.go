@@ -16,9 +16,9 @@ func TestConfig_FilterQuery(t *testing.T) {
 		config   map[string]interface{}
 		expected model.Query
 	}{
-		"empty input": {},
+		"empty input": {expected: "*"},
 		"with prefix only": {
-			config: map[string]interface{}{"metrics": "set"},
+			config: map[string]interface{}{"metrics": "set"}, expected: "set.*",
 		},
 		"with filter only": {
 			config: map[string]interface{}{"filter": "subset.*"}, expected: "subset.*",

@@ -22,7 +22,10 @@ type Config struct {
 // FilterQuery returns a Query to filter metrics.
 func (config Config) FilterQuery() model.Query {
 	filter, prefix := config.Graphite.Filter, config.Graphite.Prefix
-	if filter != "" && !strings.HasPrefix(filter, prefix) {
+	if filter == "" {
+		filter = "*"
+	}
+	if !strings.HasPrefix(filter, prefix) {
 		filter = prefix + "." + filter
 	}
 	return model.Query(filter)
