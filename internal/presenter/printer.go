@@ -7,16 +7,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+// A Printer provides functionality to output data.
 type Printer struct {
 	format string
 	prefix string
 	output io.Writer
 }
 
-func (printer *Printer) DefaultFormat() string {
-	return formatDefault
-}
-
+// SetFormat sets output format, e.g. json or tsv.
 func (printer *Printer) SetFormat(format string) error {
 	var present bool
 	for _, supported := range formats {
@@ -32,17 +30,19 @@ func (printer *Printer) SetFormat(format string) error {
 	return nil
 }
 
+// SetPrefix sets prefix to trim it from metric names.
 func (printer *Printer) SetPrefix(prefix string) {
 	printer.prefix = prefix
 }
 
+// SetOutput sets output.
 func (printer *Printer) SetOutput(output io.Writer) *Printer {
 	printer.output = output
 	return printer
 }
 
 const (
-	formatDefault     = "default"
+	DefaultFormat     = "default"
 	formatCompact     = "compact"
 	formatCompactLite = "compact-lite"
 	formatMarkdown    = "markdown"
@@ -54,7 +54,7 @@ const (
 
 var (
 	formats = []string{
-		formatDefault,
+		DefaultFormat,
 		formatCompact,
 		formatCompactLite,
 		formatMarkdown,
@@ -64,7 +64,7 @@ var (
 		formatTSV,
 	}
 	styles = map[string]*simpletable.Style{
-		formatDefault:     simpletable.StyleDefault,
+		DefaultFormat:     simpletable.StyleDefault,
 		formatCompact:     simpletable.StyleCompact,
 		formatCompactLite: simpletable.StyleCompactLite,
 		formatMarkdown:    simpletable.StyleMarkdown,

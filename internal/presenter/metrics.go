@@ -12,22 +12,23 @@ import (
 	"github.com/kamilsk/grafaman/internal/model"
 )
 
+// PrintMetrics prints metrics in a specific format.
 func (printer *Printer) PrintMetrics(metrics model.Metrics) error {
 	switch printer.format {
 	case formatJSON:
-		return PrintMetricsAsJSON(printer.output, metrics)
+		return printMetricsAsJSON(printer.output, metrics)
 	case formatTSV:
-		return PrintMetricsAsTSV(printer.output, metrics)
+		return printMetricsAsTSV(printer.output, metrics)
 	default:
-		return PrintMetricsAsTable(printer.output, metrics, styles[printer.format], printer.prefix)
+		return printMetricsAsTable(printer.output, metrics, styles[printer.format], printer.prefix)
 	}
 }
 
-func PrintMetricsAsJSON(output io.Writer, metrics model.Metrics) error {
+func printMetricsAsJSON(output io.Writer, metrics model.Metrics) error {
 	return errors.Wrap(json.NewEncoder(output).Encode(metrics), "presenter: output result as json")
 }
 
-func PrintMetricsAsTable(output io.Writer, metrics model.Metrics, style *simpletable.Style, prefix string) error {
+func printMetricsAsTable(output io.Writer, metrics model.Metrics, style *simpletable.Style, prefix string) error {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
@@ -51,7 +52,7 @@ func PrintMetricsAsTable(output io.Writer, metrics model.Metrics, style *simplet
 	return errors.Wrap(err, "presenter: output result as table")
 }
 
-func PrintMetricsAsTSV(output io.Writer, metrics model.Metrics) error {
+func printMetricsAsTSV(output io.Writer, metrics model.Metrics) error {
 	for _, metric := range metrics {
 		if _, err := fmt.Fprintln(output, metric); err != nil {
 			return errors.Wrap(err, "presenter: output result as TSV")

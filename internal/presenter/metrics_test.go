@@ -32,7 +32,7 @@ func TestPrinter_PrintMetrics(t *testing.T) {
 	}{
 		"default": {
 			output: bytes.NewBuffer(nil),
-			format: (*Printer)(nil).DefaultFormat(),
+			format: DefaultFormat,
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 

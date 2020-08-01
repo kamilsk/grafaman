@@ -13,22 +13,23 @@ import (
 	"github.com/kamilsk/grafaman/internal/model"
 )
 
+// PrintCoverage prints coverage report in a specific format.
 func (printer *Printer) PrintCoverage(report model.CoverageReport) error {
 	switch printer.format {
 	case formatJSON:
-		return PrintCoverageAsJSON(printer.output, report)
+		return printCoverageAsJSON(printer.output, report)
 	case formatTSV:
-		return PrintCoverageAsTSV(printer.output, report)
+		return printCoverageAsTSV(printer.output, report)
 	default:
-		return PrintCoverageAsTable(printer.output, report, styles[printer.format], printer.prefix)
+		return printCoverageAsTable(printer.output, report, styles[printer.format], printer.prefix)
 	}
 }
 
-func PrintCoverageAsJSON(output io.Writer, report model.CoverageReport) error {
+func printCoverageAsJSON(output io.Writer, report model.CoverageReport) error {
 	return errors.Wrap(json.NewEncoder(output).Encode(report), "presenter: output result as json")
 }
 
-func PrintCoverageAsTable(output io.Writer, report model.CoverageReport, style *simpletable.Style, prefix string) error {
+func printCoverageAsTable(output io.Writer, report model.CoverageReport, style *simpletable.Style, prefix string) error {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
@@ -55,7 +56,7 @@ func PrintCoverageAsTable(output io.Writer, report model.CoverageReport, style *
 	return errors.Wrap(err, "presenter: output result as table")
 }
 
-func PrintCoverageAsTSV(output io.Writer, report model.CoverageReport) error {
+func printCoverageAsTSV(output io.Writer, report model.CoverageReport) error {
 	for _, metric := range report.Metrics {
 		if _, err := fmt.Fprintln(output, metric.Metric, "\t", strconv.Itoa(metric.Hits)); err != nil {
 			return errors.Wrap(err, "presenter: output result as TSV")
