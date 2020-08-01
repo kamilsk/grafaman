@@ -108,7 +108,7 @@ func NewCoverageCommand(
 				return err
 			}
 
-			queries, err := dashboard.Queries(model.Transform{
+			queries, err := dashboard.Queries(model.Config{
 				SkipRaw:        false,
 				SkipDuplicates: false,
 				NeedSorting:    true,

@@ -22,7 +22,6 @@ import (
 
 func TestProvider(t *testing.T) {
 	ctx := context.Background()
-	_ = ctx
 
 	logger := logrus.New()
 	logger.SetOutput(ioutil.Discard)

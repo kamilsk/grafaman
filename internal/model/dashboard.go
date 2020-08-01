@@ -7,13 +7,21 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Config struct {
+	SkipRaw        bool
+	SkipDuplicates bool
+	NeedSorting    bool
+	Unpack         bool
+	TrimPrefixes   []string
+}
+
 type Dashboard struct {
 	Prefix    string
 	RawData   []Query
 	Variables []Variable
 }
 
-func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
+func (dashboard *Dashboard) Queries(cfg Config) (Queries, error) {
 	transformed := make(Queries, 0, len(dashboard.RawData))
 
 	for _, raw := range dashboard.RawData {
@@ -66,27 +74,16 @@ func (dashboard *Dashboard) Queries(cfg Transform) (Queries, error) {
 }
 
 func unpack(metric string, variables []Variable) []string {
-	for i, variable := range variables {
+	for _, variable := range variables {
 		env := "$" + variable.Name
 		if !strings.Contains(metric, env) {
 			continue
 		}
-		result := make([]string, 0, len(variable.Options))
-		for _, option := range variable.Options {
-			// TODO:research some variable has $__all option
-			result = append(result, unpack(strings.ReplaceAll(metric, env, option.Value), variables[i+1:])...)
-		}
-		return result
+		// simplify logic: replace a variable by wildcard
+		// motivation: variable can use dynamic source and that fact increase the complexity of the algorithm
+		metric = strings.ReplaceAll(metric, env, "*")
 	}
 	return []string{metric}
-}
-
-type Transform struct {
-	SkipRaw        bool
-	SkipDuplicates bool
-	NeedSorting    bool
-	Unpack         bool
-	TrimPrefixes   []string
 }
 
 type Variable struct {

@@ -66,7 +66,7 @@ func NewQueriesCommand(
 			}
 
 			dashboard.Prefix = config.Graphite.Prefix
-			queries, err := dashboard.Queries(model.Transform{
+			queries, err := dashboard.Queries(model.Config{
 				SkipRaw:        raw,
 				SkipDuplicates: duplicates,
 				TrimPrefixes:   trim,
