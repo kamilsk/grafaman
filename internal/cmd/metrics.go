@@ -30,7 +30,6 @@ func NewMetricsCommand(
 	},
 ) *cobra.Command {
 	var (
-		collapse int
 		last     time.Duration
 		noCache  bool
 		replMode bool
@@ -98,7 +97,6 @@ func NewMetricsCommand(
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
 	}
-	flags.IntVarP(&collapse, "collapse", "c", 0, "how many levels from the right to collapse by wildcard")
 	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
 	flags.BoolVar(&replMode, "repl", false, "enable repl mode")
