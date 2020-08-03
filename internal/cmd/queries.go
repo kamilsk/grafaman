@@ -22,7 +22,6 @@ func NewQueriesCommand(
 	printer interface{ PrintQueries(model.Queries) error },
 ) *cobra.Command {
 	var (
-		trim       []string
 		duplicates bool
 		raw        bool
 		sort       bool
@@ -69,7 +68,6 @@ func NewQueriesCommand(
 			queries, err := dashboard.Queries(model.Config{
 				SkipRaw:        raw,
 				SkipDuplicates: duplicates,
-				TrimPrefixes:   trim,
 				NeedSorting:    sort,
 			})
 			if err != nil {
@@ -86,7 +84,6 @@ func NewQueriesCommand(
 		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 	}
-	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
 	flags.BoolVar(&duplicates, "allow-duplicates", false, "allow duplicates of queries")
 	flags.BoolVar(&raw, "raw", false, "leave the original values of queries")
 	flags.BoolVar(&sort, "sort", false, "need to sort queries")

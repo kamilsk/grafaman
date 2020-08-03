@@ -53,6 +53,7 @@ func TestDashboard(t *testing.T) {
 				"env.$env.apps.services.service.api.$source.$method.POST.request_time.4*.percentile.$percentile",
 				"env.$env.apps.services.service.api.$source.$method.POST.request_time.5*.count",
 				"env.$env.apps.services.service.api.$source.$method.POST.request_time.5*.percentile.$percentile",
+				"asPercent(summarize(sum(env.$env.apps.services.service.api.call.count), '1w', 'sum', false), #A, 0)",
 			},
 			Variables: []Variable{
 				{Name: "env"},
@@ -90,7 +91,6 @@ func TestDashboard(t *testing.T) {
 			SkipDuplicates: false,
 			NeedSorting:    true,
 			Unpack:         true,
-			TrimPrefixes:   []string{"complex.$env.", "env-staging.", "env.$env."},
 		})
 		require.NoError(t, err)
 		require.Len(t, queries, len(dashboard.RawData)-1)

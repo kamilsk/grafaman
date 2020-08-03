@@ -33,7 +33,6 @@ func NewCoverageCommand(
 ) *cobra.Command {
 	var (
 		exclude  []string
-		trim     []string
 		last     time.Duration
 		noCache  bool
 		replMode bool
@@ -113,7 +112,6 @@ func NewCoverageCommand(
 				SkipDuplicates: false,
 				NeedSorting:    true,
 				Unpack:         true,
-				TrimPrefixes:   trim,
 			})
 			if err != nil {
 				return err
@@ -144,7 +142,6 @@ func NewCoverageCommand(
 		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
 	}
 	flags.StringArrayVar(&exclude, "exclude", nil, "queries to exclude metrics from coverage, e.g. *.median")
-	flags.StringArrayVar(&trim, "trim", nil, "trim prefixes from queries")
 	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
 	flags.BoolVar(&replMode, "repl", false, "enable repl mode")

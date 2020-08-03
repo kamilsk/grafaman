@@ -13,7 +13,6 @@ type Config struct {
 	SkipDuplicates bool
 	NeedSorting    bool
 	Unpack         bool
-	TrimPrefixes   []string
 }
 
 // A Dashboard represents Grafana dashboard.
@@ -26,9 +25,10 @@ type Dashboard struct {
 // Queries applies variables to raw queries to transform them.
 func (dashboard *Dashboard) Queries(cfg Config) (Queries, error) {
 	transformed := make(Queries, 0, len(dashboard.RawData))
+	prefix := dashboard.Prefix
 
 	for _, raw := range dashboard.RawData {
-		if dashboard.Prefix != "" && !strings.Contains(string(raw), dashboard.Prefix) {
+		if prefix != "" && !strings.Contains(string(raw), prefix) {
 			continue
 		}
 
@@ -41,11 +41,14 @@ func (dashboard *Dashboard) Queries(cfg Config) (Queries, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "dashboard: parse expression %q", raw)
 		}
+
 		for _, query := range exp.Metrics() {
-			for _, prefix := range cfg.TrimPrefixes {
-				if strings.HasPrefix(query.Metric, prefix) {
-					query.Metric = strings.TrimPrefix(query.Metric, prefix)
-					break
+			if prefix != "" {
+				if !strings.Contains(query.Metric, prefix) {
+					continue
+				}
+				if !strings.HasPrefix(query.Metric, prefix) {
+					query.Metric = query.Metric[strings.Index(query.Metric, prefix):]
 				}
 			}
 			queries := Queries{Query(query.Metric)}
