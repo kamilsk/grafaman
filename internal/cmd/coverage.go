@@ -26,10 +26,7 @@ import (
 func NewCoverageCommand(
 	config *cnf.Config,
 	logger *logrus.Logger,
-	printer interface {
-		SetPrefix(string)
-		PrintCoverage(model.CoverageReport) error
-	},
+	printer CoverageReportPrinter,
 ) *cobra.Command {
 	var (
 		exclude  []string
@@ -117,16 +114,16 @@ func NewCoverageCommand(
 				return err
 			}
 
-			coverage := model.NewCoverageReporter(queries)
+			reporter := model.NewCoverageReporter(queries)
 
 			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
 				metrics := metrics.Filter(config.FilterQuery().MustCompile()).Sort()
-				return printer.PrintCoverage(coverage.CoverageReport(metrics))
+				return printer.PrintCoverageReport(reporter.CoverageReport(metrics))
 			}
 			metrics.Sort()
 			prompt.New(
-				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageExecutor(metrics, coverage, printer, logger)),
+				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageExecutor(metrics, reporter, printer, logger)),
 				repl.NewMetricsCompleter(config.Graphite.Prefix, metrics),
 			).Run()
 			return nil

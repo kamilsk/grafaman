@@ -2,6 +2,7 @@ package repl
 
 import "strings"
 
+// Prefix wraps an input string by the prefix.
 func Prefix(prefix string, fn func(string)) func(string) {
 	if prefix == "" {
 		return fn

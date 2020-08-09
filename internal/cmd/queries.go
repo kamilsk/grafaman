@@ -19,7 +19,7 @@ import (
 func NewQueriesCommand(
 	config *cnf.Config,
 	logger *logrus.Logger,
-	printer interface{ PrintQueries(model.Queries) error },
+	printer QueryPrinter,
 ) *cobra.Command {
 	var (
 		duplicates bool

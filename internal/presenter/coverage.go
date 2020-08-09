@@ -13,8 +13,8 @@ import (
 	"github.com/kamilsk/grafaman/internal/model"
 )
 
-// PrintCoverage prints coverage report in a specific format.
-func (printer *Printer) PrintCoverage(report model.CoverageReport) error {
+// PrintCoverageReport prints coverage report in a specific format.
+func (printer *Printer) PrintCoverageReport(report model.CoverageReport) error {
 	switch printer.format {
 	case formatJSON:
 		return printCoverageAsJSON(printer.output, report)

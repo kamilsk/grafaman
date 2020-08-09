@@ -24,10 +24,7 @@ import (
 func NewMetricsCommand(
 	config *cnf.Config,
 	logger *logrus.Logger,
-	printer interface {
-		SetPrefix(string)
-		PrintMetrics(model.Metrics) error
-	},
+	printer MetricPrinter,
 ) *cobra.Command {
 	var (
 		last     time.Duration

@@ -165,7 +165,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 			printer.SetPrefix(test.prefix)
 			require.NoError(t, printer.SetFormat(test.format))
 
-			test.assert(t, printer.PrintCoverage(coverage), test.output.String())
+			test.assert(t, printer.PrintCoverageReport(coverage), test.output.String())
 		})
 	}
 
@@ -173,6 +173,6 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		printer := new(Printer).SetOutput(new(unhealthy))
 		require.NoError(t, printer.SetFormat("tsv"))
 
-		assert.Error(t, printer.PrintCoverage(coverage))
+		assert.Error(t, printer.PrintCoverageReport(coverage))
 	})
 }

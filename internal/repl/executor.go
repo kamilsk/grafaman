@@ -8,17 +8,13 @@ import (
 
 func NewCoverageExecutor(
 	metrics model.Metrics,
-	reporter interface {
-		CoverageReport(model.Metrics) model.CoverageReport
-	},
-	printer interface {
-		PrintCoverage(model.CoverageReport) error
-	},
+	reporter CoverageReporter,
+	printer CoverageReportPrinter,
 	logger *logrus.Logger,
 ) func(string) {
 	return func(q string) {
 		metrics := metrics.Filter(model.Query(q).MustCompile()).Sort()
-		if err := printer.PrintCoverage(reporter.CoverageReport(metrics)); err != nil {
+		if err := printer.PrintCoverageReport(reporter.CoverageReport(metrics)); err != nil {
 			logger.WithError(err).Error("repl: print coverage report")
 			return
 		}
@@ -27,7 +23,7 @@ func NewCoverageExecutor(
 
 func NewMetricsExecutor(
 	metrics model.Metrics,
-	printer interface{ PrintMetrics(model.Metrics) error },
+	printer MetricPrinter,
 	logger *logrus.Logger,
 ) func(string) {
 	return func(q string) {
