@@ -10,22 +10,22 @@
 
 ```bash
 $ grafaman coverage \
-    --grafana https://grafana.api/ -d DTknF4rik \
+    --grafana https://grafana.api/ --dashboard DTknF4rik \
     --graphite https://graphite.api/ \
     --metrics apps.services.awesome-service
-# +--------------------------------------------------------------------+--------+
-# | Metric                                                             | Hits   |
-# +--------------------------------------------------------------------+--------+
-# | apps.services.awesome-service.jaeger.finished_spans_sampled_n      |      0 |
-# | apps.services.awesome-service.rpc.client.success.ok.percentile.75  |      1 |
-# | apps.services.awesome-service.rpc.client.success.ok.percentile.95  |      1 |
-# | apps.services.awesome-service.rpc.client.success.ok.percentile.99  |      2 |
-# | apps.services.awesome-service.rpc.client.success.ok.percentile.999 |      1 |
-# | ...                                                                |    ... |
-# | apps.services.awesome-service.go.pod-5dbdcd5dbb-6z58f.threads      |      0 |
-# +--------------------------------------------------------------------+--------+
-# |                                                              Total | 65.77% |
-# +--------------------------------------------------------------------+--------+
+# +-----------------------------------------+--------+
+# | Metric of apps.services.awesome-service | Hits   |
+# +-----------------------------------------+--------+
+# | jaeger.finished_spans_sampled_n         |      0 |
+# | rpc.client.success.ok.percentile.75     |      1 |
+# | rpc.client.success.ok.percentile.95     |      1 |
+# | rpc.client.success.ok.percentile.99     |      2 |
+# | rpc.client.success.ok.percentile.999    |      1 |
+# | ...                                     |    ... |
+# | go.pod-5dbdcd5dbb-6z58f.threads         |      0 |
+# +-----------------------------------------+--------+
+# |                                   Total | 65.77% |
+# +-----------------------------------------+--------+
 ```
 
 A full description of the idea is available [here][design.page].
@@ -34,7 +34,7 @@ A full description of the idea is available [here][design.page].
 
 At [Avito](https://tech.avito.ru/), we develop many services built on top of our excellent
 [PaaS](https://en.wikipedia.org/wiki/Platform_as_a_service) and internal modules. These services send
-a lot of metrics about their internal state that are then output to [Grafana][] dashboards.
+a lot of metrics about their internal state which are then output to [Grafana][] dashboards.
 
 I need a tool that helps me to understand what metrics are published by services
 and how many of them are presented at [Grafana][] dashboards.
@@ -49,8 +49,7 @@ $ grafaman coverage \
     --graphite https://graphite.api/ \
     -m apps.services.awesome-service \
     --last 24h \
-    --trim='complex.$env.' --trim='env.$env.' \
-    --exclude='*.count' --exclude='*.max' --exclude='*.min' --exclude='*.sum'
+    --exclude='*.max' --exclude='*.mean' --exclude='*.median' --exclude='*.min' --exclude='*.sum'
 ```
 
 **Supported environment variables:**
@@ -114,7 +113,6 @@ $ grafaman metrics -e https://graphite.api/ -m apps.services.awesome-service --l
 ```bash
 $ grafaman queries -e https://grafana.api/ -d DTknF4rik \
     -m apps.services.awesome-service \
-    --trim='complex.$env.' --trim='env.$env.' \
     --sort
 ```
 

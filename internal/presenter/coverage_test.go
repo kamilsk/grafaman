@@ -32,6 +32,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"default": {
 			output: bytes.NewBuffer(nil),
 			format: DefaultFormat,
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
@@ -48,6 +49,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"compact": {
 			output: bytes.NewBuffer(nil),
 			format: "compact",
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
@@ -64,6 +66,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"compact-lite": {
 			output: bytes.NewBuffer(nil),
 			format: "compact-lite",
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
@@ -80,6 +83,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"markdown": {
 			output: bytes.NewBuffer(nil),
 			format: "markdown",
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
@@ -96,6 +100,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"rounded": {
 			output: bytes.NewBuffer(nil),
 			format: "rounded",
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
@@ -112,6 +117,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"unicode": {
 			output: bytes.NewBuffer(nil),
 			format: "unicode",
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
@@ -128,6 +134,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"json": {
 			output: bytes.NewBuffer(nil),
 			format: "json",
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
@@ -144,6 +151,7 @@ func TestPrinter_PrintCoverage(t *testing.T) {
 		"tsv": {
 			output: bytes.NewBuffer(nil),
 			format: "tsv",
+			prefix: "metric",
 			assert: func(t require.TestingT, err error, output string) {
 				require.NoError(t, err)
 
