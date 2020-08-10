@@ -1,4 +1,4 @@
-# github.com/alexeyco/simpletable v0.0.0-20200203113705-55bd62a5b8df
+# github.com/alexeyco/simpletable v0.0.0-20200730140406-5bb24159ccfb
 github.com/alexeyco/simpletable
 # github.com/c-bata/go-prompt v0.2.3
 github.com/c-bata/go-prompt
@@ -17,7 +17,7 @@ github.com/gobwas/glob/syntax/ast
 github.com/gobwas/glob/syntax/lexer
 github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
-# github.com/golang/mock v1.4.3
+# github.com/golang/mock v1.4.4
 github.com/golang/mock/gomock
 github.com/golang/mock/mockgen/model
 # github.com/hashicorp/hcl v1.0.0
@@ -51,7 +51,7 @@ github.com/mattn/go-runewidth
 github.com/mattn/go-tty
 # github.com/mitchellh/mapstructure v1.3.3
 github.com/mitchellh/mapstructure
-# github.com/pelletier/go-toml v1.2.0
+# github.com/pelletier/go-toml v1.8.0
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
@@ -61,7 +61,7 @@ github.com/pkg/term/termios
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.6.0
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.3.2
+# github.com/spf13/afero v1.3.4
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.3.0
@@ -72,7 +72,7 @@ github.com/spf13/cobra
 github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/spf13/viper v1.7.0
+# github.com/spf13/viper v1.7.1
 github.com/spf13/viper
 # github.com/stretchr/testify v1.6.1
 github.com/stretchr/testify/assert
@@ -97,7 +97,7 @@ go.octolab.org/toolkit/config/http
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.2
+# golang.org/x/text v0.3.3
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 # gopkg.in/ini.v1 v1.51.0

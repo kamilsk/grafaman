@@ -54,6 +54,7 @@ $ grafaman coverage \
 
 **Supported environment variables:**
 
+- APP_NAME
 - GRAFANA_URL
 - GRAFANA_DASHBOARD
 - GRAPHITE_URL
