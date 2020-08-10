@@ -6,7 +6,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/model"
 )
 
-func NewCoverageExecutor(
+func NewCoverageReportExecutor(
 	metrics model.Metrics,
 	reporter CoverageReporter,
 	printer CoverageReportPrinter,
@@ -21,7 +21,7 @@ func NewCoverageExecutor(
 	}
 }
 
-func NewMetricsExecutor(
+func NewMetricExecutor(
 	metrics model.Metrics,
 	printer MetricPrinter,
 	logger *logrus.Logger,

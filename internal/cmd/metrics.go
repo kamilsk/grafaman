@@ -81,7 +81,7 @@ func NewMetricsCommand(
 			}
 			metrics.Sort()
 			prompt.New(
-				repl.Prefix(config.Graphite.Prefix, repl.NewMetricsExecutor(metrics, printer, logger)),
+				repl.Prefix(config.Graphite.Prefix, repl.NewMetricExecutor(metrics, printer, logger)),
 				repl.NewMetricsCompleter(config.Graphite.Prefix, metrics),
 			).Run()
 			return nil

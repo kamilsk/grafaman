@@ -123,7 +123,7 @@ func NewCoverageCommand(
 			}
 			metrics.Sort()
 			prompt.New(
-				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageExecutor(metrics, reporter, printer, logger)),
+				repl.Prefix(config.Graphite.Prefix, repl.NewCoverageReportExecutor(metrics, reporter, printer, logger)),
 				repl.NewMetricsCompleter(config.Graphite.Prefix, metrics),
 			).Run()
 			return nil
