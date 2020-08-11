@@ -18,6 +18,7 @@ import (
 func New() *cobra.Command {
 	var (
 		debug   bool
+		host    string
 		format  string
 		verbose int
 		config  = new(cnf.Config)
@@ -47,7 +48,7 @@ func New() *cobra.Command {
 					logrus.SetLevel(logrus.ErrorLevel)
 				}
 
-				d, err := debugger.New(debugger.WithSpecificHost("localhost:"))
+				d, err := debugger.New(debugger.WithSpecificHost(host))
 				if err != nil {
 					return err
 				}
@@ -81,6 +82,7 @@ func New() *cobra.Command {
 		flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
 	}
 	flags.BoolVar(&debug, "debug", false, "enable debug")
+	flags.StringVar(&host, "debug-host", "localhost:", "specific debug host")
 	flags.StringVarP(&format, "format", "f", presenter.DefaultFormat, "output format")
 	flags.CountVarP(&verbose, "verbose", "v", "increase the verbosity of messages if debug enabled")
 	fn.Must(

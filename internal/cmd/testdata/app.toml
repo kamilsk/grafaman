@@ -1,0 +1,9 @@
+[envs]
+
+  [envs.local]
+
+    [envs.local.env_vars]
+      GRAFANA_DASHBOARD = "DTknF4rik"
+      GRAFANA_URL = "https://grafana.api/"
+      GRAPHITE_METRICS = "apps.services.awesome-service"
+      GRAPHITE_URL = "https://graphite.api/"
