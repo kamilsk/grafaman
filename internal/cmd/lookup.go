@@ -21,6 +21,7 @@ func NewCacheLookupCommand(
 		Use:   "cache-lookup",
 		Short: "lookup cache location",
 		Long:  "Lookup cache location.",
+
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
 			fn.Must(
@@ -28,6 +29,9 @@ func NewCacheLookupCommand(
 				func() error { return viper.Unmarshal(config) },
 			)
 
+			if config.Graphite.Prefix == "" {
+				return errors.New("please provide metric prefix")
+			}
 			if !model.Metric(config.Graphite.Prefix).Valid() {
 				return errors.Errorf(
 					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
@@ -36,6 +40,7 @@ func NewCacheLookupCommand(
 			}
 			return nil
 		},
+
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Println(cache.Filename(config.Graphite.Prefix))
 		},

@@ -39,6 +39,7 @@ func NewCoverageCommand(
 		Use:   "coverage",
 		Short: "calculates metrics coverage by queries",
 		Long:  "Calculates metrics coverage by queries.",
+
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
 			fn.Must(
@@ -56,6 +57,9 @@ func NewCoverageCommand(
 			if config.Grafana.Dashboard == "" {
 				return errors.New("please provide a dashboard unique identifier")
 			}
+			if config.Graphite.URL == "" {
+				return errors.New("please provide Graphite API endpoint")
+			}
 			if config.Graphite.Prefix == "" {
 				return errors.New("please provide metric prefix")
 			}
@@ -67,6 +71,7 @@ func NewCoverageCommand(
 			}
 			return nil
 		},
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				metrics   model.Metrics

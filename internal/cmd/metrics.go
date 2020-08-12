@@ -36,6 +36,7 @@ func NewMetricsCommand(
 		Use:   "metrics",
 		Short: "fetch metrics from Graphite",
 		Long:  "Fetch metrics from Graphite.",
+
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
 			fn.Must(
@@ -59,6 +60,7 @@ func NewMetricsCommand(
 			}
 			return nil
 		},
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var provider cache.Graphite
 			provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: time.Second}, logger)

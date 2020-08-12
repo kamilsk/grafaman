@@ -31,6 +31,7 @@ func NewQueriesCommand(
 		Use:   "queries",
 		Short: "fetch queries from a Grafana dashboard",
 		Long:  "Fetch queries from a Grafana dashboard.",
+
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
 			fn.Must(
@@ -46,7 +47,7 @@ func NewQueriesCommand(
 			if config.Grafana.Dashboard == "" {
 				return errors.New("please provide a dashboard unique identifier")
 			}
-			if !model.Metric(config.Graphite.Prefix).Valid() {
+			if config.Graphite.Prefix != "" && !model.Metric(config.Graphite.Prefix).Valid() {
 				return errors.Errorf(
 					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
 					config.Graphite.Prefix,
@@ -54,6 +55,7 @@ func NewQueriesCommand(
 			}
 			return nil
 		},
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger)
 			if err != nil {

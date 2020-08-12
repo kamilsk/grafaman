@@ -21,14 +21,16 @@ func New() *cobra.Command {
 		host    string
 		format  string
 		verbose int
-		config  = new(cnf.Config)
 		logger  = logrus.New()
+		config  = new(cnf.Config)
 		printer = new(presenter.Printer)
 	)
+
 	command := cobra.Command{
 		Use:   "grafaman",
 		Short: "metrics coverage reporter",
 		Long:  "Metrics coverage reporter for Graphite and Grafana.",
+
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := printer.SetOutput(cmd.OutOrStdout()).SetFormat(format); err != nil {
 				return err
@@ -74,9 +76,11 @@ func New() *cobra.Command {
 			}
 			return err
 		},
+
 		SilenceErrors: false,
 		SilenceUsage:  true,
 	}
+
 	flags := command.PersistentFlags()
 	{
 		flags.String("env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
@@ -85,6 +89,7 @@ func New() *cobra.Command {
 	flags.StringVar(&host, "debug-host", "localhost:", "specific debug host")
 	flags.StringVarP(&format, "format", "f", presenter.DefaultFormat, "output format")
 	flags.CountVarP(&verbose, "verbose", "v", "increase the verbosity of messages if debug enabled")
+
 	fn.Must(
 		func() error { return viper.BindPFlag("config", flags.Lookup("env-file")) },
 		func() error {
@@ -104,11 +109,13 @@ func New() *cobra.Command {
 			return viper.BindEnv("metrics", "GRAPHITE_METRICS")
 		},
 	)
+
 	command.AddCommand(
 		NewCacheLookupCommand(config, logger),
 		NewCoverageCommand(config, logger, printer),
 		NewMetricsCommand(config, logger, printer),
 		NewQueriesCommand(config, logger, printer),
 	)
+
 	return &command
 }
