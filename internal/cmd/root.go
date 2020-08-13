@@ -63,6 +63,9 @@ func New() *cobra.Command {
 			cfg.SetConfigType("dotenv")
 			err := cfg.ReadInConfig()
 			if err == nil {
+				if !cfg.InConfig("graphite_metrics") && cfg.InConfig("app_name") {
+					cfg.Set("graphite_metrics", "apps.services."+cfg.GetString("app_name"))
+				}
 				return viper.MergeConfigMap(cfg.AllSettings())
 			}
 
@@ -70,6 +73,9 @@ func New() *cobra.Command {
 				cfg.SetConfigFile("app.toml")
 				cfg.SetConfigType("toml")
 				if err, sub := cfg.ReadInConfig(), cfg.Sub("envs.local.env_vars"); err == nil && sub != nil {
+					if !sub.InConfig("graphite_metrics") && cfg.InConfig("name") {
+						sub.Set("graphite_metrics", "apps.services."+cfg.GetString("name"))
+					}
 					return viper.MergeConfigMap(sub.AllSettings())
 				}
 				err = nil
@@ -107,6 +113,10 @@ func New() *cobra.Command {
 		func() error {
 			viper.RegisterAlias("metrics", "graphite_metrics")
 			return viper.BindEnv("metrics", "GRAPHITE_METRICS")
+		},
+		func() error {
+			viper.RegisterAlias("name", "app_name")
+			return viper.BindEnv("name", "APP_NAME")
 		},
 	)
 
