@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -64,7 +65,7 @@ func New() *cobra.Command {
 			err := cfg.ReadInConfig()
 			if err == nil {
 				if !cfg.InConfig("graphite_metrics") && cfg.InConfig("app_name") {
-					cfg.Set("graphite_metrics", "apps.services."+cfg.GetString("app_name"))
+					cfg.Set("graphite_metrics", fmt.Sprintf("apps.services.%s", cfg.GetString("app_name")))
 				}
 				return viper.MergeConfigMap(cfg.AllSettings())
 			}
@@ -74,7 +75,7 @@ func New() *cobra.Command {
 				cfg.SetConfigType("toml")
 				if err, sub := cfg.ReadInConfig(), cfg.Sub("envs.local.env_vars"); err == nil && sub != nil {
 					if !sub.InConfig("graphite_metrics") && cfg.InConfig("name") {
-						sub.Set("graphite_metrics", "apps.services."+cfg.GetString("name"))
+						sub.Set("graphite_metrics", fmt.Sprintf("apps.services.%s", cfg.GetString("name")))
 					}
 					return viper.MergeConfigMap(sub.AllSettings())
 				}
