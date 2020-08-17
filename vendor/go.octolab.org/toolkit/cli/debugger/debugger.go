@@ -5,7 +5,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"sync"
-	"sync/atomic"
 
 	"github.com/pkg/errors"
 	"go.octolab.org/safe"
@@ -40,9 +39,9 @@ type debugger struct {
 	server   Server
 }
 
-// Debug runs debugger only once and returns the fact of success run.
+// Debug runs debugger only once and returns the fact if it is the first time.
 func (debugger *debugger) Debug(logger func(error), shutdown ...func()) (string, bool) {
-	var status uint32
+	var firstTime bool
 	debugger.debug.Do(func() {
 		for _, fn := range shutdown {
 			debugger.server.RegisterOnShutdown(fn)
@@ -53,9 +52,9 @@ func (debugger *debugger) Debug(logger func(error), shutdown ...func()) (string,
 			}
 			return nil
 		}, logger)
-		atomic.CompareAndSwapUint32(&status, 0, 1)
+		firstTime = true
 	})
-	return debugger.listener.Addr().String(), atomic.CompareAndSwapUint32(&status, 1, 0)
+	return debugger.listener.Addr().String(), firstTime
 }
 
 // Stop tries to stop debugger if it runs.
