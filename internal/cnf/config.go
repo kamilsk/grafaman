@@ -8,6 +8,7 @@ import (
 
 // A Config contains all necessary tool configuration.
 type Config struct {
+	Name    string `mapsructure:"name"`
 	Grafana struct {
 		URL       string `mapstructure:"grafana"`
 		Dashboard string `mapstructure:"dashboard"`
@@ -17,10 +18,18 @@ type Config struct {
 		Filter string `mapstructure:"filter"`
 		Prefix string `mapstructure:"metrics"`
 	} `mapstructure:",squash"`
+	Debug struct {
+		Enabled bool   `mapstructure:"enabled"`
+		Host    string `mapstructure:"host"`
+		Level   int    `mapstructure:"level"`
+	} `mapstructure:"debug"`
+	Output struct {
+		Format string `mapstructure:"format"`
+	} `mapstructure:"output"`
 }
 
 // FilterQuery returns a Query to filter metrics.
-func (config Config) FilterQuery() model.Query {
+func (config *Config) FilterQuery() model.Query {
 	filter, prefix := config.Graphite.Filter, config.Graphite.Prefix
 	if filter == "" {
 		filter = "*"

@@ -47,9 +47,7 @@ func NewCacheLookupCommand(
 	}
 
 	flags := command.Flags()
-	{
-		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-	}
+	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 
 	return &command
 }
