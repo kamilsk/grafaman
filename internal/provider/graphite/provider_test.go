@@ -125,45 +125,8 @@ func TestProvider(t *testing.T) {
 
 		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
 		assert.Error(t, err)
-		assert.Nil(t, metrics)
+		assert.Len(t, metrics, 0)
 		time.Sleep(15 * time.Millisecond)
-	})
-
-	t.Run("parallel with deadline", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		ctx, cancel := context.WithCancel(ctx)
-
-		client := NewMockClient(ctrl)
-		client.EXPECT().
-			Do(gomock.Any()).
-			Return(response("testdata/parallel.1.json")) // nolint:bodyclose
-		client.EXPECT().
-			Do(gomock.Any()).
-			Return(response("testdata/parallel.2.json")) // nolint:bodyclose
-		client.EXPECT().
-			Do(gomock.Any()).
-			DoAndReturn(func(*http.Request) (*http.Response, error) {
-				defer cancel()
-				return response("testdata/parallel.3-1.json")
-			}).
-			AnyTimes()
-		client.EXPECT().
-			Do(gomock.Any()).
-			DoAndReturn(func(*http.Request) (*http.Response, error) {
-				defer cancel()
-				return response("testdata/parallel.3-2.json")
-			}).
-			AnyTimes()
-
-		provider, err := New("test", client, logger)
-		require.NoError(t, err)
-
-		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
-		assert.Error(t, err)
-		assert.Nil(t, metrics)
-		time.Sleep(20 * time.Millisecond)
 	})
 }
 

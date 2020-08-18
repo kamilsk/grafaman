@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"runtime"
+	"sync"
 	"time"
 
 	"github.com/kamilsk/retry/v5"
@@ -16,7 +16,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.octolab.org/safe"
-	"go.octolab.org/sequence"
 	"go.octolab.org/unsafe"
 	"golang.org/x/sync/errgroup"
 
@@ -60,121 +59,49 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 	q.Add(queryParam, prefix)
 	request.URL.RawQuery = q.Encode()
 
-	var (
-		factor     = runtime.GOMAXPROCS(0)
-		aggregator = make(chan dto, factor)
-		result     = make(chan []dto, factor)
-		requests   = make(chan *http.Request, 10)
-		metrics    = make(model.Metrics, 0, 512)
-	)
+	return provider.recursive(request)
+}
 
-	main, mainCtx := errgroup.WithContext(ctx)
-	main.Go(func() error {
-		defer provider.logger.Info("aggregator done")
-		for {
-			select {
-			case node, ok := <-aggregator:
-				if !ok {
-					return nil
-				}
-				metrics = append(metrics, model.Metric(node.ID))
-			case <-mainCtx.Done():
-				provider.logger.WithError(err).Error("aggregator process timeout")
-				return errors.Wrap(mainCtx.Err(), "graphite: aggregator process")
-			}
-		}
-	})
-	main.Go(func() error {
-		defer provider.logger.Info("request manager done")
-		defer close(aggregator)
-		defer close(requests)
-
-		buffer := make([]*http.Request, 0, 1024)
-		buffer = append(buffer, request)
-
-		for len(buffer) > 0 {
-			provider.logger.WithField("len", len(buffer)).Debug("loop")
-
-			min := len(buffer)
-			if limit := cap(requests); min > limit {
-				min = limit
-			}
-
-			for range sequence.Simple(min) {
-				request, buffer = buffer[len(buffer)-1], buffer[:len(buffer)-1]
-				select {
-				case requests <- request:
-				case <-mainCtx.Done():
-					provider.logger.WithError(err).Error("request manager process timeout")
-					return errors.Wrap(mainCtx.Err(), "graphite: request manager process")
-				}
-			}
-
-			for range sequence.Simple(min) {
-				select {
-				case nodes, ok := <-result:
-					if !ok {
-						return nil
-					}
-					for _, node := range nodes {
-						if node.Leaf == 1 {
-							select {
-							case <-mainCtx.Done():
-								provider.logger.WithError(err).Error("add metric timeout")
-								return errors.Wrap(mainCtx.Err(), "graphite: add metric")
-							case aggregator <- node:
-							}
-							continue
-						}
-						request := request.Clone(ctx)
-						q := request.URL.Query()
-						q.Set(queryParam, node.ID+".*")
-						request.URL.RawQuery = q.Encode()
-						buffer = append(buffer, request)
-					}
-				case <-mainCtx.Done():
-					provider.logger.WithError(err).Error("request manager process timeout")
-					return errors.Wrap(mainCtx.Err(), "graphite: request manager process")
-				}
-			}
-		}
-		return nil
-	})
-
-	pool, poolCtx := errgroup.WithContext(mainCtx)
-	for range sequence.Simple(factor) {
-		pool.Go(func() error {
-			defer provider.logger.Info("worker done")
-			for {
-				select {
-				case request, ok := <-requests:
-					if !ok {
-						return nil
-					}
-					data, err := provider.fetch(request)
-					if err != nil {
-						provider.logger.WithError(err).Error("worker crashed")
-						return err
-					}
-					select {
-					case <-poolCtx.Done():
-						provider.logger.WithError(err).Error("worker write process timeout")
-						return errors.Wrap(poolCtx.Err(), "graphite: worker write process")
-					case result <- data:
-					}
-				case <-poolCtx.Done():
-					provider.logger.WithError(err).Error("worker read process timeout")
-					return errors.Wrap(poolCtx.Err(), "graphite: worker read process")
-				}
-			}
-		})
-	}
-	if err := pool.Wait(); err != nil {
-		close(result)
+func (provider *provider) recursive(request *http.Request) (model.Metrics, error) {
+	nodes, err := provider.fetch(request)
+	if err != nil {
 		return nil, err
 	}
 
-	return metrics, main.Wait()
+	var guard sync.Mutex
+	metrics := make(model.Metrics, 0, 1<<4)
+
+	group, ctx := errgroup.WithContext(request.Context())
+	for _, node := range nodes {
+		if node.Leaf == 1 {
+			guard.Lock()
+			metrics = append(metrics, model.Metric(node.ID))
+			guard.Unlock()
+
+			continue
+		}
+
+		node := node
+		group.Go(func() error {
+			request := request.Clone(ctx)
+			q := request.URL.Query()
+			q.Set(queryParam, node.ID+".*")
+			request.URL.RawQuery = q.Encode()
+
+			data, err := provider.recursive(request)
+			if err != nil {
+				return err
+			}
+
+			guard.Lock()
+			metrics = append(metrics, data...)
+			guard.Unlock()
+
+			return nil
+		})
+	}
+
+	return metrics, group.Wait()
 }
 
 func (provider *provider) fetch(request *http.Request) ([]dto, error) {
