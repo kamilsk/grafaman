@@ -33,7 +33,7 @@ func WithConfig(config *Config) Option {
 			cfg := viper.New()
 			cfg.SetConfigFile(config.File)
 			cfg.SetConfigType("dotenv")
-			switch err := cfg.ReadInConfig(); true {
+			switch err := cfg.ReadInConfig(); {
 			case err == nil:
 				fn.Must(func() error { return provider.MergeConfigMap(cfg.AllSettings()) })
 			case os.IsNotExist(err):
@@ -42,7 +42,6 @@ func WithConfig(config *Config) Option {
 				if err, sub := cfg.ReadInConfig(), cfg.Sub("envs.local.env_vars"); err == nil && sub != nil {
 					fn.Must(func() error { return provider.MergeConfigMap(sub.AllSettings()) })
 				}
-				err = nil // ignore, if implicit fallback doesn't work
 			}
 
 			fn.Must(func() error { return provider.Unmarshal(config) })
@@ -78,7 +77,7 @@ func WithDebug(config *Config, logger *logrus.Logger) Option {
 			logger.SetOutput(ioutil.Discard)
 			if config.Debug.Enabled {
 				logger.SetOutput(cmd.ErrOrStderr())
-				switch verbose := config.Debug.Level; true {
+				switch verbose := config.Debug.Level; {
 				case verbose == 1:
 					logger.SetLevel(logrus.WarnLevel)
 				case verbose == 2:
