@@ -1,11 +1,15 @@
 package cnf
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
+	"go.octolab.org/toolkit/cli/debugger"
 
 	"github.com/kamilsk/grafaman/internal/presenter"
 )
@@ -44,12 +48,18 @@ func WithConfig(config *Config) Option {
 			}
 
 			fn.Must(func() error { return provider.Unmarshal(config) })
+
+			// ad hoc
+			if config.Graphite.Prefix == "" && config.App != "" {
+				config.Graphite.Prefix = fmt.Sprintf("apps.services.%s", config.App)
+			}
+
 			return next(cmd, args)
 		}
 	}
 }
 
-func WithDebug() Option {
+func WithDebug(config *Config, logger *logrus.Logger) Option {
 	return func(command *cobra.Command, provider *viper.Viper) {
 		flags := command.Flags()
 		flags.Bool("debug", false, "enable debug")
@@ -61,6 +71,36 @@ func WithDebug() Option {
 			func() error { return provider.BindPFlag("debug.host", flags.Lookup("debug-host")) },
 			func() error { return provider.BindPFlag("debug.level", flags.Lookup("verbose")) },
 		)
+
+		next := command.PreRunE
+		if next == nil {
+			next = func(cmd *cobra.Command, args []string) error { return nil }
+		}
+		command.PreRunE = func(cmd *cobra.Command, args []string) error {
+			logger.SetOutput(ioutil.Discard)
+			if config.Debug.Enabled {
+				logger.SetOutput(cmd.ErrOrStderr())
+				switch verbose := config.Debug.Level; true {
+				case verbose == 1:
+					logger.SetLevel(logrus.WarnLevel)
+				case verbose == 2:
+					logger.SetLevel(logrus.InfoLevel)
+				case verbose > 2:
+					logger.SetLevel(logrus.DebugLevel)
+				default:
+					logger.SetLevel(logrus.ErrorLevel)
+				}
+
+				d, err := debugger.New(debugger.WithSpecificHost(config.Debug.Host))
+				if err != nil {
+					return err
+				}
+				host, _ := d.Debug(func(err error) { logger.WithError(err).Fatal("run debugger") })
+				logger.Warningf("start listen and serve pprof at http://%s/debug/pprof/", host)
+			}
+
+			return next(cmd, args)
+		}
 	}
 }
 
