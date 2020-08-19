@@ -14,6 +14,7 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
+	"github.com/kamilsk/grafaman/internal/presenter"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/provider/graphite/cache"
@@ -21,11 +22,7 @@ import (
 )
 
 // NewCoverageCommand returns command to calculate metrics coverage by queries.
-func NewCoverageCommand(
-	config *cnf.Config,
-	logger *logrus.Logger,
-	printer CoverageReportPrinter,
-) *cobra.Command {
+func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Command {
 	var (
 		exclude  []string
 		last     time.Duration
@@ -58,6 +55,12 @@ func NewCoverageCommand(
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
+			printer := new(presenter.Printer)
+			if err := printer.SetOutput(cmd.OutOrStdout()).SetFormat(config.Output.Format); err != nil {
+				return err
+			}
+			printer.SetPrefix(config.Graphite.Prefix)
+
 			var (
 				metrics   model.Metrics
 				dashboard *model.Dashboard
@@ -106,7 +109,6 @@ func NewCoverageCommand(
 
 			reporter := model.NewCoverageReporter(queries)
 
-			printer.SetPrefix(config.Graphite.Prefix)
 			if !replMode {
 				metrics := metrics.Filter(config.FilterQuery().MustCompile()).Sort()
 				return printer.PrintCoverageReport(reporter.CoverageReport(metrics))

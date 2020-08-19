@@ -10,15 +10,12 @@ import (
 
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
+	"github.com/kamilsk/grafaman/internal/presenter"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 )
 
 // NewQueriesCommand returns command to fetch queries from a Grafana dashboard.
-func NewQueriesCommand(
-	config *cnf.Config,
-	logger *logrus.Logger,
-	printer QueryPrinter,
-) *cobra.Command {
+func NewQueriesCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Command {
 	var cfg model.Config
 
 	command := cobra.Command{
@@ -40,6 +37,11 @@ func NewQueriesCommand(
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
+			printer := new(presenter.Printer)
+			if err := printer.SetOutput(cmd.OutOrStdout()).SetFormat(config.Output.Format); err != nil {
+				return err
+			}
+
 			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger)
 			if err != nil {
 				return err

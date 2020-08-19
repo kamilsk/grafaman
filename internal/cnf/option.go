@@ -14,8 +14,6 @@ import (
 	"github.com/kamilsk/grafaman/internal/presenter"
 )
 
-const ConfigKey = "config"
-
 func Apply(command *cobra.Command, provider *viper.Viper, options ...Option) *cobra.Command {
 	for _, configure := range options {
 		configure(command, provider)
@@ -161,5 +159,7 @@ func WithOutputFormat() Option {
 	return func(command *cobra.Command, provider *viper.Viper) {
 		flags := command.Flags()
 		flags.StringP("format", "f", presenter.DefaultFormat, "output format")
+
+		fn.Must(func() error { return provider.BindPFlag("output.format", flags.Lookup("format")) })
 	}
 }
