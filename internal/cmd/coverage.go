@@ -9,8 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"go.octolab.org/fn"
 	xtime "go.octolab.org/time"
 	"golang.org/x/sync/errgroup"
 
@@ -41,16 +39,6 @@ func NewCoverageCommand(
 		Long:  "Calculates metrics coverage by queries.",
 
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			flags := cmd.Flags()
-			fn.Must(
-				func() error { return viper.BindPFlag("grafana_url", flags.Lookup("grafana")) },
-				func() error { return viper.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
-				func() error { return viper.BindPFlag("graphite_url", flags.Lookup("graphite")) },
-				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
-				func() error { return viper.BindPFlag("filter", flags.Lookup("filter")) },
-				func() error { return viper.Unmarshal(config) },
-			)
-
 			if config.Grafana.URL == "" {
 				return errors.New("please provide Grafana API endpoint")
 			}
@@ -63,11 +51,8 @@ func NewCoverageCommand(
 			if config.Graphite.Prefix == "" {
 				return errors.New("please provide metric prefix")
 			}
-			if !model.Metric(config.Graphite.Prefix).Valid() {
-				return errors.Errorf(
-					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
-					config.Graphite.Prefix,
-				)
+			if prefix := config.Graphite.Prefix; !model.Metric(prefix).Valid() {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", prefix)
 			}
 			return nil
 		},
@@ -136,13 +121,6 @@ func NewCoverageCommand(
 	}
 
 	flags := command.Flags()
-	{
-		flags.String("grafana", "", "Grafana API endpoint")
-		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
-		flags.String("graphite", "", "Graphite API endpoint")
-		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
-	}
 	flags.StringArrayVar(&exclude, "exclude", nil, "queries to exclude metrics from coverage, e.g. *.median")
 	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")

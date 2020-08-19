@@ -25,7 +25,7 @@ var _ = Describe("fetch queries", func() {
 		})
 
 		It("returns an error if a subset of metrics is omitted", func() {
-			root.SetArgs([]string{"metrics", "-e", graphite.URL})
+			root.SetArgs([]string{"metrics", "--graphite", graphite.URL})
 			Expect(root.Execute()).To(HaveOccurred())
 			Expect(buffer.String()).To(ContainSubstring("please provide metric prefix"))
 		})
@@ -33,7 +33,7 @@ var _ = Describe("fetch queries", func() {
 		It("returns an error if a subset of metrics is invalid", func() {
 			root.SetArgs([]string{
 				"metrics",
-				"-e", graphite.URL,
+				"--graphite", graphite.URL,
 				"-m", "$invalid.name",
 			})
 			Expect(root.Execute()).To(HaveOccurred())

@@ -7,8 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"go.octolab.org/fn"
 
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
@@ -21,11 +19,7 @@ func NewQueriesCommand(
 	logger *logrus.Logger,
 	printer QueryPrinter,
 ) *cobra.Command {
-	var (
-		duplicates bool
-		raw        bool
-		sort       bool
-	)
+	var cfg model.Config
 
 	command := cobra.Command{
 		Use:   "queries",
@@ -33,25 +27,14 @@ func NewQueriesCommand(
 		Long:  "Fetch queries from a Grafana dashboard.",
 
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			flags := cmd.Flags()
-			fn.Must(
-				func() error { return viper.BindPFlag("grafana_url", flags.Lookup("grafana")) },
-				func() error { return viper.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
-				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
-				func() error { return viper.Unmarshal(config) },
-			)
-
 			if config.Grafana.URL == "" {
 				return errors.New("please provide Grafana API endpoint")
 			}
 			if config.Grafana.Dashboard == "" {
 				return errors.New("please provide a dashboard unique identifier")
 			}
-			if config.Graphite.Prefix != "" && !model.Metric(config.Graphite.Prefix).Valid() {
-				return errors.Errorf(
-					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
-					config.Graphite.Prefix,
-				)
+			if prefix := config.Graphite.Prefix; prefix != "" && !model.Metric(prefix).Valid() {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", prefix)
 			}
 			return nil
 		},
@@ -67,11 +50,7 @@ func NewQueriesCommand(
 			}
 
 			dashboard.Prefix = config.Graphite.Prefix
-			queries, err := dashboard.Queries(model.Config{
-				SkipRaw:        raw,
-				SkipDuplicates: duplicates,
-				NeedSorting:    sort,
-			})
+			queries, err := dashboard.Queries(cfg)
 			if err != nil {
 				return err
 			}
@@ -81,14 +60,9 @@ func NewQueriesCommand(
 	}
 
 	flags := command.Flags()
-	{
-		flags.StringP("grafana", "e", "", "Grafana API endpoint")
-		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
-		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-	}
-	flags.BoolVar(&duplicates, "allow-duplicates", false, "allow duplicates of queries")
-	flags.BoolVar(&raw, "raw", false, "leave the original values of queries")
-	flags.BoolVar(&sort, "sort", false, "need to sort queries")
+	flags.BoolVar(&cfg.SkipDuplicates, "allow-duplicates", false, "allow duplicates of queries")
+	flags.BoolVar(&cfg.SkipRaw, "raw", false, "leave the original values of queries")
+	flags.BoolVar(&cfg.NeedSorting, "sort", false, "need to sort queries")
 
 	return &command
 }

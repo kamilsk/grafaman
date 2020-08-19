@@ -106,13 +106,13 @@ $ grafaman coverage ... -f tsv | column -t
 ### Fetch metrics from [Graphite][]
 
 ```bash
-$ grafaman metrics -e https://graphite.api/ -m apps.services.awesome-service --last 24h
+$ grafaman metrics --graphite https://graphite.api/ -m apps.services.awesome-service --last 24h
 ```
 
 ### Fetch queries from [Grafana][]
 
 ```bash
-$ grafaman queries -e https://grafana.api/ -d DTknF4rik \
+$ grafaman queries --grafana https://grafana.api/ -d DTknF4rik \
     -m apps.services.awesome-service \
     --sort
 ```

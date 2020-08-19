@@ -9,8 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"go.octolab.org/fn"
 	xtime "go.octolab.org/time"
 
 	"github.com/kamilsk/grafaman/internal/cnf"
@@ -38,25 +36,14 @@ func NewMetricsCommand(
 		Long:  "Fetch metrics from Graphite.",
 
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			flags := cmd.Flags()
-			fn.Must(
-				func() error { return viper.BindPFlag("graphite_url", flags.Lookup("graphite")) },
-				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
-				func() error { return viper.BindPFlag("filter", flags.Lookup("filter")) },
-				func() error { return viper.Unmarshal(config) },
-			)
-
 			if config.Graphite.URL == "" {
 				return errors.New("please provide Graphite API endpoint")
 			}
 			if config.Graphite.Prefix == "" {
 				return errors.New("please provide metric prefix")
 			}
-			if !model.Metric(config.Graphite.Prefix).Valid() {
-				return errors.Errorf(
-					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
-					config.Graphite.Prefix,
-				)
+			if prefix := config.Graphite.Prefix; !model.Metric(prefix).Valid() {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", prefix)
 			}
 			return nil
 		},
@@ -91,11 +78,6 @@ func NewMetricsCommand(
 	}
 
 	flags := command.Flags()
-	{
-		flags.StringP("graphite", "e", "", "Graphite API endpoint")
-		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
-		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
-	}
 	flags.DurationVar(&last, "last", xtime.Day, "the last interval to fetch")
 	flags.BoolVar(&noCache, "no-cache", false, "disable caching")
 	flags.BoolVar(&replMode, "repl", false, "enable repl mode")

@@ -4,8 +4,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"go.octolab.org/fn"
 
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
@@ -23,20 +21,11 @@ func NewCacheLookupCommand(
 		Long:  "Lookup cache location.",
 
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			flags := cmd.Flags()
-			fn.Must(
-				func() error { return viper.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
-				func() error { return viper.Unmarshal(config) },
-			)
-
 			if config.Graphite.Prefix == "" {
 				return errors.New("please provide metric prefix")
 			}
-			if !model.Metric(config.Graphite.Prefix).Valid() {
-				return errors.Errorf(
-					"invalid metric prefix: %s; it must be simple, e.g. apps.services.name",
-					config.Graphite.Prefix,
-				)
+			if prefix := config.Graphite.Prefix; !model.Metric(prefix).Valid() {
+				return errors.Errorf("invalid metric prefix: %s; it must be simple, e.g. apps.services.name", prefix)
 			}
 			return nil
 		},
@@ -45,9 +34,6 @@ func NewCacheLookupCommand(
 			cmd.Println(cache.Filename(config.Graphite.Prefix))
 		},
 	}
-
-	flags := command.Flags()
-	flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 
 	return &command
 }

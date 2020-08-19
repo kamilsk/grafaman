@@ -8,7 +8,8 @@ import (
 
 // A Config contains all necessary tool configuration.
 type Config struct {
-	Name    string `mapsructure:"name"`
+	App     string `mapstructure:"app"`
+	File    string `mapstructure:"-"`
 	Grafana struct {
 		URL       string `mapstructure:"grafana"`
 		Dashboard string `mapstructure:"dashboard"`

@@ -25,7 +25,7 @@ var _ = Describe("fetch queries", func() {
 		})
 
 		It("returns an error if a dashboard unique identifier is omitted", func() {
-			root.SetArgs([]string{"queries", "-e", grafana.URL})
+			root.SetArgs([]string{"queries", "--grafana", grafana.URL})
 			Expect(root.Execute()).To(HaveOccurred())
 			Expect(buffer.String()).To(ContainSubstring("please provide a dashboard unique identifier"))
 		})
@@ -33,7 +33,7 @@ var _ = Describe("fetch queries", func() {
 		It("returns an error if a subset of metrics is invalid", func() {
 			root.SetArgs([]string{
 				"queries",
-				"-e", grafana.URL,
+				"--grafana", grafana.URL,
 				"-d", "uid",
 				"-m", "$invalid.name",
 			})
