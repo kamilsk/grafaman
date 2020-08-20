@@ -14,66 +14,114 @@ import (
 	"github.com/kamilsk/grafaman/internal/presenter"
 )
 
-func Apply(command *cobra.Command, provider *viper.Viper, options ...Option) *cobra.Command {
+// After inserts a new function into the pointer, which calls the self function before and the last after.
+func After(pointer *func(*cobra.Command, []string), last func(*cobra.Command, []string)) {
+	first := *pointer
+	if first == nil {
+		first = func(*cobra.Command, []string) {}
+	}
+	*pointer = func(command *cobra.Command, args []string) {
+		first(command, args)
+		last(command, args)
+	}
+}
+
+// AfterE inserts a new function into the pointer, which calls the self function before and the last after.
+func AfterE(pointer *func(*cobra.Command, []string) error, last func(*cobra.Command, []string) error) {
+	first := *pointer
+	if first == nil {
+		first = func(*cobra.Command, []string) error { return nil }
+	}
+	*pointer = func(command *cobra.Command, args []string) error {
+		if err := first(command, args); err != nil {
+			return err
+		}
+		return last(command, args)
+	}
+}
+
+// Apply applies options to the Command.
+func Apply(command *cobra.Command, container *viper.Viper, options ...Option) *cobra.Command {
 	for _, configure := range options {
-		configure(command, provider)
+		configure(command, container)
 	}
 	return command
 }
 
-type Option func(command *cobra.Command, provider *viper.Viper)
+// Before inserts a new function into the pointer, which calls the first function before and the self after.
+func Before(pointer *func(*cobra.Command, []string), first func(*cobra.Command, []string)) {
+	last := *pointer
+	if last == nil {
+		last = func(*cobra.Command, []string) {}
+	}
+	*pointer = func(command *cobra.Command, args []string) {
+		first(command, args)
+		last(command, args)
+	}
+}
 
-func WithConfig(config *Config) Option {
-	return func(command *cobra.Command, provider *viper.Viper) {
-		next := command.PreRunE
-		if next == nil {
-			next = func(cmd *cobra.Command, args []string) error { return nil }
+// BeforeE inserts a new function into the pointer, which calls the first function before and the self after.
+func BeforeE(pointer *func(*cobra.Command, []string) error, first func(*cobra.Command, []string) error) {
+	last := *pointer
+	if last == nil {
+		last = func(*cobra.Command, []string) error { return nil }
+	}
+	*pointer = func(command *cobra.Command, args []string) error {
+		if err := first(command, args); err != nil {
+			return err
 		}
-		command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		return last(command, args)
+	}
+}
+
+// An Option is a Command configuration function.
+type Option func(*cobra.Command, *viper.Viper)
+
+// WithConfig returns an Option to inject configuration from a container and config files into the Config.
+func WithConfig(config *Config) Option {
+	return func(command *cobra.Command, container *viper.Viper) {
+		BeforeE(&command.PreRunE, func(cmd *cobra.Command, args []string) error {
 			cfg := viper.New()
 			cfg.SetConfigFile(config.File)
 			cfg.SetConfigType("dotenv")
 			switch err := cfg.ReadInConfig(); {
 			case err == nil:
-				fn.Must(func() error { return provider.MergeConfigMap(cfg.AllSettings()) })
+				fn.Must(func() error { return container.MergeConfigMap(cfg.AllSettings()) })
 			case os.IsNotExist(err):
 				cfg.SetConfigFile("app.toml")
 				cfg.SetConfigType("toml")
 				if err, sub := cfg.ReadInConfig(), cfg.Sub("envs.local.env_vars"); err == nil && sub != nil {
-					fn.Must(func() error { return provider.MergeConfigMap(sub.AllSettings()) })
+					fn.Must(func() error { return container.MergeConfigMap(sub.AllSettings()) })
 				}
 			}
 
-			fn.Must(func() error { return provider.Unmarshal(config) })
+			fn.Must(func() error { return container.Unmarshal(config) })
 
 			// ad hoc
 			if config.Graphite.Prefix == "" && config.App != "" {
 				config.Graphite.Prefix = fmt.Sprintf("apps.services.%s", config.App)
 			}
 
-			return next(cmd, args)
-		}
+			return nil
+		})
 	}
 }
 
+// WithDebug returns an Option to inject debugger and configure the logger.
 func WithDebug(config *Config, logger *logrus.Logger) Option {
-	return func(command *cobra.Command, provider *viper.Viper) {
+	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.Bool("debug", false, "enable debug")
 		flags.String("debug-host", "localhost:", "specific debug host")
 		flags.CountP("verbose", "v", "increase the verbosity of messages if debug enabled")
 
 		fn.Must(
-			func() error { return provider.BindPFlag("debug.enabled", flags.Lookup("debug")) },
-			func() error { return provider.BindPFlag("debug.host", flags.Lookup("debug-host")) },
-			func() error { return provider.BindPFlag("debug.level", flags.Lookup("verbose")) },
+			func() error { return container.BindPFlag("debug.enabled", flags.Lookup("debug")) },
+			func() error { return container.BindPFlag("debug.host", flags.Lookup("debug-host")) },
+			func() error { return container.BindPFlag("debug.level", flags.Lookup("verbose")) },
 		)
 
-		next := command.PreRunE
-		if next == nil {
-			next = func(cmd *cobra.Command, args []string) error { return nil }
-		}
-		command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		BeforeE(&command.PreRunE, func(cmd *cobra.Command, args []string) error {
 			logger.SetOutput(ioutil.Discard)
 			if config.Debug.Enabled {
 				logger.SetOutput(cmd.ErrOrStderr())
@@ -96,69 +144,73 @@ func WithDebug(config *Config, logger *logrus.Logger) Option {
 				logger.Warningf("start listen and serve pprof at http://%s/debug/pprof/", host)
 			}
 
-			return next(cmd, args)
-		}
+			return nil
+		})
 	}
 }
 
+// WithGrafana returns an Option to inject flags related to Grafana configuration.
 func WithGrafana() Option {
-	return func(command *cobra.Command, provider *viper.Viper) {
+	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.String("grafana", "", "Grafana API endpoint")
 		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
 
-		provider.RegisterAlias("grafana", "grafana_url")
-		provider.RegisterAlias("dashboard", "grafana_dashboard")
+		container.RegisterAlias("grafana", "grafana_url")
+		container.RegisterAlias("dashboard", "grafana_dashboard")
 
 		fn.Must(
-			func() error { return provider.BindPFlag("grafana_url", flags.Lookup("grafana")) },
-			func() error { return provider.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
-			func() error { return provider.BindEnv("grafana", "GRAFANA_URL") },
-			func() error { return provider.BindEnv("dashboard", "GRAFANA_DASHBOARD") },
+			func() error { return container.BindPFlag("grafana_url", flags.Lookup("grafana")) },
+			func() error { return container.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
+			func() error { return container.BindEnv("grafana", "GRAFANA_URL") },
+			func() error { return container.BindEnv("dashboard", "GRAFANA_DASHBOARD") },
 		)
 	}
 }
 
+// WithGraphite returns an Option to inject flags related to Graphite configuration.
 func WithGraphite() Option {
-	return func(command *cobra.Command, provider *viper.Viper) {
+	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.StringP("graphite", "e", "", "Graphite API endpoint")
 		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
 
-		provider.RegisterAlias("graphite", "graphite_url")
+		container.RegisterAlias("graphite", "graphite_url")
 
 		fn.Must(
-			func() error { return provider.BindPFlag("graphite_url", flags.Lookup("graphite")) },
-			func() error { return provider.BindPFlag("filter", flags.Lookup("filter")) },
-			func() error { return provider.BindEnv("graphite", "GRAPHITE_URL") },
+			func() error { return container.BindPFlag("graphite_url", flags.Lookup("graphite")) },
+			func() error { return container.BindPFlag("filter", flags.Lookup("filter")) },
+			func() error { return container.BindEnv("graphite", "GRAPHITE_URL") },
 		)
 
-		WithGraphiteMetrics()(command, provider)
+		WithGraphiteMetrics()(command, container)
 	}
 }
 
+// WithGraphiteMetrics returns an Option to inject flags related to Graphite configuration.
 func WithGraphiteMetrics() Option {
-	return func(command *cobra.Command, provider *viper.Viper) {
+	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 
-		provider.RegisterAlias("app_name", "app")
-		provider.RegisterAlias("name", "app")
-		provider.RegisterAlias("metrics", "graphite_metrics")
+		container.RegisterAlias("app_name", "app")
+		container.RegisterAlias("name", "app")
+		container.RegisterAlias("metrics", "graphite_metrics")
 
 		fn.Must(
-			func() error { return provider.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
-			func() error { return provider.BindEnv("app", "APP_NAME") },
-			func() error { return provider.BindEnv("metrics", "GRAPHITE_METRICS") },
+			func() error { return container.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
+			func() error { return container.BindEnv("app", "APP_NAME") },
+			func() error { return container.BindEnv("metrics", "GRAPHITE_METRICS") },
 		)
 	}
 }
 
+// WithOutputFormat returns an Option to inject flags related to output format.
 func WithOutputFormat() Option {
-	return func(command *cobra.Command, provider *viper.Viper) {
+	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.StringP("format", "f", presenter.DefaultFormat, "output format")
 
-		fn.Must(func() error { return provider.BindPFlag("output.format", flags.Lookup("format")) })
+		fn.Must(func() error { return container.BindPFlag("output.format", flags.Lookup("format")) })
 	}
 }
