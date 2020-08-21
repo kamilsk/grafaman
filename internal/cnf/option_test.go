@@ -308,3 +308,20 @@ func TestWithDebug(t *testing.T) {
 		assert.Empty(t, buf.String())
 	})
 }
+
+func TestWithGrafana(t *testing.T) {}
+
+func TestWithGraphite(t *testing.T) {}
+
+func TestWithGraphiteMetrics(t *testing.T) {}
+
+func TestWithOutputFormat(t *testing.T) {
+	var (
+		box = viper.New()
+		cmd = new(cobra.Command)
+	)
+
+	cmd = Apply(cmd, box, WithOutputFormat())
+	assert.NoError(t, cmd.ParseFlags([]string{"-f", "json"}))
+	assert.Equal(t, "json", box.GetString("debug.enabled"))
+}
