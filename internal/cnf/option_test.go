@@ -1,10 +1,12 @@
 package cnf_test
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -190,5 +192,119 @@ func TestWithConfig(t *testing.T) {
 		cmd = Apply(cmd, box, WithConfig(&cnf))
 		assert.NoError(t, cmd.PreRunE(cmd, nil))
 		assert.Equal(t, src, cnf)
+	})
+}
+
+func TestWithDebug(t *testing.T) {
+	t.Run("flags and bindings", func(t *testing.T) {
+		var (
+			box = viper.New()
+			buf = bytes.NewBuffer(nil)
+			cmd = new(cobra.Command)
+			cnf = new(Config)
+		)
+
+		logger := logrus.New()
+		cmd.SetErr(buf)
+
+		cmd = Apply(cmd, box, WithDebug(cnf, logger))
+		assert.NoError(t, cmd.ParseFlags([]string{
+			"--debug",
+			"--debug-host", "127.0.0.1:1234",
+			"-vvv",
+		}))
+		assert.True(t, box.GetBool("debug.enabled"))
+		assert.Equal(t, "127.0.0.1:1234", box.GetString("debug.host"))
+		assert.Equal(t, 3, box.GetInt("debug.level"))
+	})
+
+	t.Run("debug with defaults", func(t *testing.T) {
+		var (
+			box = viper.New()
+			buf = bytes.NewBuffer(nil)
+			cmd = new(cobra.Command)
+			cnf = new(Config)
+		)
+
+		logger := logrus.New()
+		cmd.SetErr(buf)
+
+		cmd = Apply(cmd, box, WithDebug(cnf, logger))
+		assert.NoError(t, cmd.ParseFlags([]string{"--debug"}))
+		assert.NoError(t, box.Unmarshal(cnf))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.Empty(t, buf.String())
+	})
+
+	t.Run("debug with warnings", func(t *testing.T) {
+		var (
+			box = viper.New()
+			buf = bytes.NewBuffer(nil)
+			cmd = new(cobra.Command)
+			cnf = new(Config)
+		)
+
+		logger := logrus.New()
+		cmd.SetErr(buf)
+
+		cmd = Apply(cmd, box, WithDebug(cnf, logger))
+		assert.NoError(t, cmd.ParseFlags([]string{"--debug", "-v"}))
+		assert.NoError(t, box.Unmarshal(cnf))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.Contains(t, buf.String(), "start listen and serve pprof")
+	})
+
+	t.Run("debug with infos", func(t *testing.T) {
+		var (
+			box = viper.New()
+			buf = bytes.NewBuffer(nil)
+			cmd = new(cobra.Command)
+			cnf = new(Config)
+		)
+
+		logger := logrus.New()
+		cmd.SetErr(buf)
+
+		cmd = Apply(cmd, box, WithDebug(cnf, logger))
+		assert.NoError(t, cmd.ParseFlags([]string{"--debug", "-vv"}))
+		assert.NoError(t, box.Unmarshal(cnf))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.Contains(t, buf.String(), "start listen and serve pprof")
+	})
+
+	t.Run("verbose debug", func(t *testing.T) {
+		var (
+			box = viper.New()
+			buf = bytes.NewBuffer(nil)
+			cmd = new(cobra.Command)
+			cnf = new(Config)
+		)
+
+		logger := logrus.New()
+		cmd.SetErr(buf)
+
+		cmd = Apply(cmd, box, WithDebug(cnf, logger))
+		assert.NoError(t, cmd.ParseFlags([]string{"--debug", "-vvv"}))
+		assert.NoError(t, box.Unmarshal(cnf))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.Contains(t, buf.String(), "start listen and serve pprof")
+	})
+
+	t.Run("invalid host", func(t *testing.T) {
+		var (
+			box = viper.New()
+			buf = bytes.NewBuffer(nil)
+			cmd = new(cobra.Command)
+			cnf = new(Config)
+		)
+
+		logger := logrus.New()
+		cmd.SetErr(buf)
+
+		cmd = Apply(cmd, box, WithDebug(cnf, logger))
+		assert.NoError(t, cmd.ParseFlags([]string{"--debug", "--debug-host", "invalid:host"}))
+		assert.NoError(t, box.Unmarshal(cnf))
+		assert.Error(t, cmd.PreRunE(cmd, nil))
+		assert.Empty(t, buf.String())
 	})
 }

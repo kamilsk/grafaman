@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
 	"go.octolab.org/toolkit/cli/debugger"
+	"go.octolab.org/unsafe"
 
 	"github.com/kamilsk/grafaman/internal/presenter"
 )
@@ -145,7 +146,7 @@ func WithDebug(config *Config, logger *logrus.Logger) Option {
 				if err != nil {
 					return err
 				}
-				host, _ := d.Debug(func(err error) { logger.WithError(err).Fatal("run debugger") })
+				host, _ := d.Debug(unsafe.Ignore)
 				logger.Warningf("start listen and serve pprof at http://%s/debug/pprof/", host)
 			}
 
