@@ -91,7 +91,12 @@ func WithConfig(config *Config) Option {
 				cfg.SetConfigFile("app.toml")
 				cfg.SetConfigType("toml")
 				if err, sub := cfg.ReadInConfig(), cfg.Sub("envs.local.env_vars"); err == nil && sub != nil {
-					fn.Must(func() error { return container.MergeConfigMap(sub.AllSettings()) })
+					fn.Must(
+						func() error {
+							return container.MergeConfigMap(map[string]interface{}{"app_name": cfg.GetString("name")})
+						},
+						func() error { return container.MergeConfigMap(sub.AllSettings()) },
+					)
 				}
 			}
 

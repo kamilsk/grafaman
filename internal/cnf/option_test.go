@@ -2,10 +2,13 @@ package cnf_test
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "github.com/kamilsk/grafaman/internal/cnf"
 )
@@ -93,5 +96,99 @@ func TestExtendCommand(t *testing.T) {
 		assert.Equal(t, command.Use, "last")
 		assert.Error(t, command.RunE(&command, nil))
 		assert.Equal(t, command.Use, "first")
+	})
+}
+
+func TestWithConfig(t *testing.T) {
+	t.Run("load from dotenv", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+			cnf = Config{File: "testdata/.env.paas"}
+		)
+
+		src := cnf // copy
+		box.RegisterAlias("app", "app_name")
+		box.RegisterAlias("grafana", "grafana_url")
+		box.RegisterAlias("dashboard", "grafana_dashboard")
+		box.RegisterAlias("graphite", "graphite_url")
+		box.RegisterAlias("metrics", "graphite_metrics")
+
+		cmd = Apply(cmd, box, WithConfig(&cnf))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.NotEqual(t, src, cnf)
+		assert.Equal(t, "awesome-service", cnf.App)
+		assert.Equal(t, "DTknF4rik", cnf.Grafana.Dashboard)
+		assert.Equal(t, "https://grafana.api/", cnf.Grafana.URL)
+		assert.Equal(t, "https://graphite.api/", cnf.Graphite.URL)
+		assert.Equal(t, "apps.services.awesome-service", cnf.Graphite.Prefix)
+	})
+
+	t.Run("load from old dotenv", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+			cnf = Config{File: "testdata/.env"}
+		)
+
+		src := cnf // copy
+		box.RegisterAlias("app", "app_name")
+		box.RegisterAlias("grafana", "grafana_url")
+		box.RegisterAlias("dashboard", "grafana_dashboard")
+		box.RegisterAlias("graphite", "graphite_url")
+		box.RegisterAlias("metrics", "graphite_metrics")
+
+		cmd = Apply(cmd, box, WithConfig(&cnf))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.NotEqual(t, src, cnf)
+		assert.Equal(t, "", cnf.App)
+		assert.Equal(t, "DTknF4rik", cnf.Grafana.Dashboard)
+		assert.Equal(t, "https://grafana.api/", cnf.Grafana.URL)
+		assert.Equal(t, "https://graphite.api/", cnf.Graphite.URL)
+		assert.Equal(t, "apps.services.awesome-service", cnf.Graphite.Prefix)
+	})
+
+	t.Run("load from app.toml", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+			cnf = Config{File: ".env.unknown"}
+		)
+
+		src := cnf // copy
+		box.RegisterAlias("app", "app_name")
+		box.RegisterAlias("grafana", "grafana_url")
+		box.RegisterAlias("dashboard", "grafana_dashboard")
+		box.RegisterAlias("graphite", "graphite_url")
+		box.RegisterAlias("metrics", "graphite_metrics")
+
+		cmd = Apply(cmd, box, WithConfig(&cnf))
+		require.NoError(t, os.Chdir("testdata"))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.NotEqual(t, src, cnf)
+		assert.Equal(t, "awesome-service", cnf.App)
+		assert.Equal(t, "DTknF4rik", cnf.Grafana.Dashboard)
+		assert.Equal(t, "https://grafana.api/", cnf.Grafana.URL)
+		assert.Equal(t, "https://graphite.api/", cnf.Graphite.URL)
+		assert.Equal(t, "apps.services.awesome-service", cnf.Graphite.Prefix)
+	})
+
+	t.Run("without config file", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+			cnf = Config{}
+		)
+
+		src := cnf // copy
+		box.RegisterAlias("app", "app_name")
+		box.RegisterAlias("grafana", "grafana_url")
+		box.RegisterAlias("dashboard", "grafana_dashboard")
+		box.RegisterAlias("graphite", "graphite_url")
+		box.RegisterAlias("metrics", "graphite_metrics")
+
+		cmd = Apply(cmd, box, WithConfig(&cnf))
+		assert.NoError(t, cmd.PreRunE(cmd, nil))
+		assert.Equal(t, src, cnf)
 	})
 }

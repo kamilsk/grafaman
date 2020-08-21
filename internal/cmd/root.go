@@ -25,7 +25,7 @@ func New() *cobra.Command {
 	}
 
 	flags := command.PersistentFlags()
-	flags.StringVar(&config.File, "env-file", ".env.paas", "read in a file of environment variables; fallback to app.toml")
+	flags.StringVar(&config.File, "env-file", ".env.paas", "file with environment variables; fallback to app.toml")
 
 	command.AddCommand(
 		cnf.Apply(
