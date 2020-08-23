@@ -166,10 +166,10 @@ func WithGrafana() Option {
 		container.RegisterAlias("dashboard", "grafana_dashboard")
 
 		fn.Must(
+			func() error { return container.BindEnv("grafana_url", "GRAFANA_URL") },
 			func() error { return container.BindPFlag("grafana_url", flags.Lookup("grafana")) },
+			func() error { return container.BindEnv("grafana_dashboard", "GRAFANA_DASHBOARD") },
 			func() error { return container.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
-			func() error { return container.BindEnv("grafana", "GRAFANA_URL") },
-			func() error { return container.BindEnv("dashboard", "GRAFANA_DASHBOARD") },
 		)
 	}
 }

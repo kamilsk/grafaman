@@ -312,7 +312,45 @@ func TestWithDebug(t *testing.T) {
 	})
 }
 
-func TestWithGrafana(t *testing.T) {}
+func TestWithGrafana(t *testing.T) {
+	t.Run("configure by flags", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+		)
+
+		cmd = Apply(cmd, box, WithGrafana())
+		assert.NoError(t, cmd.ParseFlags([]string{
+			"--grafana", "https://grafana.api/",
+			"-d", "DTknF4rik",
+		}))
+		assert.Equal(t, "https://grafana.api/", box.GetString("grafana"))
+		assert.Equal(t, "https://grafana.api/", box.GetString("grafana_url"))
+		assert.Equal(t, "DTknF4rik", box.GetString("dashboard"))
+		assert.Equal(t, "DTknF4rik", box.GetString("grafana_dashboard"))
+	})
+
+	t.Run("configure by environment", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+		)
+
+		release, err := setEnvs(
+			"GRAFANA_URL", "https://grafana.api/",
+			"GRAFANA_DASHBOARD", "DTknF4rik",
+		)
+		require.NoError(t, err)
+		defer safe.Do(release, func(err error) { require.NoError(t, err) })
+
+		cmd = Apply(cmd, box, WithGrafana())
+		assert.NoError(t, cmd.ParseFlags(nil))
+		assert.Equal(t, "https://grafana.api/", box.GetString("grafana"))
+		assert.Equal(t, "https://grafana.api/", box.GetString("grafana_url"))
+		assert.Equal(t, "DTknF4rik", box.GetString("dashboard"))
+		assert.Equal(t, "DTknF4rik", box.GetString("grafana_dashboard"))
+	})
+}
 
 func TestWithGraphite(t *testing.T) {
 	t.Run("configure by flags", func(t *testing.T) {
