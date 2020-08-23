@@ -199,14 +199,13 @@ func WithGraphiteMetrics() Option {
 		flags := command.Flags()
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
 
-		container.RegisterAlias("app_name", "app")
-		container.RegisterAlias("name", "app")
+		container.RegisterAlias("app", "app_name")
 		container.RegisterAlias("metrics", "graphite_metrics")
 
 		fn.Must(
+			func() error { return container.BindEnv("app_name", "APP_NAME") },
+			func() error { return container.BindEnv("graphite_metrics", "GRAPHITE_METRICS") },
 			func() error { return container.BindPFlag("graphite_metrics", flags.Lookup("metrics")) },
-			func() error { return container.BindEnv("app", "APP_NAME") },
-			func() error { return container.BindEnv("metrics", "GRAPHITE_METRICS") },
 		)
 	}
 }
