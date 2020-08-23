@@ -142,10 +142,9 @@ github.com/subosito/gotenv
 go.octolab.org/errors
 go.octolab.org/fn
 go.octolab.org/safe
-go.octolab.org/sequence
 go.octolab.org/time
 go.octolab.org/unsafe
-# go.octolab.org/toolkit/cli v0.1.2
+# go.octolab.org/toolkit/cli v0.2.0
 ## explicit
 go.octolab.org/toolkit/cli/cobra
 go.octolab.org/toolkit/cli/debugger

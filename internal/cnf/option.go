@@ -9,79 +9,20 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.octolab.org/fn"
+	xcobra "go.octolab.org/toolkit/cli/cobra"
 	"go.octolab.org/toolkit/cli/debugger"
 	"go.octolab.org/unsafe"
 
 	"github.com/kamilsk/grafaman/internal/presenter"
 )
 
-// After inserts a new function into the pointer, which calls the self function before and the last after.
-func After(pointer *func(*cobra.Command, []string), last func(*cobra.Command, []string)) {
-	first := *pointer
-	if first == nil {
-		first = func(*cobra.Command, []string) {}
-	}
-	*pointer = func(command *cobra.Command, args []string) {
-		first(command, args)
-		last(command, args)
-	}
-}
-
-// AfterE inserts a new function into the pointer, which calls the self function before and the last after.
-func AfterE(pointer *func(*cobra.Command, []string) error, last func(*cobra.Command, []string) error) {
-	first := *pointer
-	if first == nil {
-		first = func(*cobra.Command, []string) error { return nil }
-	}
-	*pointer = func(command *cobra.Command, args []string) error {
-		if err := first(command, args); err != nil {
-			return err
-		}
-		return last(command, args)
-	}
-}
-
-// Apply applies options to the Command.
-func Apply(command *cobra.Command, container *viper.Viper, options ...Option) *cobra.Command {
-	for _, configure := range options {
-		configure(command, container)
-	}
-	return command
-}
-
-// Before inserts a new function into the pointer, which calls the first function before and the self after.
-func Before(pointer *func(*cobra.Command, []string), first func(*cobra.Command, []string)) {
-	last := *pointer
-	if last == nil {
-		last = func(*cobra.Command, []string) {}
-	}
-	*pointer = func(command *cobra.Command, args []string) {
-		first(command, args)
-		last(command, args)
-	}
-}
-
-// BeforeE inserts a new function into the pointer, which calls the first function before and the self after.
-func BeforeE(pointer *func(*cobra.Command, []string) error, first func(*cobra.Command, []string) error) {
-	last := *pointer
-	if last == nil {
-		last = func(*cobra.Command, []string) error { return nil }
-	}
-	*pointer = func(command *cobra.Command, args []string) error {
-		if err := first(command, args); err != nil {
-			return err
-		}
-		return last(command, args)
-	}
-}
-
-// An Option is a Command configuration function.
-type Option func(*cobra.Command, *viper.Viper)
+// Apply is an alias for the toolkit method.
+var Apply = xcobra.Apply
 
 // WithConfig returns an Option to inject configuration from a container and config files into the Config.
-func WithConfig(config *Config) Option {
+func WithConfig(config *Config) xcobra.Option {
 	return func(command *cobra.Command, container *viper.Viper) {
-		BeforeE(&command.PreRunE, func(cmd *cobra.Command, args []string) error {
+		xcobra.BeforeE(&command.PreRunE, func(cmd *cobra.Command, args []string) error {
 			cfg := viper.New()
 			cfg.SetConfigFile(config.File)
 			cfg.SetConfigType("dotenv")
@@ -114,7 +55,7 @@ func WithConfig(config *Config) Option {
 }
 
 // WithDebug returns an Option to inject debugger and configure the logger.
-func WithDebug(config *Config, logger *logrus.Logger) Option {
+func WithDebug(config *Config, logger *logrus.Logger) xcobra.Option {
 	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.Bool("debug", false, "enable debug")
@@ -127,7 +68,7 @@ func WithDebug(config *Config, logger *logrus.Logger) Option {
 			func() error { return container.BindPFlag("debug.level", flags.Lookup("verbose")) },
 		)
 
-		BeforeE(&command.PreRunE, func(cmd *cobra.Command, args []string) error {
+		xcobra.BeforeE(&command.PreRunE, func(cmd *cobra.Command, args []string) error {
 			logger.SetOutput(ioutil.Discard)
 			if config.Debug.Enabled {
 				logger.SetOutput(cmd.ErrOrStderr())
@@ -156,7 +97,7 @@ func WithDebug(config *Config, logger *logrus.Logger) Option {
 }
 
 // WithGrafana returns an Option to inject flags related to Grafana configuration.
-func WithGrafana() Option {
+func WithGrafana() xcobra.Option {
 	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.String("grafana", "", "Grafana API endpoint")
@@ -175,7 +116,7 @@ func WithGrafana() Option {
 }
 
 // WithGraphite returns an Option to inject flags related to Graphite configuration.
-func WithGraphite() Option {
+func WithGraphite() xcobra.Option {
 	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
@@ -194,7 +135,7 @@ func WithGraphite() Option {
 }
 
 // WithGraphiteMetrics returns an Option to inject flags related to Graphite configuration.
-func WithGraphiteMetrics() Option {
+func WithGraphiteMetrics() xcobra.Option {
 	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.StringP("metrics", "m", "", "the required subset of metrics (must be a simple prefix)")
@@ -211,7 +152,7 @@ func WithGraphiteMetrics() Option {
 }
 
 // WithOutputFormat returns an Option to inject flags related to output format.
-func WithOutputFormat() Option {
+func WithOutputFormat() xcobra.Option {
 	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
 		flags.StringP("format", "f", presenter.DefaultFormat, "output format")
