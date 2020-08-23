@@ -314,10 +314,43 @@ func TestWithDebug(t *testing.T) {
 
 func TestWithGrafana(t *testing.T) {}
 
-func TestWithGraphite(t *testing.T) {}
+func TestWithGraphite(t *testing.T) {
+	t.Run("configure by flags", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+		)
+
+		cmd = Apply(cmd, box, WithGraphite())
+		assert.NoError(t, cmd.ParseFlags([]string{
+			"--filter", "metric.*",
+			"--graphite", "https://graphite.api/",
+		}))
+		assert.Equal(t, "metric.*", box.GetString("filter"))
+		assert.Equal(t, "https://graphite.api/", box.GetString("graphite"))
+		assert.Equal(t, "https://graphite.api/", box.GetString("graphite_url"))
+	})
+
+	t.Run("configure by environment", func(t *testing.T) {
+		var (
+			box = viper.New()
+			cmd = new(cobra.Command)
+		)
+
+		release, err := setEnvs("GRAPHITE_URL", "https://graphite.api/")
+		require.NoError(t, err)
+		defer safe.Do(release, func(err error) { require.NoError(t, err) })
+
+		cmd = Apply(cmd, box, WithGraphite())
+		assert.NoError(t, cmd.ParseFlags(nil))
+		assert.Empty(t, box.GetString("filter"))
+		assert.Equal(t, "https://graphite.api/", box.GetString("graphite"))
+		assert.Equal(t, "https://graphite.api/", box.GetString("graphite_url"))
+	})
+}
 
 func TestWithGraphiteMetrics(t *testing.T) {
-	t.Run("configure by flag", func(t *testing.T) {
+	t.Run("configure by flags", func(t *testing.T) {
 		var (
 			box = viper.New()
 			cmd = new(cobra.Command)

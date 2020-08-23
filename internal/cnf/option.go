@@ -178,15 +178,15 @@ func WithGrafana() Option {
 func WithGraphite() Option {
 	return func(command *cobra.Command, container *viper.Viper) {
 		flags := command.Flags()
-		flags.StringP("graphite", "e", "", "Graphite API endpoint")
 		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
+		flags.String("graphite", "", "Graphite API endpoint")
 
 		container.RegisterAlias("graphite", "graphite_url")
 
 		fn.Must(
-			func() error { return container.BindPFlag("graphite_url", flags.Lookup("graphite")) },
 			func() error { return container.BindPFlag("filter", flags.Lookup("filter")) },
-			func() error { return container.BindEnv("graphite", "GRAPHITE_URL") },
+			func() error { return container.BindEnv("graphite_url", "GRAPHITE_URL") },
+			func() error { return container.BindPFlag("graphite_url", flags.Lookup("graphite")) },
 		)
 
 		WithGraphiteMetrics()(command, container)
