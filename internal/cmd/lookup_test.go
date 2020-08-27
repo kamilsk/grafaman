@@ -5,7 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 
 	. "github.com/kamilsk/grafaman/internal/cmd"
 )
@@ -13,7 +12,6 @@ import (
 var _ = Describe("lookup cache", func() {
 	BeforeEach(func() {
 		buffer.Reset()
-		viper.Reset()
 
 		root = New()
 		root.SetOut(buffer)
