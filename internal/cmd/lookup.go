@@ -13,7 +13,7 @@ import (
 // NewCacheLookupCommand returns command to lookup cache.
 func NewCacheLookupCommand(
 	config *cnf.Config,
-	logger *logrus.Logger,
+	_ *logrus.Logger,
 ) *cobra.Command {
 	command := cobra.Command{
 		Use:   "cache-lookup",

@@ -1,6 +1,8 @@
 package cmd_test
 
 import (
+	"strings"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -39,5 +41,26 @@ var _ = Describe("fetch queries", func() {
 		})
 	})
 
-	When("correct usage", func() {})
+	metrics := strings.TrimSpace(`
+a.b.c
+a.b.d
+a.b.e
+a.f.g
+a.f.h
+a.i.j
+a.i.k`)
+
+	When("correct usage", func() {
+		It("returns metrics if all work well", func() {
+			root.SetArgs([]string{
+				"metrics",
+				"--graphite", graphite.URL,
+				"-m", "a",
+				"-f", "tsv",
+				"--no-cache",
+			})
+			Expect(root.Execute()).ToNot(HaveOccurred())
+			Expect(buffer.String()).To(ContainSubstring(metrics))
+		})
+	})
 })

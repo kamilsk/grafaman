@@ -40,5 +40,7 @@ var _ = Describe("fetch queries", func() {
 		})
 	})
 
-	When("correct usage", func() {})
+	When("correct usage", func() {
+		// TODO:implement
+	})
 })
