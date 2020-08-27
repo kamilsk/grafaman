@@ -2,9 +2,7 @@ package cnf_test
 
 import (
 	"bytes"
-	"fmt"
 	"os"
-	"sync"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -249,12 +247,12 @@ func TestWithGrafana(t *testing.T) {
 			cmd = new(cobra.Command)
 		)
 
-		release, err := setEnvs(
+		release, err := safe.SetEnvs(
 			"GRAFANA_URL", "https://grafana.api/",
 			"GRAFANA_DASHBOARD", "DTknF4rik",
 		)
 		require.NoError(t, err)
-		defer safe.Do(release, func(err error) { require.NoError(t, err) })
+		defer release(func(err error) { require.NoError(t, err) })
 
 		cmd = Apply(cmd, box, WithGrafana())
 		assert.NoError(t, cmd.ParseFlags(nil))
@@ -288,9 +286,9 @@ func TestWithGraphite(t *testing.T) {
 			cmd = new(cobra.Command)
 		)
 
-		release, err := setEnvs("GRAPHITE_URL", "https://graphite.api/")
+		release, err := safe.SetEnvs("GRAPHITE_URL", "https://graphite.api/")
 		require.NoError(t, err)
-		defer safe.Do(release, func(err error) { require.NoError(t, err) })
+		defer release(func(err error) { require.NoError(t, err) })
 
 		cmd = Apply(cmd, box, WithGraphite())
 		assert.NoError(t, cmd.ParseFlags(nil))
@@ -321,12 +319,12 @@ func TestWithGraphiteMetrics(t *testing.T) {
 			cmd = new(cobra.Command)
 		)
 
-		release, err := setEnvs(
+		release, err := safe.SetEnvs(
 			"APP_NAME", "awesome-service",
 			"GRAPHITE_METRICS", "apps.services.awesome-service",
 		)
 		require.NoError(t, err)
-		defer safe.Do(release, func(err error) { require.NoError(t, err) })
+		defer release(func(err error) { require.NoError(t, err) })
 
 		cmd = Apply(cmd, box, WithGraphiteMetrics())
 		assert.NoError(t, cmd.ParseFlags(nil))
@@ -346,44 +344,4 @@ func TestWithOutputFormat(t *testing.T) {
 	cmd = Apply(cmd, box, WithOutputFormat())
 	assert.NoError(t, cmd.ParseFlags([]string{"-f", "json"}))
 	assert.Equal(t, "json", box.GetString("output.format"))
-}
-
-// helpers
-
-var mx sync.Mutex
-
-// issue: https://github.com/octolab/pkg/issues/22
-func setEnvs(envs ...string) (func() error, error) {
-	mx.Lock()
-
-	before := make([]*string, len(envs))
-	for i := 0; i < len(envs); i += 2 {
-		var prev *string
-		val, present := os.LookupEnv(envs[i])
-		if present {
-			prev = &val
-		}
-		before[i], before[i+1] = &envs[i], prev
-		if err := os.Setenv(envs[i], envs[i+1]); err != nil {
-			mx.Unlock()
-			return nil, fmt.Errorf("cannot set environment variable %s=%q", envs[i], envs[i+1])
-		}
-	}
-
-	return func() error {
-		defer mx.Unlock()
-		for i := 0; i < len(before); i += 2 {
-			var err error
-			env, val := before[i], before[i+1]
-			if val == nil {
-				err = os.Unsetenv(*env)
-			} else {
-				err = os.Setenv(*env, *val)
-			}
-			if err != nil {
-				return fmt.Errorf("cannot restore previos environment variable %s", *env)
-			}
-		}
-		return nil
-	}, nil
 }

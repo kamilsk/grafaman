@@ -137,7 +137,7 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/subosito/gotenv v1.2.0
 github.com/subosito/gotenv
-# go.octolab.org v0.2.0
+# go.octolab.org v0.3.0
 ## explicit
 go.octolab.org/errors
 go.octolab.org/fn
