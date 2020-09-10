@@ -1,6 +1,6 @@
 module github.com/kamilsk/grafaman
 
-go 1.14
+go 1.15
 
 require (
 	github.com/alexeyco/simpletable v0.0.0-20200730140406-5bb24159ccfb
