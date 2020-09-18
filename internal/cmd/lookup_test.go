@@ -14,6 +14,7 @@ var _ = Describe("lookup cache", func() {
 		buffer.Reset()
 
 		root = New()
+		root.SetErr(buffer)
 		root.SetOut(buffer)
 	})
 

@@ -12,6 +12,7 @@ var _ = Describe("fetch queries", func() {
 		buffer.Reset()
 
 		root = New()
+		root.SetErr(buffer)
 		root.SetOut(buffer)
 	})
 
