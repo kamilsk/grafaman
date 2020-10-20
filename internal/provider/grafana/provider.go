@@ -20,7 +20,7 @@ import (
 )
 
 // New returns an instance of Grafana dashboard provider.
-func New(endpoint string, client Client, logger *logrus.Logger) (*provider, error) {
+func New(endpoint string, client Client, logger *logrus.Logger, listener ProgressListener) (*provider, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "grafana: prepare dashboard provider endpoint URL")
@@ -29,6 +29,7 @@ func New(endpoint string, client Client, logger *logrus.Logger) (*provider, erro
 		client:   client,
 		endpoint: *u,
 		logger:   logger,
+		listener: listener,
 	}, nil
 }
 
@@ -36,11 +37,15 @@ type provider struct {
 	client   Client
 	endpoint url.URL
 	logger   *logrus.Logger
+	listener ProgressListener
 }
 
 // Fetch takes a dashboard JSON model and extracts queries and variables from it.
 // Documentation: https://grafana.com/docs/grafana/latest/http_api/dashboard/#get-dashboard-by-uid.
 func (provider *provider) Fetch(ctx context.Context, uid string) (*model.Dashboard, error) {
+	provider.listener.OnStepQueued()
+	defer provider.listener.OnStepDone()
+
 	const source = "/api/dashboards/uid/"
 
 	u := provider.endpoint

@@ -44,7 +44,11 @@ func TestProvider(t *testing.T) {
 			Do(gomock.Any()).
 			Return(response("testdata/success.3.json")) // nolint:bodyclose
 
-		provider, err := New("test", client, logger)
+		listener := NewMockProgressListener(ctrl)
+		listener.EXPECT().OnStepDone().AnyTimes()
+		listener.EXPECT().OnStepQueued().AnyTimes()
+
+		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)
 
 		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
@@ -57,13 +61,27 @@ func TestProvider(t *testing.T) {
 	})
 
 	t.Run("bad endpoint", func(t *testing.T) {
-		provider, err := New(":invalid", nil, logger)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		listener := NewMockProgressListener(ctrl)
+		listener.EXPECT().OnStepDone().AnyTimes()
+		listener.EXPECT().OnStepQueued().AnyTimes()
+
+		provider, err := New(":invalid", nil, logger, listener)
 		assert.Error(t, err)
 		assert.Nil(t, provider)
 	})
 
 	t.Run("nil context", func(t *testing.T) {
-		provider, err := New("test", nil, logger)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		listener := NewMockProgressListener(ctrl)
+		listener.EXPECT().OnStepDone().AnyTimes()
+		listener.EXPECT().OnStepQueued().AnyTimes()
+
+		provider, err := New("test", nil, logger, listener)
 		require.NoError(t, err)
 
 		metrics, err := provider.Fetch(nil, "apps.services.awesome-service", xtime.Day) // nolint:staticcheck
@@ -80,7 +98,11 @@ func TestProvider(t *testing.T) {
 			Do(gomock.Any()).
 			Return(nil, errors.New(http.StatusText(http.StatusServiceUnavailable)))
 
-		provider, err := New("test", client, logger)
+		listener := NewMockProgressListener(ctrl)
+		listener.EXPECT().OnStepDone().AnyTimes()
+		listener.EXPECT().OnStepQueued().AnyTimes()
+
+		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)
 
 		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
@@ -97,7 +119,11 @@ func TestProvider(t *testing.T) {
 			Do(gomock.Any()).
 			Return(response("testdata/invalid.json")) // nolint:bodyclose
 
-		provider, err := New("test", client, logger)
+		listener := NewMockProgressListener(ctrl)
+		listener.EXPECT().OnStepDone().AnyTimes()
+		listener.EXPECT().OnStepQueued().AnyTimes()
+
+		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)
 
 		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)
@@ -120,7 +146,11 @@ func TestProvider(t *testing.T) {
 				return response("testdata/success.1.json")
 			})
 
-		provider, err := New("test", client, logger)
+		listener := NewMockProgressListener(ctrl)
+		listener.EXPECT().OnStepDone().AnyTimes()
+		listener.EXPECT().OnStepQueued().AnyTimes()
+
+		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)
 
 		metrics, err := provider.Fetch(ctx, "apps.services.awesome-service", xtime.Day)

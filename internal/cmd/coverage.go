@@ -15,6 +15,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
 	"github.com/kamilsk/grafaman/internal/presenter"
+	"github.com/kamilsk/grafaman/internal/progress"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 	"github.com/kamilsk/grafaman/internal/provider/graphite"
 	"github.com/kamilsk/grafaman/internal/provider/graphite/cache"
@@ -61,6 +62,8 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 			}
 			printer.SetPrefix(config.Graphite.Prefix)
 
+			prg := progress.New()
+
 			var (
 				metrics   model.Metrics
 				dashboard *model.Dashboard
@@ -69,7 +72,7 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var provider cache.Graphite
-				provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: time.Second}, logger)
+				provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: 5 * time.Second}, logger, prg)
 				if err != nil {
 					return err
 				}
@@ -86,7 +89,7 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 				return nil
 			})
 			g.Go(func() error {
-				provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger)
+				provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger, prg)
 				if err != nil {
 					return err
 				}

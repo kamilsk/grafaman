@@ -23,7 +23,7 @@ import (
 )
 
 // New returns an instance of Graphite metrics provider.
-func New(endpoint string, client Client, logger *logrus.Logger) (*provider, error) {
+func New(endpoint string, client Client, logger *logrus.Logger, listener ProgressListener) (*provider, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "graphite: prepare metrics provider endpoint URL")
@@ -32,6 +32,7 @@ func New(endpoint string, client Client, logger *logrus.Logger) (*provider, erro
 		client:   client,
 		endpoint: *u,
 		logger:   logger,
+		listener: listener,
 	}, nil
 }
 
@@ -39,6 +40,7 @@ type provider struct {
 	client   Client
 	endpoint url.URL
 	logger   *logrus.Logger
+	listener ProgressListener
 }
 
 // Fetch walks through the endpoint and takes all metrics with the specified prefix.
@@ -59,6 +61,8 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 	q.Add(queryParam, prefix)
 	request.URL.RawQuery = q.Encode()
 
+	provider.listener.OnStepQueued()
+
 	return provider.recursive(request)
 }
 
@@ -67,6 +71,8 @@ func (provider *provider) recursive(request *http.Request) (model.Metrics, error
 	if err != nil {
 		return nil, err
 	}
+
+	provider.listener.OnStepDone()
 
 	var guard sync.Mutex
 	metrics := make(model.Metrics, 0, 1<<4)
@@ -80,6 +86,8 @@ func (provider *provider) recursive(request *http.Request) (model.Metrics, error
 
 			continue
 		}
+
+		provider.listener.OnStepQueued()
 
 		node := node
 		group.Go(func() error {

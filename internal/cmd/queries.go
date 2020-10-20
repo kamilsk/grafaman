@@ -11,6 +11,7 @@ import (
 	"github.com/kamilsk/grafaman/internal/cnf"
 	"github.com/kamilsk/grafaman/internal/model"
 	"github.com/kamilsk/grafaman/internal/presenter"
+	"github.com/kamilsk/grafaman/internal/progress"
 	"github.com/kamilsk/grafaman/internal/provider/grafana"
 )
 
@@ -42,7 +43,9 @@ func NewQueriesCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Command
 				return err
 			}
 
-			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger)
+			prg := progress.New()
+
+			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger, prg)
 			if err != nil {
 				return err
 			}
