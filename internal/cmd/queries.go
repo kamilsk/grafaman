@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -42,7 +41,7 @@ func NewQueriesCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Command
 				return err
 			}
 
-			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger)
+			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: config.Grafana.Timeout}, logger)
 			if err != nil {
 				return err
 			}

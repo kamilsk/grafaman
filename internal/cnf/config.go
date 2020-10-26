@@ -2,6 +2,7 @@ package cnf
 
 import (
 	"strings"
+	"time"
 
 	"github.com/kamilsk/grafaman/internal/model"
 )
@@ -11,13 +12,15 @@ type Config struct {
 	App     string `mapstructure:"app"`
 	File    string `mapstructure:"-"`
 	Grafana struct {
-		URL       string `mapstructure:"grafana"`
-		Dashboard string `mapstructure:"dashboard"`
+		URL       string        `mapstructure:"grafana"`
+		Dashboard string        `mapstructure:"dashboard"`
+		Timeout   time.Duration `mapstructure:"grafana_timeout"`
 	} `mapstructure:",squash"`
 	Graphite struct {
-		URL    string `mapstructure:"graphite"`
-		Filter string `mapstructure:"filter"`
-		Prefix string `mapstructure:"metrics"`
+		URL     string        `mapstructure:"graphite"`
+		Filter  string        `mapstructure:"filter"`
+		Prefix  string        `mapstructure:"metrics"`
+		Timeout time.Duration `mapstructure:"graphite_timeout"`
 	} `mapstructure:",squash"`
 	Debug struct {
 		Enabled bool   `mapstructure:"enabled"`
