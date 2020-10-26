@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -102,6 +103,7 @@ func WithGrafana() xcobra.Option {
 		flags := command.Flags()
 		flags.String("grafana", "", "Grafana API endpoint")
 		flags.StringP("dashboard", "d", "", "a dashboard unique identifier")
+		flags.Duration("grafana-timeout", time.Second, "timeout duration for Grafana API requests")
 
 		container.RegisterAlias("grafana", "grafana_url")
 		container.RegisterAlias("dashboard", "grafana_dashboard")
@@ -111,6 +113,8 @@ func WithGrafana() xcobra.Option {
 			func() error { return container.BindPFlag("grafana_url", flags.Lookup("grafana")) },
 			func() error { return container.BindEnv("grafana_dashboard", "GRAFANA_DASHBOARD") },
 			func() error { return container.BindPFlag("grafana_dashboard", flags.Lookup("dashboard")) },
+			func() error { return container.BindEnv("grafana_timeout", "GRAFANA_TIMEOUT") },
+			func() error { return container.BindPFlag("grafana_timeout", flags.Lookup("grafana-timeout")) },
 		)
 	}
 }
@@ -121,6 +125,7 @@ func WithGraphite() xcobra.Option {
 		flags := command.Flags()
 		flags.String("filter", "", "query to filter metrics, e.g. some.*.metric")
 		flags.String("graphite", "", "Graphite API endpoint")
+		flags.Duration("graphite-timeout", time.Second, "timeout duration for Graphite API requests")
 
 		container.RegisterAlias("graphite", "graphite_url")
 
@@ -128,6 +133,8 @@ func WithGraphite() xcobra.Option {
 			func() error { return container.BindPFlag("filter", flags.Lookup("filter")) },
 			func() error { return container.BindEnv("graphite_url", "GRAPHITE_URL") },
 			func() error { return container.BindPFlag("graphite_url", flags.Lookup("graphite")) },
+			func() error { return container.BindEnv("graphite_timeout", "GRAPHITE_TIMEOUT") },
+			func() error { return container.BindPFlag("graphite_timeout", flags.Lookup("graphite-timeout")) },
 		)
 
 		WithGraphiteMetrics()(command, container)

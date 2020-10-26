@@ -53,7 +53,7 @@ func NewMetricsCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Command
 			printer.SetPrefix(config.Graphite.Prefix)
 
 			var provider cache.Graphite
-			provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: time.Second}, logger)
+			provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: config.Graphite.Timeout}, logger)
 			if err != nil {
 				return err
 			}
