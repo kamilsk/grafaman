@@ -45,8 +45,8 @@ func TestProvider(t *testing.T) {
 			Return(response("testdata/success.3.json")) // nolint:bodyclose
 
 		listener := NewMockProgressListener(ctrl)
-		listener.EXPECT().OnStepDone().AnyTimes()
-		listener.EXPECT().OnStepQueued().AnyTimes()
+		listener.EXPECT().OnStepDone().Times(3)
+		listener.EXPECT().OnStepQueued().Times(3)
 
 		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)
@@ -65,8 +65,8 @@ func TestProvider(t *testing.T) {
 		defer ctrl.Finish()
 
 		listener := NewMockProgressListener(ctrl)
-		listener.EXPECT().OnStepDone().AnyTimes()
-		listener.EXPECT().OnStepQueued().AnyTimes()
+		listener.EXPECT().OnStepDone().Times(0)
+		listener.EXPECT().OnStepQueued().Times(0)
 
 		provider, err := New(":invalid", nil, logger, listener)
 		assert.Error(t, err)
@@ -78,8 +78,8 @@ func TestProvider(t *testing.T) {
 		defer ctrl.Finish()
 
 		listener := NewMockProgressListener(ctrl)
-		listener.EXPECT().OnStepDone().AnyTimes()
-		listener.EXPECT().OnStepQueued().AnyTimes()
+		listener.EXPECT().OnStepDone().Times(0)
+		listener.EXPECT().OnStepQueued().Times(0)
 
 		provider, err := New("test", nil, logger, listener)
 		require.NoError(t, err)
@@ -99,8 +99,8 @@ func TestProvider(t *testing.T) {
 			Return(nil, errors.New(http.StatusText(http.StatusServiceUnavailable)))
 
 		listener := NewMockProgressListener(ctrl)
-		listener.EXPECT().OnStepDone().AnyTimes()
-		listener.EXPECT().OnStepQueued().AnyTimes()
+		listener.EXPECT().OnStepDone().Times(1)
+		listener.EXPECT().OnStepQueued().Times(1)
 
 		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)
@@ -120,8 +120,8 @@ func TestProvider(t *testing.T) {
 			Return(response("testdata/invalid.json")) // nolint:bodyclose
 
 		listener := NewMockProgressListener(ctrl)
-		listener.EXPECT().OnStepDone().AnyTimes()
-		listener.EXPECT().OnStepQueued().AnyTimes()
+		listener.EXPECT().OnStepDone().Times(1)
+		listener.EXPECT().OnStepQueued().Times(1)
 
 		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)
@@ -147,8 +147,8 @@ func TestProvider(t *testing.T) {
 			})
 
 		listener := NewMockProgressListener(ctrl)
-		listener.EXPECT().OnStepDone().AnyTimes()
-		listener.EXPECT().OnStepQueued().AnyTimes()
+		listener.EXPECT().OnStepDone().Times(2)
+		listener.EXPECT().OnStepQueued().Times(2)
 
 		provider, err := New("test", client, logger, listener)
 		require.NoError(t, err)

@@ -61,8 +61,6 @@ func (provider *provider) Fetch(ctx context.Context, prefix string, last time.Du
 	q.Add(queryParam, prefix)
 	request.URL.RawQuery = q.Encode()
 
-	provider.listener.OnStepQueued()
-
 	return provider.recursive(request)
 }
 
@@ -71,8 +69,6 @@ func (provider *provider) recursive(request *http.Request) (model.Metrics, error
 	if err != nil {
 		return nil, err
 	}
-
-	provider.listener.OnStepDone()
 
 	var guard sync.Mutex
 	metrics := make(model.Metrics, 0, 1<<4)
@@ -86,8 +82,6 @@ func (provider *provider) recursive(request *http.Request) (model.Metrics, error
 
 			continue
 		}
-
-		provider.listener.OnStepQueued()
 
 		node := node
 		group.Go(func() error {
@@ -113,6 +107,9 @@ func (provider *provider) recursive(request *http.Request) (model.Metrics, error
 }
 
 func (provider *provider) fetch(request *http.Request) ([]dto, error) {
+	provider.listener.OnStepQueued()
+	defer provider.listener.OnStepDone()
+
 	var response *http.Response
 
 	what := func(ctx context.Context) error {

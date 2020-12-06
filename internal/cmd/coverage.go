@@ -62,7 +62,7 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 			}
 			printer.SetPrefix(config.Graphite.Prefix)
 
-			prg := progress.New()
+			indicator := progress.New()
 
 			var (
 				metrics   model.Metrics
@@ -72,7 +72,7 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var provider cache.Graphite
-				provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: config.Graphite.Timeout}, logger, prg)
+				provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: config.Graphite.Timeout}, logger, indicator)
 				if err != nil {
 					return err
 				}
@@ -89,7 +89,7 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 				return nil
 			})
 			g.Go(func() error {
-				provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: config.Grafana.Timeout}, logger, prg)
+				provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: config.Grafana.Timeout}, logger, indicator)
 				if err != nil {
 					return err
 				}

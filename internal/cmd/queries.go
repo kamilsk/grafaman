@@ -42,9 +42,9 @@ func NewQueriesCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Command
 				return err
 			}
 
-			prg := progress.New()
+			indicator := progress.New()
 
-			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: config.Grafana.Timeout}, logger, prg)
+			provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: config.Grafana.Timeout}, logger, indicator)
 			if err != nil {
 				return err
 			}

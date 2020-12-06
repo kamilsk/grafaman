@@ -36,8 +36,8 @@ func TestProvider(t *testing.T) {
 			Return(response("testdata/success.json")) // nolint:bodyclose
 
 		progress := NewMockProgressListener(ctrl)
-		progress.EXPECT().OnStepDone().AnyTimes()
-		progress.EXPECT().OnStepQueued().AnyTimes()
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
 
 		provider, err := New("test", client, logger, progress)
 		require.NoError(t, err)
@@ -52,8 +52,8 @@ func TestProvider(t *testing.T) {
 		defer ctrl.Finish()
 
 		progress := NewMockProgressListener(ctrl)
-		progress.EXPECT().OnStepDone().AnyTimes()
-		progress.EXPECT().OnStepQueued().AnyTimes()
+		progress.EXPECT().OnStepDone().Times(0)
+		progress.EXPECT().OnStepQueued().Times(0)
 
 		provider, err := New(":invalid", nil, logger, progress)
 		assert.Error(t, err)
@@ -65,8 +65,8 @@ func TestProvider(t *testing.T) {
 		defer ctrl.Finish()
 
 		progress := NewMockProgressListener(ctrl)
-		progress.EXPECT().OnStepDone().AnyTimes()
-		progress.EXPECT().OnStepQueued().AnyTimes()
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
 
 		provider, err := New("test", nil, logger, progress)
 		require.NoError(t, err)
@@ -86,8 +86,8 @@ func TestProvider(t *testing.T) {
 			Return(nil, errors.New(http.StatusText(http.StatusServiceUnavailable)))
 
 		progress := NewMockProgressListener(ctrl)
-		progress.EXPECT().OnStepDone().AnyTimes()
-		progress.EXPECT().OnStepQueued().AnyTimes()
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
 
 		provider, err := New("test", client, logger, progress)
 		require.NoError(t, err)
@@ -107,8 +107,8 @@ func TestProvider(t *testing.T) {
 			Return(response("testdata/invalid.json")) // nolint:bodyclose
 
 		progress := NewMockProgressListener(ctrl)
-		progress.EXPECT().OnStepDone().AnyTimes()
-		progress.EXPECT().OnStepQueued().AnyTimes()
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
 
 		provider, err := New("test", client, logger, progress)
 		require.NoError(t, err)
