@@ -56,7 +56,7 @@ func NewMetricsCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Command
 			prg := progress.New()
 
 			var provider cache.Graphite
-			provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: time.Second}, logger, prg)
+			provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: config.Graphite.Timeout}, logger, prg)
 			if err != nil {
 				return err
 			}

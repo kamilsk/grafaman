@@ -72,7 +72,7 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 			g, ctx := errgroup.WithContext(cmd.Context())
 			g.Go(func() error {
 				var provider cache.Graphite
-				provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: 5 * time.Second}, logger, prg)
+				provider, err := graphite.New(config.Graphite.URL, &http.Client{Timeout: config.Graphite.Timeout}, logger, prg)
 				if err != nil {
 					return err
 				}
@@ -89,7 +89,7 @@ func NewCoverageCommand(config *cnf.Config, logger *logrus.Logger) *cobra.Comman
 				return nil
 			})
 			g.Go(func() error {
-				provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: time.Second}, logger, prg)
+				provider, err := grafana.New(config.Grafana.URL, &http.Client{Timeout: config.Grafana.Timeout}, logger, prg)
 				if err != nil {
 					return err
 				}

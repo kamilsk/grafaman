@@ -5,9 +5,13 @@ github.com/acarl005/stripansi
 # github.com/alexeyco/simpletable v0.0.0-20200730140406-5bb24159ccfb
 ## explicit
 github.com/alexeyco/simpletable
-# github.com/c-bata/go-prompt v0.2.3
+# github.com/c-bata/go-prompt v0.2.5
 ## explicit
 github.com/c-bata/go-prompt
+github.com/c-bata/go-prompt/internal/bisect
+github.com/c-bata/go-prompt/internal/debug
+github.com/c-bata/go-prompt/internal/strings
+github.com/c-bata/go-prompt/internal/term
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.9
@@ -47,19 +51,15 @@ github.com/inconshreveable/mousetrap
 github.com/kamilsk/retry/v5
 github.com/kamilsk/retry/v5/backoff
 github.com/kamilsk/retry/v5/strategy
-# github.com/konsorten/go-windows-terminal-sequences v1.0.3
-github.com/konsorten/go-windows-terminal-sequences
 # github.com/magiconair/properties v1.8.1
 github.com/magiconair/properties
-# github.com/mattn/go-colorable v0.1.4
+# github.com/mattn/go-colorable v0.1.7
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.10
+# github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.9
-## explicit
 github.com/mattn/go-runewidth
 # github.com/mattn/go-tty v0.0.3
-## explicit
 github.com/mattn/go-tty
 # github.com/mitchellh/mapstructure v1.3.3
 ## explicit
@@ -70,7 +70,7 @@ github.com/nxadm/tail/ratelimiter
 github.com/nxadm/tail/util
 github.com/nxadm/tail/watch
 github.com/nxadm/tail/winfile
-# github.com/onsi/ginkgo v1.14.1
+# github.com/onsi/ginkgo v1.14.2
 ## explicit
 github.com/onsi/ginkgo
 github.com/onsi/ginkgo/config
@@ -91,7 +91,7 @@ github.com/onsi/ginkgo/reporters/stenographer
 github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable
 github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty
 github.com/onsi/ginkgo/types
-# github.com/onsi/gomega v1.10.2
+# github.com/onsi/gomega v1.10.3
 ## explicit
 github.com/onsi/gomega
 github.com/onsi/gomega/format
@@ -105,32 +105,31 @@ github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
-# github.com/pelletier/go-toml v1.8.0
+# github.com/pelletier/go-toml v1.8.1
 ## explicit
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
-# github.com/pkg/term v0.0.0-20200520122047-c3ffed290a03
-## explicit
+# github.com/pkg/term v1.1.0
 github.com/pkg/term/termios
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/sirupsen/logrus v1.6.0
+# github.com/sirupsen/logrus v1.7.0
 ## explicit
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.3.5
+# github.com/spf13/afero v1.4.1
 ## explicit
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.3.0
 github.com/spf13/cast
-# github.com/spf13/cobra v1.0.0
+# github.com/spf13/cobra v1.1.1
 ## explicit
 github.com/spf13/cobra
 # github.com/spf13/jwalterweatherman v1.0.0
 github.com/spf13/jwalterweatherman
-# github.com/spf13/pflag v1.0.3
+# github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
 # github.com/spf13/viper v1.7.1
 ## explicit
@@ -147,7 +146,7 @@ github.com/vbauerster/mpb/v5
 github.com/vbauerster/mpb/v5/cwriter
 github.com/vbauerster/mpb/v5/decor
 github.com/vbauerster/mpb/v5/internal
-# go.octolab.org v0.3.0
+# go.octolab.org v0.5.4
 ## explicit
 go.octolab.org/errors
 go.octolab.org/fn
@@ -163,14 +162,14 @@ go.octolab.org/toolkit/cli/internal/os/shell
 ## explicit
 go.octolab.org/toolkit/config
 go.octolab.org/toolkit/config/http
-# golang.org/x/net v0.0.0-20200520004742-59133d7f0dd7
+# golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
+# golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 ## explicit
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20200810151505-1b9f1253b3ed
+# golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
