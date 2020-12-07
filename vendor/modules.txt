@@ -1,3 +1,7 @@
+# github.com/VividCortex/ewma v1.1.1
+github.com/VividCortex/ewma
+# github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
+github.com/acarl005/stripansi
 # github.com/alexeyco/simpletable v0.0.0-20200730140406-5bb24159ccfb
 ## explicit
 github.com/alexeyco/simpletable
@@ -136,6 +140,12 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/subosito/gotenv v1.2.0
 github.com/subosito/gotenv
+# github.com/vbauerster/mpb/v5 v5.3.0
+## explicit
+github.com/vbauerster/mpb/v5
+github.com/vbauerster/mpb/v5/cwriter
+github.com/vbauerster/mpb/v5/decor
+github.com/vbauerster/mpb/v5/internal
 # go.octolab.org v0.5.4
 ## explicit
 go.octolab.org/errors

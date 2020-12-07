@@ -35,7 +35,11 @@ func TestProvider(t *testing.T) {
 			Do(gomock.Any()).
 			Return(response("testdata/success.json")) // nolint:bodyclose
 
-		provider, err := New("test", client, logger)
+		progress := NewMockProgressListener(ctrl)
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
+
+		provider, err := New("test", client, logger, progress)
 		require.NoError(t, err)
 
 		dashboard, err := provider.Fetch(ctx, "dashboard")
@@ -44,13 +48,27 @@ func TestProvider(t *testing.T) {
 	})
 
 	t.Run("bad endpoint", func(t *testing.T) {
-		provider, err := New(":invalid", nil, logger)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		progress := NewMockProgressListener(ctrl)
+		progress.EXPECT().OnStepDone().Times(0)
+		progress.EXPECT().OnStepQueued().Times(0)
+
+		provider, err := New(":invalid", nil, logger, progress)
 		assert.Error(t, err)
 		assert.Nil(t, provider)
 	})
 
 	t.Run("nil context", func(t *testing.T) {
-		provider, err := New("test", nil, logger)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		progress := NewMockProgressListener(ctrl)
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
+
+		provider, err := New("test", nil, logger, progress)
 		require.NoError(t, err)
 
 		dashboard, err := provider.Fetch(nil, "dashboard") // nolint:staticcheck
@@ -67,7 +85,11 @@ func TestProvider(t *testing.T) {
 			Do(gomock.Any()).
 			Return(nil, errors.New(http.StatusText(http.StatusServiceUnavailable)))
 
-		provider, err := New("test", client, logger)
+		progress := NewMockProgressListener(ctrl)
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
+
+		provider, err := New("test", client, logger, progress)
 		require.NoError(t, err)
 
 		dashboard, err := provider.Fetch(ctx, "dashboard")
@@ -84,7 +106,11 @@ func TestProvider(t *testing.T) {
 			Do(gomock.Any()).
 			Return(response("testdata/invalid.json")) // nolint:bodyclose
 
-		provider, err := New("test", client, logger)
+		progress := NewMockProgressListener(ctrl)
+		progress.EXPECT().OnStepDone().Times(1)
+		progress.EXPECT().OnStepQueued().Times(1)
+
+		provider, err := New("test", client, logger, progress)
 		require.NoError(t, err)
 
 		dashboard, err := provider.Fetch(ctx, "dashboard")

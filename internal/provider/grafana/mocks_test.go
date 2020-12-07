@@ -48,3 +48,50 @@ func (mr *MockClientMockRecorder) Do(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Do", reflect.TypeOf((*MockClient)(nil).Do), arg0)
 }
+
+// MockProgressListener is a mock of ProgressListener interface
+type MockProgressListener struct {
+	ctrl     *gomock.Controller
+	recorder *MockProgressListenerMockRecorder
+}
+
+// MockProgressListenerMockRecorder is the mock recorder for MockProgressListener
+type MockProgressListenerMockRecorder struct {
+	mock *MockProgressListener
+}
+
+// NewMockProgressListener creates a new mock instance
+func NewMockProgressListener(ctrl *gomock.Controller) *MockProgressListener {
+	mock := &MockProgressListener{ctrl: ctrl}
+	mock.recorder = &MockProgressListenerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockProgressListener) EXPECT() *MockProgressListenerMockRecorder {
+	return m.recorder
+}
+
+// OnStepDone mocks base method
+func (m *MockProgressListener) OnStepDone() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "OnStepDone")
+}
+
+// OnStepDone indicates an expected call of OnStepDone
+func (mr *MockProgressListenerMockRecorder) OnStepDone() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnStepDone", reflect.TypeOf((*MockProgressListener)(nil).OnStepDone))
+}
+
+// OnStepQueued mocks base method
+func (m *MockProgressListener) OnStepQueued() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "OnStepQueued")
+}
+
+// OnStepQueued indicates an expected call of OnStepQueued
+func (mr *MockProgressListenerMockRecorder) OnStepQueued() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnStepQueued", reflect.TypeOf((*MockProgressListener)(nil).OnStepQueued))
+}

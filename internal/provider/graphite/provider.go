@@ -23,7 +23,7 @@ import (
 )
 
 // New returns an instance of Graphite metrics provider.
-func New(endpoint string, client Client, logger *logrus.Logger) (*provider, error) {
+func New(endpoint string, client Client, logger *logrus.Logger, listener ProgressListener) (*provider, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "graphite: prepare metrics provider endpoint URL")
@@ -32,6 +32,7 @@ func New(endpoint string, client Client, logger *logrus.Logger) (*provider, erro
 		client:   client,
 		endpoint: *u,
 		logger:   logger,
+		listener: listener,
 	}, nil
 }
 
@@ -39,6 +40,7 @@ type provider struct {
 	client   Client
 	endpoint url.URL
 	logger   *logrus.Logger
+	listener ProgressListener
 }
 
 // Fetch walks through the endpoint and takes all metrics with the specified prefix.
@@ -105,6 +107,9 @@ func (provider *provider) recursive(request *http.Request) (model.Metrics, error
 }
 
 func (provider *provider) fetch(request *http.Request) ([]dto, error) {
+	provider.listener.OnStepQueued()
+	defer provider.listener.OnStepDone()
+
 	var response *http.Response
 
 	what := func(ctx context.Context) error {
